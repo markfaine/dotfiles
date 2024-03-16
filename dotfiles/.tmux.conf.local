@@ -1,0 +1,144 @@
+# : << EOF
+# https://github.com/gpakosz/.tmux
+# (‑●‑●)> dual licensed under the WTFPL v2 license and the MIT license,
+#         without any warranty.
+#         Copyright 2012— Gregory Pakosz (@gpakosz).
+
+
+# ## Window & Pane Creation
+tmux_conf_new_window_retain_current_path=false
+tmux_conf_new_pane_retain_current_path=true
+tmux_conf_new_pane_reconnect_ssh=false
+tmux_conf_new_session_prompt=false
+
+# ## Clipboard
+tmux_conf_24b_colour=true
+
+# Clipboard # requires xsel or xclip
+tmux_conf_copy_to_os_clipboard=true
+
+# ## User Customizations ------------------------------------------
+
+# ## TPM Config options -------------------------------------------
+tmux_conf_update_plugins_on_launch=true
+tmux_conf_update_plugins_on_reload=true
+tmux_conf_uninstall_plugins_on_reload=true
+
+# ## TPM Plugins --------------------------------------------------
+set -g @plugin 'seebi/tmux-colors-solarized'
+set -g @plugin 'nhdaly/tmux-better-mouse-mode'
+set -g @plugin 'tmux-plugins/tmux-yank'
+set -g @plugin 'tmux-plugins/tmux-copycat'
+set -g @plugin 'tmux-plugins/tmux-cpu'
+set -g @plugin 'tmux-plugins/tmux-resurrect'
+set -g @plugin 'tmux-plugins/tmux-continuum'
+set -g @continuum-restore 'on'
+
+# ## Fixes --------------------------------------------------------
+# ## Fix tmux issue with gpg
+set-option -g update-environment 'DBUS_SESSION_BUS_ADDRESS'
+
+# ## This fixes issues with keymappings with tmux and zsh
+set -g default-terminal "screen-256color"
+
+# ## Default overrides -------------------------------------------
+# ## History size
+set -g history-limit 5000000
+
+# ## Start with mouse mode enabled
+set -g mouse on
+
+# ## Appearance --------------------------------------------------
+# ## Themes
+set -g @plugin 'jimeh/tmux-themepack'
+set -g @themepack 'powerline/block/cyan'
+# set -g @plugin 'seebi/tmux-colors-solarized'
+# set -g @colors-solarized 'dark'
+# set -g @plugin 'wfxr/tmux-power'
+# set -g @tmux_power_theme 'redwine'
+# set -g @plugin 'dracula/tmux'
+# set -g @dracula-show-powerline true
+# set -g @dracula-git-disable-status true
+# set -g @plugin 'o0th/tmux-nova'
+# set -g @nova-nerdfonts true
+
+# Term
+set -g default-terminal "xterm-256color"
+
+# ## Status Bar --------------------------------------------------
+
+# ## Update interval for status bar
+# set status-interval 10
+# ## Gitmux
+set -g status-right '#(gitmux "#{pane_current_path}")'
+
+
+# ## Bindings ----------------------------------------------------
+
+# ## Panes -----------------------------------------
+# ## Synchronize panes toggle
+bind-key a set-window-option synchronize-panes\; display-message "synchronize-panes is now #{?pane_synchronized,on,off}"
+
+# Set pane titles # might not work with different themes, needs testing
+# set -g pane-border-format "#{pane_index} #{pane_title}"
+# set -g pane-border-status bottom
+
+# ## Toggle pane title visibility
+bind T run 'bash -c "arr=( off top ) && tmux setw pane-border-status \${arr[\$(( \${arr[(I)#{pane-border-status}]} % 2 + 1 ))]}"'
+
+# ## Rename pane
+bind t command-prompt -p "(rename-pane)" -I "#T" "select-pane -T '%%'"
+
+# ## Windows --------------------------------------
+
+# ## Move between Widow
+bind -n S-down new-window
+bind -n S-left prev
+bind -n S-right next
+
+# ## Split Window
+bind V split-window -h
+bind H split-window
+
+# ## Reorder window tabs
+bind-key -n C-M-Left swap-window -t -1
+bind-key -n C-M-Right swap-window -t +1
+bind-key -n C-Left previous-window
+bind-key -n C-Right next-window
+
+# ## Buffer ------------------------------------------------------
+# Capture scrollback to a file
+bind-key P command-prompt -p 'save history to filename:' -I '~/tmux.history' 'capture-pane -S -32768 ; save-buffer %1 ; delete-buffer'
+
+# Clear scrollback
+bind -n C-k send-keys -R \; send-keys C-l \; clear-history
+
+# ## Session ----------------------------------------------------
+bind-key q      confirm-before kill-session
+bind-key Q      confirm-before kill-server
+
+# ## Session menu
+bind-key ` run-shell -b "~/.tmux/session-menu"
+
+# ## Help -------------------------------------------------------
+# ## List bound keys
+bind-key -n '?' list-keys
+
+# ## Toggle mouse with notification
+bind m run "cut -c3- ~/.tmux.conf | sh -s _toggle_mouse \; display-message 'Mouse #{?mouse,on,off}'"
+# # /!\ do not remove the following line
+# EOF
+#
+# # /!\ do not "uncomment" the functions: the leading "# " characters are needed
+#
+# weather() {                                         # see https://github.com/chubin/wttr.in#one-line-output
+#   curl -f -s -m 2 'wttr.in?format=3' || printf '\n' # /!\ make sure curl is installed
+#   sleep 900                                         # sleep for 15 minutes, throttle network requests whatever the value of status-interval
+# }
+#
+# online() {
+#   ping -c 1 1.1.1.1 >/dev/null 2>&1 && printf '✔' || printf '✘'
+# }
+#
+# "$@"
+# # /!\ do not remove the previous line

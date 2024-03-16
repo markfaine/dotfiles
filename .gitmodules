@@ -1,0 +1,75 @@
+[submodule ".config/nvim"]
+	path = .config/nvim
+	url = https://github.com/NvChad/NvChad
+[submodule "tmux/.tmux"]
+	path = tmux/.tmux
+	url = https://github.com/gpakosz/.tmux.git
+[submodule "bash/.bash_it"]
+	path = bash/.bash_it
+	url = https://github.com/Bash-it/bash-it.git
+[submodule "zsh/.zim/modules/zsh-syntax-highlighting"]
+	path = zsh/.zim/modules/zsh-syntax-highlighting
+	url = https://github.com/zsh-users/zsh-syntax-highlighting.git
+[submodule "zsh/.zim/modules/fzf"]
+	path = zsh/.zim/modules/fzf
+	url = https://github.com/zimfw/fzf.git
+[submodule "zsh/.zim/modules/zsh-completions"]
+	path = zsh/.zim/modules/zsh-completions
+	url = https://github.com/zsh-users/zsh-completions.git
+[submodule "zsh/.zim/modules/asciiship"]
+	path = zsh/.zim/modules/asciiship
+	url = https://github.com/zimfw/asciiship.git
+[submodule "zsh/.zim/modules/git-info"]
+	path = zsh/.zim/modules/git-info
+	url = https://github.com/zimfw/git-info.git
+[submodule "zsh/.zim/modules/pvenv"]
+	path = zsh/.zim/modules/pvenv
+	url = https://github.com/zimfw/pvenv.git
+[submodule "zsh/.zim/modules/ssh"]
+	path = zsh/.zim/modules/ssh
+	url = https://github.com/zimfw/ssh.git
+[submodule "zsh/.zim/modules/zsh-autosuggestions"]
+	path = zsh/.zim/modules/zsh-autosuggestions
+	url = https://github.com/zsh-users/zsh-autosuggestions.git
+[submodule "zsh/.zim/modules/archive"]
+	path = zsh/.zim/modules/archive
+	url = https://github.com/zimfw/archive.git
+[submodule "zsh/.zim/modules/termtitle"]
+	path = zsh/.zim/modules/termtitle
+	url = https://github.com/zimfw/termtitle.git
+[submodule "zsh/.zim/modules/prompt-pwd"]
+	path = zsh/.zim/modules/prompt-pwd
+	url = https://github.com/zimfw/prompt-pwd.git
+[submodule "zsh/.zim/modules/environment"]
+	path = zsh/.zim/modules/environment
+	url = https://github.com/zimfw/environment.git
+[submodule "zsh/.zim/modules/zim-gopass"]
+	path = zsh/.zim/modules/zim-gopass
+	url = https://github.com/joke/zim-gopass.git
+[submodule "zsh/.zim/modules/utility"]
+	path = zsh/.zim/modules/utility
+	url = https://github.com/zimfw/utility.git
+[submodule "zsh/.zim/modules/duration-info"]
+	path = zsh/.zim/modules/duration-info
+	url = https://github.com/zimfw/duration-info.git
+[submodule "zsh/.zim/modules/k"]
+	path = zsh/.zim/modules/k
+	url = https://github.com/zimfw/k.git
+[submodule "zsh/.zim/modules/zim-yq"]
+	path = zsh/.zim/modules/zim-yq
+	url = https://github.com/joke/zim-yq.git
+[submodule "zsh/.zim/modules/completion"]
+	path = zsh/.zim/modules/completion
+	url = https://github.com/zimfw/completion.git
+[submodule "zsh/.zim/modules/zsh-history-substring-search"]
+	path = zsh/.zim/modules/zsh-history-substring-search
+	url = https://github.com/zsh-users/zsh-history-substring-search.git
+[submodule "zsh/.zim/modules/asdf"]
+	path = zsh/.zim/modules/asdf
+	url = https://github.com/zimfw/asdf.git
+[submodule "zsh/.zim/modules/input"]
+	path = zsh/.zim/modules/input
+	url = https://github.com/zimfw/input.git
+[submodule "zsh/.zim/modules/gitster"]
+	path = zsh/.zim/modules/gitster
+	url = https://github.com/zimfw/gitster.git
