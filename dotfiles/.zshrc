@@ -156,26 +156,8 @@ zstyle ':completion:*:*:ls:*:*' file-patterns '^/mnt'
 # Add username to prompt
 export PS1="%n $PS1"
 
-if cat /proc/1/sched | head -n 1 | grep -q systemd; then
-  . ~/venv/bin/activate
-fi
-
-#if [[ -e ~/bin/tools.sh ]]; then
-#  . ~/bin/tools.sh
-#fi
-
-if [[ -e ~/bin/zfunctions.sh ]]; then
-  . ~/bin/zfunctions.sh
-fi
-
 export DISABLE_AUTO_TITLE=true
 export EDITOR='nvim'
 alias mux="tmuxinator"
 
-export DOCKER_ANSIBLE_DEFAULT_CONTAINER_VERSION=2.15.1
-export ANSIBLE_DEFAULT_CONFIG="$HOME/ansible/development/ansible.cfg"
-
 eval "$(direnv export zsh)"
-
-DENO_INSTALL="/home/mfaine/.deno"
-export PATH="$DENO_INSTALL/bin:$PATH"
