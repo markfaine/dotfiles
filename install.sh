@@ -132,5 +132,5 @@ for package in "${packages[@]}"; do
 done
 
 printf "\nInstall Zim Modeles\n"
-zsh -c "source "$HOME/.zim/init.zsh" && zimfw install"
+zsh "$DIR/zsh/install_modules.zsh"
 
