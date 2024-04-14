@@ -128,7 +128,7 @@ printf "\nStow activate packages from ~/dotfiles\n"
 mapfile -t packages < <(find "$DIR" -mindepth 1 -maxdepth 1 -type d -not -name '.git')
 for package in "${packages[@]}"; do
     bn="$(basename "$package")"
-    echo stow -d "$DIR" -t "$HOME" "$bn"
+    stow -d "$DIR" -t "$HOME" "$bn"
 done
 
 printf "\nInstall Zim Modeles\n"
