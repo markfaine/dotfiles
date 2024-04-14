@@ -81,4 +81,27 @@ export BASH_IT_AUTOMATIC_RELOAD_AFTER_CONFIG_CHANGE=1
 # export BASH_IT_RELOAD_LEGACY=1
 
 # Load Bash It
-source "$BASH_IT"/bash_it.sh
+source "$BASH_IT/bash_it.sh"
+
+# Add neovim to the path
+PATH="$PATH:/opt/nvim-linux64/bin"
+export PATH
+
+# Aliases
+alias vi='/opt/nvim-linux64/bin/nvim'
+alias vim='/opt/nvim-linux64/bin/nvim'
+alias mux="tmuxinator"
+
+# DIRENV
+eval "$(direnv export bash)"
+
+# FZF
+[ -f ~/.fzf.bash ] && source ~/.fzf.bash
+
+# Source ASDF
+. $HOME/.asdf/asdf.sh
+. $HOME/.asdf/completions/asdf.bash
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
