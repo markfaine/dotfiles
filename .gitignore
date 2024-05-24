@@ -2,3 +2,5 @@ zsh/.zim/modules
 **/*.git
 **/*.old
 **/*.bak
+**/*.key
+**/.vault
