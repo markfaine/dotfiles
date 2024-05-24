@@ -1,0 +1,9 @@
+{
+	"auths": {
+		"registry.enms.nisn.nasa.gov": {}
+	},
+	"credsStore": "pass",
+	"aliases": {
+		"builder": "buildx"
+	}
+}
