@@ -72,6 +72,9 @@ WORDCHARS=${WORDCHARS//[\/]}
 # zsh-users/zsh-autosuggestions is the last module in your ~/.zimrc.
 ZSH_AUTOSUGGEST_MANUAL_REBIND=1
 
+# Set color for zsh-autosuggestions
+ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=6'
+
 # Customize the style that the suggestions are shown with.
 # See https://github.com/zsh-users/zsh-autosuggestions/blob/master/README.md#suggestion-highlight-style
 #ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=242'
