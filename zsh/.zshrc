@@ -164,3 +164,8 @@ setopt AUTO_PARAM_SLASH
 
 # Don't complete windows dirs
 zstyle ':completion:*:*:ls:*:*' file-patterns '^/mnt'
+
+# Fix an issue with zim init.zsh
+if ! grep -q "\$HOME" "$HOME/.zim/init.zsh"; then
+    sed -ri 's/\/home\/mfaine/\$HOME/g' init.zsh
+fi
