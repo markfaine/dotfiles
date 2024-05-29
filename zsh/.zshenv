@@ -15,9 +15,6 @@ alias nvim=/opt/nvim/bin/nvim
 alias vim=/opt/nvim/bin/nvim
 alias mux=tmuxinator
 
-# Add username to prompt
-export PS1="%n $PS1"
-
 # direnv support
 eval "$(direnv export zsh)"
 
