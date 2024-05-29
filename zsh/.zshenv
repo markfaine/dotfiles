@@ -2,7 +2,7 @@ export GIT_SSL_NO_VERIFY=true
 skip_global_compinit=1
 
 # Add neovim to the path
-PATH="$PATH:/opt/nvim-linux64/bin"
+PATH="$PATH:/opt/nvim/bin"
 export PATH
 
 # Set editor
@@ -10,8 +10,9 @@ export DISABLE_AUTO_TITLE=true
 export EDITOR='nvim'
 
 # Aliases
-alias vi=/opt/nvim-linux64/bin/nvim
-alias vim=/opt/nvim-linux64/bin/nvim
+alias vi=/opt/nvim/bin/nvim
+alias nvim=/opt/nvim/bin/nvim
+alias vim=/opt/nvim/bin/nvim
 alias mux=tmuxinator
 
 # Add username to prompt

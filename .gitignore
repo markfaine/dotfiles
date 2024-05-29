@@ -4,3 +4,4 @@ zsh/.zim/modules
 **/*.bak
 **/*.key
 **/.vault
+nvim/nvim/lazy-lock.json
