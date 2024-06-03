@@ -167,5 +167,5 @@ zstyle ':completion:*:*:ls:*:*' file-patterns '^/mnt'
 
 # Fix an issue with zim init.zsh
 if ! grep -q "\$HOME" "$HOME/.zim/init.zsh"; then
-    sed -ri 's/\/home\/mfaine/\$HOME/g' init.zsh
+    sed -ri 's/\/home\/mfaine/\$HOME/g' "$HOME/.zim/init.zsh"
 fi
