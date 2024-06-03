@@ -20,4 +20,10 @@ map("n", "<leader>ta", function()
   vim.cmd(string.format("%s", "Gitsigns toggle_signs"))
 end, { desc = "Toggle All Visible Markers"})
 
+map("n", "<A-i>", function()
+  require("nvchad.term").toggle({ pos = "sp", id ='abc' })
+end, { desc = "Terminal toggle floating" })
+
+map('t', '<C-w>h', "<C-\\><C-n><C-w>h",{silent = true, desc = "Terminal Buffer"})
+
 require("ibl").setup_buffer(0, { enabled = true, })
