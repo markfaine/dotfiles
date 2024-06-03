@@ -27,7 +27,7 @@ THEME_CHECK_SUDO='true'
 # export BASH_IT_DEVELOPMENT_BRANCH='master'
 
 # Your place for hosting Git repos. I use this for private repos.
-export GIT_HOSTING='git@gitlab.enms.nisn.nasa.gov'
+export GIT_HOSTING='git@gitlab.enms.ndc.nasa.gov'
 
 # Don't check mail when opening terminal.
 unset MAILCHECK
@@ -83,13 +83,20 @@ export BASH_IT_AUTOMATIC_RELOAD_AFTER_CONFIG_CHANGE=1
 # Load Bash It
 source "$BASH_IT/bash_it.sh"
 
-# Add neovim to the path
-PATH="$PATH:/opt/nvim-linux64/bin"
+# neovim aliases
+if [[ -x "$HOME/apps/nvim/bin/nvim" ]]; then
+    alias nvim="$HOME/apps/nvim/bin/nvim"
+    alias vim='nvim'
+    alias vi='nvim'
+    PATH="$PATH:$HOME/apps/nvim/bin"
+    export EDITOR='nvim'
+else
+    export EDITOR='vim'
+fi
+PATH=".:$PATH"
 export PATH
 
-# Aliases
-alias vi='/opt/nvim-linux64/bin/nvim'
-alias vim='/opt/nvim-linux64/bin/nvim'
+# Tmux Aliases
 alias mux="tmuxinator"
 
 # DIRENV
@@ -98,10 +105,11 @@ eval "$(direnv export bash)"
 # FZF
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
 
-# Source ASDF
-. $HOME/.asdf/asdf.sh
-. $HOME/.asdf/completions/asdf.bash
-
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+# Source ASDF
+export ASDF_FORCE_PREPEND=no
+. $HOME/.asdf/asdf.sh
+. $HOME/.asdf/completions/asdf.bash
