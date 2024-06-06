@@ -27,7 +27,7 @@
 	filemode = true
 	eol = lf
 	whitespace = tab-in-indent
-	excludesfile = "/home/mfaine/.gitignore"
+	excludesFile = ~/.gitignore_global
 	editor = vim
 [preserve-permissions]
 	user = true
