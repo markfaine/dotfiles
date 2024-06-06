@@ -169,3 +169,9 @@ zstyle ':completion:*:*:ls:*:*' file-patterns '^/mnt'
 if ! grep -q "\$HOME" "$HOME/.zim/init.zsh"; then
     sed -ri 's/\/home\/mfaine/\$HOME/g' "$HOME/.zim/init.zsh"
 fi
+
+# Use default venv
+pvenv -n default use python3 --system-site-packages
+
+# Initialize pass
+pass show docker-credential-helpers/docker-pass-initialized-check

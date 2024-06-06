@@ -1,17 +1,18 @@
-export GIT_SSL_NO_VERIFY=true
+# Need by zim
 skip_global_compinit=1
 
-# Add neovim to the path
+# Add dot to the path
 path=('.' $path)
 
-# Set editor
+# Temporarily disabled due to an issue with MS terminal 
 export DISABLE_AUTO_TITLE=true
 
-# Aliases
+# Configure path, aliases, and environment variables for neovim
 if [[ -x "$HOME/apps/nvim/bin/nvim" ]]; then
     alias nvim="$HOME/apps/nvim/bin/nvim"
     alias vim='nvim'
     alias vi='nvim'
+    alias svim='/usr/bin/vim' # stock vim
     path+="$HOME/apps/nvim/bin"
     export EDITOR='nvim'
 fi
@@ -20,13 +21,16 @@ fi
 export PATH
 
 # Tmux alias
-alias mux=tmuxinator
+TMUXINATOR="$(command -v tmuxinator)"
+[ -x "$TMUXINATOR" ] && alias mux="$TMUXINATOR"
 
 # direnv support
-eval "$(direnv export zsh)"
+DIRENV="$(command -v direnv)"
+[ -x "$DIRENV" ] && eval "$("$DIRENV" export zsh)"
 
 # Source fzf
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+FZF="$(command -v fzf)"
+[ -x "$FZF" ] && source <(fzf --zsh)
 
 # Load nvm
 export NVM_DIR="$HOME/.nvm"
@@ -35,3 +39,6 @@ export NVM_DIR="$HOME/.nvm"
 # Source ASDF
 export ASDF_FORCE_PREPEND=no
 . "$HOME/.asdf/asdf.sh"
+
+# Git environment variables
+export GIT_SSL_NO_VERIFY=true

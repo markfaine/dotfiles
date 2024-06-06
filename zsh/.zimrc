@@ -51,4 +51,7 @@ zmodule zsh-users/zsh-history-substring-search
 # Theme
 zmodule bira
 
+# Python
+zmodule pvenv
+
 # }}} End configuration added by Zim install
