@@ -5,7 +5,7 @@ skip_global_compinit=1
 path=('.' $path)
 
 # Temporarily disabled due to an issue with MS terminal 
-export DISABLE_AUTO_TITLE=true
+#export DISABLE_AUTO_TITLE=true
 
 # Configure path, aliases, and environment variables for neovim
 if [[ -x "$HOME/apps/nvim/bin/nvim" ]]; then
@@ -39,6 +39,9 @@ export NVM_DIR="$HOME/.nvm"
 # Source ASDF
 export ASDF_FORCE_PREPEND=no
 . "$HOME/.asdf/asdf.sh"
+
+# zoxide
+eval "$(zoxide init zsh --cmd cd)"
 
 # Git environment variables
 export GIT_SSL_NO_VERIFY=true
