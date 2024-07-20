@@ -3,18 +3,28 @@
 	email = {'changed': False, 'results': [], 'failed': False}
 [alias]
 	lg = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
-	st = status
-	co = checkout
-	pr = pull
 	pl = pull
 	pu = push
-	sb = show-branch
+	st = status -s
+	sta = status
+	conf = config --global --edit
+	cge = config --global --edit
+	ci = commit
+	co = checkout
+	cod = checkout .
+	rh = reset HEAD
+	aa = add -A
+	cdf = clean -df
+	br = branch
+	bra = branch -a
+	pr = pull --rebase
+	amend = commit -a --amend --no-edit
+	ciam = commit -a --amend --no-edit
 	preserve-permissions-save = =
 	preserve-permissions-restore = =
 	preserve-permissions-check = =
-	pr = pull
 	up = "!git remote update -p; git merge --ff-only @{u}"
-	gdh = "!git diff HEAD \"$1\" #"
+	dh = "!git diff HEAD \"$1\" #"
 [merge]
 	ff = only
 [push]
