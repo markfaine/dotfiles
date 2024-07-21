@@ -5,3 +5,4 @@ zsh/.zim/modules
 **/*.key
 **/.vault
 nvim/nvim/lazy-lock.json
+nvim/nvim/lazy-lock.json
