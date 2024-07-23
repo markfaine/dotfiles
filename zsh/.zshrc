@@ -220,8 +220,11 @@ ZOXIDE="$HOME/.local/bin/zoxide"
 [ -x "$ZOXIDE" ] && eval "$("$ZOXIDE" init zsh --cmd cd)"
 
 # Use default venv
-PVENV="$(command -v pvenv)"
-[ -x "$PVENV" ] && "$PVENV" -n default use python3 --system-site-packages &>/dev/null
+# requires pvenv installed in .zimrc
+export PVENV_HOME="$HOME/.venvs"
+if cat /proc/1/sched | head -n 1 | grep -q systemd; then
+    pvenv -n default use python3 --system-site-packages &>/dev/null
+fi
 
 # Initialize pass
 PASS="$(command -v pass)"
