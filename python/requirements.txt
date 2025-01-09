@@ -1,6 +1,6 @@
 ansible==10.7.0
 ansible-compat==24.7.0
-ansible-core==2.17.4
+ansible-core==2.17.7rc1
 ansible-lint @ git+https://github.com/ansible/ansible-lint@9d5fd7975b873a435f21680390f1c6a893cc95c6
 appdirs==1.4.4
 attrs==23.2.0
