@@ -28,17 +28,11 @@ TMUXINATOR="$(command -v tmuxinator)"
 DIRENV="$(command -v direnv)"
 # Don't display direnv output
 export DIRENV_LOG_FORMAT=
-[ -x "$DIRENV" ] && eval "$("$DIRENV" export zsh)"
+[ -x "$DIRENV" ] && eval "$("$DIRENV" hook zsh)"
 
 # Source fzf
 FZF="$(command -v fzf)"
 [ -x "$FZF" ] && source <(fzf --zsh)
-
-# Fix an issue with zim init.zsh
-# May no longer need this
-#if ! grep -q "\$HOME" "$HOME/.zim/init.zsh"; then
-#    sed -ri 's/\/home\/mfaine/\$HOME/g' "$HOME/.zim/init.zsh"
-#fi
 
 # Evaluate zoxide to integrate into shell
 path=('.' $path)
@@ -53,5 +47,10 @@ ZOXIDE="$HOME/.local/bin/zoxide"
 PASS="$(command -v pass)"
 [ -x "$PASS" ] && "$PASS" show docker-credential-helpers/docker-pass-initialized-check &>/dev/null
 
-# Created by `pipx` on 2024-12-22 16:23:29
-export PATH="$PATH:/home/mfaine/.local/bin"
+# Load ssh agent and resident keys
+function ssh_load(){
+    eval "$(ssh-agent -s; SSH_ASKPASS=/usr/bin/ssh-askpass)"
+    ssh-add -K
+}
+export -f ssh_load
+ssh_load
