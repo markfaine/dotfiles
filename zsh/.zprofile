@@ -85,9 +85,10 @@ function ssh_load(){
     eval "$(ssh-agent -s; SSH_ASKPASS=$SSH_ASKPASS)"
     ssh-add -K
 }
-if [[ "${SSH_ASKPASS:-}" == "" ]]; then
-    ssh_load
-fi
+# This won't work unless usb is mounted in WSL
+#if [[ "${SSH_ASKPASS:-}" == "" ]]; then
+#    ssh_load
+#fi
 
 # Load pvenv
 if [[ "${PVENV_HOME:-}" == "" ]]; then
