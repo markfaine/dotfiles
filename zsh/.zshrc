@@ -168,13 +168,9 @@ setopt AUTO_PARAM_SLASH
 # Don't complete windows dirs
 zstyle ':completion:*:*:ls:*:*' file-patterns '^/mnt'
 
-# Fix an issue with zim init.zsh
-if ! grep -q "\$HOME" "$HOME/.zim/init.zsh"; then
-    sed -ri 's/\/home\/mfaine/\$HOME/g' "$HOME/.zim/init.zsh"
-fi
-
 # Use default venv
-pvenv -n default use python3 --system-site-packages
-
-# Initialize pass
-pass show docker-credential-helpers/docker-pass-initialized-check
+# requires pvenv installed in .zimrc
+export PVENV_HOME="$HOME/.venvs"
+if cat /proc/1/sched | head -n 1 | grep -q systemd; then
+    pvenv -n default use python3 --system-site-packages &>/dev/null
+fi
