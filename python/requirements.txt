@@ -1,7 +1,6 @@
 ansible==10.7.0
 ansible-compat==24.7.0
 ansible-core==2.17.7rc1
-ansible-lint @ git+https://github.com/ansible/ansible-lint@9d5fd7975b873a435f21680390f1c6a893cc95c6
 appdirs==1.4.4
 attrs==23.2.0
 awxkit==24.6.0
@@ -39,14 +38,13 @@ mdurl==0.1.2
 molecule==24.7.0
 msgpack==1.0.3
 mypy-extensions==1.0.0
-nats-ansible==1.0
-nats-docker==1.0
 natsort==8.4.0
 nodeenv==1.9.1
 obsidianhtml==4.0.1
 packaging==24.1
 pandoc==2.3
 pandocfilters==1.5.1
+passlib
 pathspec==0.12.1
 platformdirs==4.2.2
 pluggy==1.5.0
@@ -84,7 +82,7 @@ soupsieve==2.5
 subprocess-tee==0.4.2
 typing_extensions==4.12.2
 urllib3==2.2.2
-virtualenv==20.26.3
+virtualenv==20.26.6
 wcmatch==8.5.2
 wcwidth==0.2.13
 webencodings==0.5.1
