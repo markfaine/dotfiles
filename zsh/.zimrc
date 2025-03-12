@@ -19,6 +19,9 @@ zmodule termtitle
 # Utility aliases and functions. Adds colour to ls, grep and less.
 zmodule utility
 
+# Ruby
+zmodule ruby
+
 # Exposes to prompts how long the last command took to execute, used by asciiship.
 zmodule duration-info
 
@@ -31,10 +34,11 @@ zmodule zsh-users/zsh-completions --fpath src
 # Should be initialized almost last 
 zmodule prompt-pwd
 zmodule gitster
+zmodule joke/zim-gopass
 zmodule ssh
 zmodule fzf
 zmodule archive
-zmodule asdf
+# zmodule asdf - not compatible with 0.16.5
 zmodule joke/zim-yq
 
 # Enables and configures smart and extensive tab completion.
@@ -50,6 +54,9 @@ zmodule zsh-users/zsh-history-substring-search
 
 # Theme
 zmodule bira
+
+# direnv
+zmodule direnv
 
 # Python
 zmodule pvenv
