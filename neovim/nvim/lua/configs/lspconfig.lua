@@ -40,7 +40,6 @@ for _, lsp in ipairs(servers) do
 end
 
 -- ansiblels - didn't work in the loop above
-
 require("lspconfig").ansiblels.setup {
   on_attach = M.on_attach,
   on_init = nvlsp.on_init,

@@ -8,18 +8,18 @@ return {
     config = function()
       require("conform").setup {
         formatters_by_ft = {
-          sh = { "shfmt", lsp_format = "prefer" },
-          python = { "isort", "black" },
-          md = { name = "mdformat", timeout_ms = 500, lsp_format = "prefer" },
-          css = { "prettier" },
-          html = { "prettier" },
-          javascript = { "prettier" },
-          lua = { "stylua" },
+          css = { "prettier", lsp_format = "fallback" },
+          html = { "prettier", lsp_format = "fallback" },
+          javascript = { "prettier", lsp_format = "fallback" },
+          lua = { "stylua", lsp_format = "fallback" },
+          md = { name = "mdformat", lsp_format = "fallback" },
+          python = { "isort", "black", lsp_fallback = "fallback" },
+          sh = { "shfmt", lsp_format = "fallback" },
           yaml = { "yamlfmt", lsp_format = "prefer" },
         },
         format_on_save = {
           timeout_ms = 500,
-          lsp_fallback = false,
+          lsp_fallback = "fallback",
         },
       }
 
@@ -75,6 +75,7 @@ return {
           "glow",
           "isort",
           "jinja-lsp",
+          "jq",
           "mdformat",
           "mypy",
           "prettier",
@@ -87,9 +88,12 @@ return {
           "shellcheck",
           "shfmt",
           "sphinx-lint",
+          "terraform-ls",
+          "tflint",
           "yamllint",
           "yamlfmt",
           "yamlfix",
+          "yq",
         },
       }
     end,
