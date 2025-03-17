@@ -13,7 +13,7 @@ return {
           javascript = { "prettier", lsp_format = "fallback" },
           lua = { "stylua", lsp_format = "fallback" },
           md = { name = "mdformat", lsp_format = "fallback" },
-          python = { "isort", "black", lsp_fallback = "fallback" },
+          python = { "black", lsp_fallback = "fallback" },
           sh = { "shfmt", lsp_format = "fallback" },
           yaml = { "yamlfmt", lsp_format = "prefer" },
         },
@@ -38,6 +38,20 @@ return {
   -- LSP
   {
     "williamboman/mason.nvim",
+    opts = {},
+    lazy = false,
+  },
+  {
+    "williamboman/mason-lspconfig.nvim",
+    config = function()
+      require "configs.lspconfig"
+    end,
+    automatic_installation = true,
+    lazy = false,
+  },
+  {
+    "neovim/nvim-lspconfig",
+    opts = {},
     lazy = false,
   },
   {
@@ -53,14 +67,25 @@ return {
     lazy = false,
   },
   {
-    "williamboman/mason-lspconfig.nvim",
-    config = function()
-      require "configs.lspconfig"
-    end,
+    "kdheepak/lazygit.nvim",
     lazy = false,
+    dependencies = {
+      "nvim-telescope/telescope.nvim",
+      "nvim-lua/plenary.nvim",
+    },
+    config = function()
+      require "configs.lazygit"
+    end,
   },
   {
-    "neovim/nvim-lspconfig",
+    "amitds1997/remote-nvim.nvim",
+    version = "*",
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      "MunifTanjim/nui.nvim",
+      "nvim-telescope/telescope.nvim",
+    },
+    config = true,
   },
   {
     "WhoIsSethDaniel/mason-tool-installer.nvim",
@@ -73,18 +98,14 @@ return {
           "black",
           "editorconfig-checker",
           "glow",
-          "isort",
           "jinja-lsp",
           "jq",
           "mdformat",
-          "mypy",
           "prettier",
           "rstcheck",
           "shellcheck",
           "shfmt",
           "pylsp",
-          "pyright",
-          "ruff",
           "shellcheck",
           "shfmt",
           "sphinx-lint",

@@ -38,6 +38,7 @@ autocmd("BufReadPost", {
 })
 
 -- WSL clipboard
+vim.o.clipboard = ""
 vim.g.clipboard = {
   name = "WslClipboard",
   copy = {

@@ -26,24 +26,22 @@ if command -v tmuxinator &>/dev/null; then
     alias mux="tmuxinator"
 fi
 
-# Source fzf
-#if command -v fzf &>/dev/null; then
-#    source <(fzf --zsh)
-#fi
-
-# Export path at the end
-#export PATH
-
-# Evaluate zoxide to integrate into shell
-#ZOXIDE="$HOME/.local/bin/zoxide"
-#[ -x "$ZOXIDE" ] && eval "$("$ZOXIDE" init zsh --cmd cd)"
-
-# Initialize pass
-#PASS="$(command -v pass)"
-#[ -x "$PASS" ] && "$PASS" show docker-credential-helpers/docker-pass-initialized-check &>/dev/null
+# alias rm
+alias rm='echo "This is not the command you are looking for."; false'
+alias trm='trash-put'
 
 # Mason bin directory
 path=("$HOME/.local/share/nvim/mason/bin" $path )
+
+# Setup trash
+if [[ ! -d "$HOME/.Trash" ]]; then
+    mkdir -p "$HOME/.Trash"
+fi
+
+# Add yarn global bin to path
+if command -v yarn &>/dev/null; then
+    path=("$(yarn global bin)" $path)
+fi
 
 # Prepend dot to path
 path=('.' $path)

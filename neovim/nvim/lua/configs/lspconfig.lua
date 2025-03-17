@@ -1,19 +1,29 @@
---
-require("nvchad.configs.lspconfig").defaults()
+require("mason").setup()
 local map = vim.keymap.set
 local nomap = vim.keymap.del
--- local nomap = vim.keymap.del
-local servers = { "html", "cssls", "pyright", "bashls", "jinja_lsp" }
-local nvlsp = require "nvchad.configs.lspconfig"
 local lspconfig = require "lspconfig"
+local nvlsp = require "nvchad.configs.lspconfig"
+nvlsp.defaults()
 
-local M = {}
-M.on_attach = function(_, bufnr)
+----- Keymapping - This on_attach callback is used to override keymaps for LSP
+local on_attach = function(client, bufnr)
+  nvlsp.on_attach(client, bufnr)
+
+  -- -- Disable keys that aren't used -----------------------------------------
+  nomap("n", "K", { buffer = bufnr })
+  nomap("n", "<leader>wa", { buffer = bufnr })
+  nomap("n", "<leader>wr", { buffer = bufnr })
+  nomap("n", "<leader>wl", { buffer = bufnr })
+  nomap("n", "<leader>D", { buffer = bufnr })
+  map("n", "<leader>l", "<Nop>", { desc = "LSP" })
+
   local function opts(desc)
     return { buffer = bufnr, desc = "LSP " .. desc }
   end
-  -- map("n", "<leader>lK", vim.lsp.buf.hover, opts "Hover")
-  map("n", "<leader>ll", vim.diagnostic.setloclist, { desc = "LSP diagnostic loclist" })
+  if vim.fn.maparg("K", "n", false, false) == "" then
+    map("n", "<leader>lK", "vim.lsp.buf.hover", opts "hover")
+  end
+  map("n", "<leader>ll", vim.diagnostic.setloclist, opts "diagnostic loclist")
   map({ "n", "v" }, "<leader>la", vim.lsp.buf.code_action, opts "Code action")
   map("n", "lD", vim.lsp.buf.declaration, opts "Go to declaration")
   map("n", "ld", vim.lsp.buf.definition, opts "Go to definition")
@@ -30,18 +40,31 @@ M.on_attach = function(_, bufnr)
   map("n", "lgR", vim.lsp.buf.references, opts "Show references")
 end
 
--- lsps with default config
+local servers = require("mason-lspconfig").get_installed_servers()
 for _, lsp in ipairs(servers) do
   lspconfig[lsp].setup {
-    on_attach = M.on_attach,
+    on_attach = on_attach,
     on_init = nvlsp.on_init,
     capabilities = nvlsp.capabilities,
   }
 end
 
--- ansiblels - didn't work in the loop above
-require("lspconfig").ansiblels.setup {
-  on_attach = M.on_attach,
+--- Customize lua_ls to use my keymappings and add vim global to diagnostics
+lspconfig["lua_ls"].setup {
+  on_attach = on_attach,
+  on_init = nvlsp.on_init,
+  capabilities = nvlsp.capabilities,
+  settings = {
+    Lua = {
+      diagnostics = { globals = { "vim" } },
+    },
+  },
+}
+
+--- Customize ansiblels to use my keymappings
+--- Set the filetype, command, and options
+lspconfig.ansiblels.setup {
+  on_attach = on_attach,
   on_init = nvlsp.on_init,
   capabilities = nvlsp.capabilities,
   settings = {
