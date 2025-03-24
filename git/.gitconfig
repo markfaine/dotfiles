@@ -24,9 +24,13 @@
 	preserve-permissions-restore = =
 	preserve-permissions-check = =
 	up = "!git remote update -p; git merge --ff-only @{u}"
-	dh = "!git diff HEAD \"$1\" #"
+  dh = "!git diff HEAD \"$1\" #"
+[mergetool "nvim"]
+  cmd = !nvim +DiffviewOpen +tabonly
+  trustExitCode = true
 [merge]
 	ff = only
+	tool = nvim
 [push]
 	default = simple
 [pull]

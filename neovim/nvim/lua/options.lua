@@ -5,6 +5,9 @@ local o = vim.o
 -- Disable mouse support
 o.mouse = ""
 
+-- Some plugins require this to be explicitly set
+vim.api.nvim_command "filetype plugin on"
+
 --   The time in milliseconds that is waited for a key code or mapped
 --   key sequence to complete.
 o.ttimeoutlen = 10
@@ -50,6 +53,18 @@ vim.g.clipboard = {
     ["*"] = 'pwsh.exe -c [Console]::Out.Write($(Get-Clipboard -Raw).tostring().replace("`r", ""))',
   },
   cache_enabled = 0,
+}
+
+-- diff options
+vim.opt.diffopt = {
+  "internal",
+  "filler",
+  "closeoff",
+  "context:12",
+  "algorithm:histogram",
+  "linematch:200",
+  "indent-heuristic",
+  "iwhite",
 }
 
 -- Show Dash when all buffers are closed

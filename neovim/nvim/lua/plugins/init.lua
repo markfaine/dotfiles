@@ -1,8 +1,10 @@
 return {
+  -- Ansible (filetype)
   {
     "mfussenegger/nvim-ansible",
     lazy = false,
   },
+  -- formatting
   {
     "stevearc/conform.nvim",
     config = function()
@@ -19,7 +21,7 @@ return {
         },
         format_on_save = {
           timeout_ms = 500,
-          lsp_fallback = "fallback",
+          lsp_fallback = "never",
         },
       }
 
@@ -29,18 +31,35 @@ return {
         args = { "-i", "4" },
       }
 
+      require("conform").formatters.black = {
+        inherit = true,
+        prepend_args = {
+          "--line-length",
+          "79",
+          "-t",
+          "py310",
+          "-t",
+          "py311",
+          "-t",
+          "py312",
+          "-t",
+          "py313",
+        },
+      }
+
       require("conform").formatters.yamlfmt = {
         args = { "--formatter", "indent=2,retain_line_breaks_single=true" },
       }
     end,
     lazy = false,
   },
-  -- LSP
+  -- LSP/package management
   {
     "williamboman/mason.nvim",
     opts = {},
     lazy = false,
   },
+  -- LSP
   {
     "williamboman/mason-lspconfig.nvim",
     config = function()
@@ -49,11 +68,13 @@ return {
     automatic_installation = true,
     lazy = false,
   },
+  -- LSP
   {
     "neovim/nvim-lspconfig",
     opts = {},
     lazy = false,
   },
+  -- linting/tools
   {
     "jay-babu/mason-null-ls.nvim",
     event = { "BufReadPre", "BufNewFile" },
@@ -66,6 +87,7 @@ return {
     end,
     lazy = false,
   },
+  -- package management
   {
     "kdheepak/lazygit.nvim",
     lazy = false,
@@ -77,6 +99,7 @@ return {
       require "configs.lazygit"
     end,
   },
+  -- git tui
   {
     "amitds1997/remote-nvim.nvim",
     version = "*",
@@ -87,16 +110,27 @@ return {
     },
     config = true,
   },
+  -- git diff
+  {
+    "sindrets/diffview.nvim",
+    lazy = false,
+    config = function()
+      require "configs.diffview"
+    end,
+  },
+  -- package management
   {
     "WhoIsSethDaniel/mason-tool-installer.nvim",
     config = function()
       require("mason-tool-installer").setup {
         ensure_installed = {
+          "autopep8",
           "ansible-language-server",
           "ansible-lint",
           "bashls",
           "black",
           "editorconfig-checker",
+          "flake8",
           "glow",
           "jinja-lsp",
           "jq",
@@ -105,23 +139,45 @@ return {
           "rstcheck",
           "shellcheck",
           "shfmt",
+          "pydocstyle",
+          "pylint",
           "pylsp",
+          "pyflakes",
           "shellcheck",
           "shfmt",
           "sphinx-lint",
           "terraform-ls",
           "tflint",
+          "yapf",
           "yamllint",
           "yamlfmt",
-          "yamlfix",
           "yq",
         },
       }
     end,
     lazy = false,
   },
+  -- key mapping
   {
     "folke/which-key.nvim",
     lazy = false,
+  },
+  -- docstring generator
+  {
+    "kkoomen/vim-doge",
+    config = function()
+      require "configs.vim-doge"
+    end,
+    lazy = false,
+  },
+  -- improved copy/paste
+  { "ibhagwan/smartyank.nvim", lazy = false },
+  {
+    "folke/snacks.nvim",
+    priority = 1000,
+    lazy = false,
+    config = function()
+      require "configs.snacks"
+    end,
   },
 }
