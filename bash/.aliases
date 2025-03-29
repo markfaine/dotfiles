@@ -5,68 +5,28 @@ alias c='clear'
 alias claer='clear'
 alias clar='clear'
 
-# ## PUSHD/POPD
-dedup(){
-    declare -a new=() copy=("${DIRSTACK[@]:1}")
-    declare -A seen
-    local v i
-    seen[$PWD]=1
-    seen[~]=1
-    for v in "${copy[@]}"
-    do if [ -z "${seen[$v]}" ]; then
-       new+=("$v")
-       seen[$v]=1
-    fi
-    done
-    builtin dirs -c
-    for ((i=${#new[@]}-1; i>=0; i--)); do
-      builtin pushd -n "${new[i]}" >/dev/null
-    done
-}
-
-pushd(){
-  if [[ $# -eq 0 ]]; then
-    builtin cd "$HOME"
-    return 0
-  elif [[ "$DIR" =~ ~[0-9] ]]; then
-      builtin cd "$DIR" &> /dev/null
-      return 0
-  else
-    DIR="$1"
-  fi
-  if ! builtin pushd "$DIR" &> /dev/null; then
-      echo "No such directory '$DIR'"
-      return 1
-  fi
-  dedup
-}
-
-pushd_builtin(){
-  builtin pushd &> /dev/null
-}
-
-popd(){
-  builtin popd &> /dev/null
-}
-
-function dirs(){
-  printf "%s\n" "DIRSTACK:"
-  builtin dirs -v
-}
-alias d='dirs'
-
-# ## CD + typos
-alias cdp='builtin cd -'
-alias cd..='cd ..'
-alias cd='pushd'
-alias back='popd'
-
 # ## MV
 alias mv='mv -i'
 
-# ## RM
-alias rm='rm -i'
-alias rmf='rm'
+# Typo or cd
+alias cd..='cd ..'
+
+# Configure editor
+alias svim="/usr/bin/vi" # stock vim
+if command -v nvim &>/dev/null; then
+   export EDITOR=nvim
+   alias vim="\$EDITOR"
+   alias vi="\$EDITOR"
+fi
+
+# Tmux alias
+if command -v tmuxinator &>/dev/null; then
+    alias mux="tmuxinator"
+fi
+
+# Alias rm to trash-put
+alias rm='printf "Use trm to delete to trash or bypass alias by prepending a backslash.\n"'; false
+alias trm='trash-put'
 
 # ## Disk Space
 alias df='df -kTh'
@@ -87,9 +47,10 @@ alias tial='tail'
 # ## LS + typos
 alias ls='ls --color'
 alias kk='ll'
+alias ls-la='ls -la'
 
 # ## Processes + typos
-alias ps-ef='ps -ef'
+alias ps='ps -ef'
 
 # ## Command is better
 alias which='command -v'
@@ -100,37 +61,18 @@ if command -v gawk >/dev/null 2>&1; then
 fi
 
 # ## What is my path?
-alias path='echo -e ${PATH//:/\\n}'
+alias mypath='echo -e ${PATH//:/\\n}'
 
 # ## Git
 alias git='git --no-pager'
 alias gits='git status'                                     # Git Status
 alias gitcfg='git config --list --show-origin --show-scope' #Show config options
-gd(){
-    local path
-    path="$1"
-    if [[ ! -e "$path" ]]; then echo "$path does not exist!"; return 1; fi
-    git gdh "$path"
-}
 
 # ## Vim check for errors
 alias checkvimrc="vim -q fakefile >/dev/null 2>/tmp/checkforerrors; grep -q -F 'Error detected while processing ' /tmp/checkforerrors && echo '.vimrc syntax is bad' || echo '.vimrc syntax is good!!'; rm -f /tmp/checkforerrors"
 
-# ## nvim is better if available
-if command -v nvim &>/dev/null; then
-    alias vim='nvim'
-    alias vi='nvim'
-fi
-
-# ## In case I mess up my .vimrc
-alias safevim='/usr/bin/vim -u NONE -U NONE -N'
-
 # ## Grep
-alias egrep='grep -E --color=always'
-alias fgrep='fgrep --color=always'
-alias grep='grep --color=always'
-alias grepnc='grep --color=never'
-
+alias grep='rg -IN -uuu'
 
 # ## TMUX
 # ## Tmux should always be tmux -2
@@ -139,21 +81,6 @@ alias tmux='tmux -T 256'
 # ## Docker
 alias dockerps='docker ps -a --format="table {{.ID}}\t{{.Names}}\t{{.Image}}\t{{.Command}}\t{{.Status}}"'
 
-# ## Admin
-llog(){
-    mapfile -t users < <(last | awk '{printf $1 "\n" }' | grep -v reboot \
-    | grep -v wtmp | grep -v root | sort  | uniq | xargs)
-    if [[ "${#users[@]}" -gt 0 ]]; then
-        printf "Username         Port     From             Latest\n"
-    fi
-    for user in "${users[@]}"; do
-        lastlog -u "$user" | grep -Ev "^Username.*"
-    done
-}
-
-# ## Systemctl
-alias systemctl='systemctl --no-pager'
-alias journalctl='journalctl --no-pager'
-
-# ## Environment
-alias sbrc='source ~/.bashrc'
+# ## Restart shell
+alias sbrc='exec bash'
+alias zbrc='exec zsh'

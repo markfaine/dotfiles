@@ -4,7 +4,7 @@
 skip_global_compinit=1
 
 # Uncomment if issue with MS terminal persists
-# export DISABLE_AUTO_TITLE=true
+export DISABLE_AUTO_TITLE=true
 
 # Git environment variables
 export GIT_SSL_NO_VERIFY=true

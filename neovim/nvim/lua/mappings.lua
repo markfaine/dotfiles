@@ -2,7 +2,7 @@ require "nvchad.mappings"
 
 local map = vim.keymap.set
 local nomap = vim.keymap.del
--- Snacks = require "snacks"
+Snacks = require "snacks"
 
 ----------------------- Disable nvchad stock keymappings if enabled -------------------
 -- disable stock comment toggle keymap
@@ -27,9 +27,13 @@ map("n", "<leader>r", ":%s/\\<<C-r><C-w>\\>/", { desc = "Replace word under curs
 
 -- lsp hover
 map("n", ",K", vim.lsp.buf.hover, { desc = "Hover" })
+
+-- Delete mark
+map("n", "dm", ":execute 'delmarks '.nr2char(getchar())<cr>", { desc = "Delete mark" })
+
 -- -- End General Mappings
 
------------------------End General mappings-------------------------------------
+-----------------------End General Mappings-------------------------------------
 
 ----------------------- Quick Actions (common operations) ----------------------
 -- , - for common operations

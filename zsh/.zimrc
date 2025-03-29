@@ -2,7 +2,7 @@
 
 # Modules
 # Sets sane Zsh built-in environment options.
-zmodule environment
+# zmodule environment
 
 ## Git
 # Provides handy git aliases and functions.
@@ -38,15 +38,12 @@ zmodule joke/zim-gopass
 zmodule ssh
 zmodule fzf
 zmodule archive
+zmodule magic-enter
 # zmodule asdf - not compatible with 0.16.5
 zmodule joke/zim-yq
 
-# Enables and configures smart and extensive tab completion.
-# completion must be sourced after all modules that add completion definitions.
-zmodule completion
-
 # Syntax highlighting
-# zsh-users/zsh-syntax-highlighting must be sourced after completion
+zsh-users/zsh-syntax-highlighting must be sourced after completion
 zmodule zsh-users/zsh-syntax-highlighting
 
 # zsh-users/zsh-history-substring-search must be sourced after zsh-users/zsh-syntax-highlighting
@@ -56,9 +53,16 @@ zmodule zsh-users/zsh-history-substring-search
 zmodule bira
 
 # direnv
-zmodule direnv
+# zmodule direnv # not compatible with asdf 0.16.5
 
 # Python
 zmodule pvenv
+
+# Zoxide
+zmodule kiesman99/zim-zoxide
+
+# Enables and configures smart and extensive tab completion.
+# completion must be sourced after all modules that add completion definitions.
+zmodule completion
 
 # }}} End configuration added by Zim install

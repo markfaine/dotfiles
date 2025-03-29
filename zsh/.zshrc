@@ -169,10 +169,3 @@ setopt AUTO_PARAM_SLASH
 # Don't complete windows dirs
 #zstyle ':completion:*:*:ls:*:*' file-patterns '^/mnt'
 
-
-# Use default venv
-# requires pvenv installed in .zimrc
-export PVENV_HOME="$HOME/.venvs"
-if cat /proc/1/sched | head -n 1 | grep -q systemd; then
-    pvenv -n default use python3 --system-site-packages &>/dev/null
-fi
