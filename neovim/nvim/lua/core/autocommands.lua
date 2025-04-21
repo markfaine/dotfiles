@@ -1,19 +1,3 @@
-require "nvchad.options"
-
-local o = vim.o
-
--- Disable mouse support
-o.mouse = ""
-
--- Some plugins require this to be explicitly set
-vim.api.nvim_command "filetype plugin on"
-
---   The time in milliseconds that is waited for a key code or mapped
---   key sequence to complete.
-o.ttimeoutlen = 10
--- Time in milliseconds to wait for a mapped sequence to complete.
-o.timeoutlen = 500
-
 -- Dynamic terminal padding
 local autocmd = vim.api.nvim_create_autocmd
 autocmd("VimEnter", {
@@ -40,32 +24,22 @@ autocmd("BufReadPost", {
   end,
 })
 
--- WSL clipboard
-vim.o.clipboard = ""
-vim.g.clipboard = {
-  name = "WslClipboard",
-  copy = {
-    ["+"] = "clip.exe",
-    ["*"] = "clip.exe",
-  },
-  paste = {
-    ["+"] = 'pwsh.exe -c [Console]::Out.Write($(Get-Clipboard -Raw).tostring().replace("`r", ""))',
-    ["*"] = 'pwsh.exe -c [Console]::Out.Write($(Get-Clipboard -Raw).tostring().replace("`r", ""))',
-  },
-  cache_enabled = 0,
-}
+-- Turn on line number for all new buffers
+autocmd("BufRead", {
+  pattern = "*",
+  callback = function()
+    vim.wo.number = true
+    vim.wo.relativenumber = true
+  end,
+})
 
--- diff options
-vim.opt.diffopt = {
-  "internal",
-  "filler",
-  "closeoff",
-  "context:12",
-  "algorithm:histogram",
-  "linematch:200",
-  "indent-heuristic",
-  "iwhite",
-}
+-- yaml.gitlab
+vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+  pattern = "*.gitlab-ci*.{yml,yaml}",
+  callback = function()
+    vim.bo.filetype = "yaml.gitlab"
+  end,
+})
 
 -- Show Dash when all buffers are closed
 vim.api.nvim_create_autocmd("BufDelete", {
@@ -76,7 +50,6 @@ vim.api.nvim_create_autocmd("BufDelete", {
     end
   end,
 })
-require "nvchad.options"
 
 -- Remove trailing whitespaces
 vim.api.nvim_create_autocmd("FileType", {
@@ -98,5 +71,11 @@ vim.api.nvim_create_autocmd("FileType", {
   end,
 })
 
--- Enable indent blank line plugin in all new buffers
-require("ibl").setup_buffer(0, { enabled = true })
+-- Close everything with q
+vim.api.nvim_create_autocmd({ "FileType" }, {
+  desc = "Close window",
+  pattern = "help,qf,buffer,TelescopePrompt",
+  callback = function()
+    vim.keymap.set("n", "<s-esc>", "<esc><esc>", { buffer = true, desc = "Close" })
+  end,
+})

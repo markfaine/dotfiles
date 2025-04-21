@@ -18,8 +18,12 @@ if command -v nvim &>/dev/null; then
     alias vi="$EDITOR"
 fi
 
+# npm/yarn bin directory
+path=("$HOME/development/python/nats-util/node_modules/.bin" $path)
+
 # Mason bin directory
 path=("$HOME/.local/share/nvim/mason/bin" $path )
+
 
 # Setup trash
 if [[ ! -d "$HOME/.Trash" ]]; then
@@ -48,3 +52,8 @@ fi
 
 # Source aliases
 . "$HOME/.aliases"
+
+export CONTROLLER_INVENTORY=7
+export CONTROLLER_HOST=n-msfc-aap.ndc.nasa.gov
+export CONTROLLER_PASSWORD='V4&R0mfQn#rJw%cVYZ'
+export CONTROLLER_USERNAME=bean
