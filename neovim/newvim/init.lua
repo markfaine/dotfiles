@@ -1,0 +1,2 @@
+-- Require core
+require 'core'

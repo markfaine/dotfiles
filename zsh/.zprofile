@@ -56,8 +56,9 @@ path=($path $HOME/.local/bin)
 export PATH
 
 # Attach yubikey
-#
-usbipd.exe attach --busid 5-1 --wsl
+if ! usbipd.exe list | grep -qi attached; then
+    usbipd.exe attach --busid 5-1 --wsl
+fi
 function ssh_load(){
     export SSH_ASKPASS=/usr/bin/ssh-askpass
     eval "$(ssh-agent -s; SSH_ASKPASS=$SSH_ASKPASS)"
