@@ -1,6 +1,6 @@
 [user]
 	name = mfaine
-	email = {'changed': False, 'results': [], 'failed': False}
+	email = "mark.faine@nasa.gov"
 [alias]
 	lg = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
 	pl = pull

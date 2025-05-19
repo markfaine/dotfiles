@@ -2,7 +2,6 @@
 #
 # User configuration sourced by interactive shells
 #
-
 # -----------------
 # Zsh configuration
 # -----------------
@@ -11,12 +10,33 @@
 # History
 #
 
-# Remove older command from the history if a duplicate is to be added.
-setopt HIST_IGNORE_ALL_DUPS
+# ## History customization
+# ## See https://zsh.sourceforge.io/Doc/Release/Options.html
+# ## Seems ignoring in the current shell session isn't possible
+# ## but we can prevent saving to the history file.
+touch ~/.zsh_history
+export HIST_IGNORE_ALL_DUPS
+export HISTFILE=~/.zsh_history
+export HISTSIZE=1000
+export SAVEHIST=1000
+export APPEND_HISTORY=true
+export BANG_HISTORY=true
+export HIST_ALLOW_CLOBBER=true
+export HIST_IGNORE_SPACE=true
+export HIST_NO_FUNCTIONS=true
+export HIST_NO_STORE=true
+export HISTORY_IGNORE="(ls*|ll*|pwd|exit|cd*|vi|vim)"
+
+# ## To read the history file every time history is called upon,
+# ## as well as the functionality from inc_append_history
+setopt share_history
 
 #
 # Input/output
 #
+
+# ## This disables the stupid "File exists!" warning on redirection
+setopt clobber
 
 # Set editor default keymap to emacs (`-e`) or vi (`-v`)
 bindkey -e
@@ -166,6 +186,7 @@ bindkey -M menuselect '^xi' vi-insert
 # It's annoying to always have to type a slash before tabbing
 setopt AUTO_PARAM_SLASH
 
-# Don't complete windows dirs
-#zstyle ':completion:*:*:ls:*:*' file-patterns '^/mnt'
-
+# If this is the only instance of zsh, source zprofile
+if [[ "$(pgrep -fc "/usr/bin/zsh")" -eq 1 ]]; then
+    . ~/.zprofile
+fi  

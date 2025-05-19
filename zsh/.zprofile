@@ -1,8 +1,4 @@
 # Source ASDF
-#
-# Prepend ~/.local/bin to path
-path=($HOME/.local/bin $path)
-
 # asdf
 export ASDF_DATA_DIR="$HOME/.asdf"
 path=("$ASDF_DATA_DIR/shims" $path)
@@ -17,12 +13,13 @@ if command -v nvim &>/dev/null; then
     alias vim="$EDITOR"
     alias vi="$EDITOR"
 fi
+alias nvi='NVIM_APPNAME=newvim nvim'
 
 # npm/yarn bin directory
-path=("$HOME/development/python/nats-util/node_modules/.bin" $path)
+path=($path "$HOME/development/python/nats-util/node_modules/.bin")
 
 # Mason bin directory
-path=("$HOME/.local/share/nvim/mason/bin" $path )
+path=($path "$HOME/.local/share/nvim/mason/bin")
 
 
 # Setup trash
@@ -32,7 +29,7 @@ fi
 
 # Add yarn global bin to path
 if command -v yarn &>/dev/null; then
-    path=("$(yarn global bin)" $path)
+    path=($path "$(yarn global bin)")
 fi
 
 # Set pvenv venvs location
@@ -42,10 +39,9 @@ export PVENV_HOME="$HOME/.venvs"
 path=('.' $path)
 export PATH
 
-# direnv support
-# DIRENV_DIFF
+# direnv support, looks for defined DIRENV_DIFF
 if [[ -z "$DIRENV_DIFF" ]]; then
-    export DIRENV_WARN_TIMEOUT=1m
+    export DIRENV_WARN_TIMEOUT=10s
     export DIRENV_LOG_FORMAT=
     eval "$(direnv hook zsh)"
 fi
@@ -53,7 +49,18 @@ fi
 # Source aliases
 . "$HOME/.aliases"
 
-export CONTROLLER_INVENTORY=7
-export CONTROLLER_HOST=n-msfc-aap.ndc.nasa.gov
-export CONTROLLER_PASSWORD='V4&R0mfQn#rJw%cVYZ'
-export CONTROLLER_USERNAME=bean
+# Prepend ~/.local/bin to path
+path=($path $HOME/.local/bin)
+
+# Export path changes
+export PATH
+
+# Attach yubikey
+#
+usbipd.exe attach --busid 5-1 --wsl
+function ssh_load(){
+    export SSH_ASKPASS=/usr/bin/ssh-askpass
+    eval "$(ssh-agent -s; SSH_ASKPASS=$SSH_ASKPASS)"
+    ssh-add -K
+}
+ssh_load

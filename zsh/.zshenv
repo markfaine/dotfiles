@@ -8,7 +8,3 @@ export DISABLE_AUTO_TITLE=true
 
 # Git environment variables
 export GIT_SSL_NO_VERIFY=true
-
-
-# Export path changes
-export PATH

@@ -29,3 +29,4 @@ yq 4.45.1
 semver 3.4.0
 terraform-lsp 0.0.12
 zoxide 0.9.7
+fd 10.2.0
