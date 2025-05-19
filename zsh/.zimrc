@@ -43,8 +43,8 @@ zmodule magic-enter
 zmodule joke/zim-yq
 
 # Syntax highlighting
-zsh-users/zsh-syntax-highlighting must be sourced after completion
-zmodule zsh-users/zsh-syntax-highlighting
+#zsh-users/zsh-syntax-highlighting must be sourced after completion
+#zmodule zsh-users/zsh-syntax-highlighting
 
 # zsh-users/zsh-history-substring-search must be sourced after zsh-users/zsh-syntax-highlighting
 zmodule zsh-users/zsh-history-substring-search
