@@ -1,0 +1,5 @@
+function ssh_load(){
+    eval "$(ssh-agent -s; SSH_ASKPASS=$SSH_ASKPASS)"
+    ssh-add -K || true
+}
+ssh_load

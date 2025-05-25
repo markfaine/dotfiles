@@ -23,18 +23,5 @@ fi
 # # Source aliases
 . "$HOME/.aliases"
 
-# # Attach yubikey, if wsl
-# if [[ -f "/etc/wsl.conf" ]]; then
-#     if ! usbipd.exe list | grep -qi attached; then
-#         usbipd.exe attach --busid 5-1 --wsl || true
-#     fi
-# fi
-
-function ssh_load(){
-    eval "$(ssh-agent -s; SSH_ASKPASS=$SSH_ASKPASS)"
-    usbipd.exe attach --busid 5-1 --wsl || true
-    ssh-add -K || true
-    #ssh-add ~/.ssh/id_rsa
-    #ssh-add ~/.ssh/id_bean-rsa
-}
-ssh_load
+# SSH Load
+. "$HOME/.load_ssh"
