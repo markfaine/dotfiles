@@ -2,7 +2,10 @@
 
 # Modules
 # Sets sane Zsh built-in environment options.
-# zmodule environment
+zmodule environment
+
+# Mise
+zmodule mise
 
 ## Git
 # Provides handy git aliases and functions.
@@ -39,7 +42,6 @@ zmodule ssh
 zmodule fzf
 zmodule archive
 zmodule magic-enter
-# zmodule asdf - not compatible with 0.16.5
 zmodule joke/zim-yq
 
 # Syntax highlighting
@@ -51,12 +53,6 @@ zmodule zsh-users/zsh-history-substring-search
 
 # Theme
 zmodule bira
-
-# direnv
-# zmodule direnv # not compatible with asdf 0.16.5
-
-# Python
-zmodule pvenv
 
 # Zoxide
 zmodule kiesman99/zim-zoxide

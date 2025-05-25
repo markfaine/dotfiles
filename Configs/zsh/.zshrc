@@ -5,7 +5,6 @@
 # -----------------
 # Zsh configuration
 # -----------------
-
 #
 # History
 #
@@ -15,17 +14,11 @@
 # ## Seems ignoring in the current shell session isn't possible
 # ## but we can prevent saving to the history file.
 touch ~/.zsh_history
-export HIST_IGNORE_ALL_DUPS
-export HISTFILE=~/.zsh_history
-export HISTSIZE=1000
-export SAVEHIST=1000
-export APPEND_HISTORY=true
-export BANG_HISTORY=true
-export HIST_ALLOW_CLOBBER=true
-export HIST_IGNORE_SPACE=true
-export HIST_NO_FUNCTIONS=true
-export HIST_NO_STORE=true
-export HISTORY_IGNORE="(ls*|ll*|pwd|exit|cd*|vi|vim)"
+
+# Source.env if it exists
+#if [[ -f .env ]]; then
+#    . .env
+#fi
 
 # ## To read the history file every time history is called upon,
 # ## as well as the functionality from inc_append_history
@@ -173,6 +166,14 @@ zstyle ':completion:*' squeeze-slashes true
 # Match on options not dirs
 zstyle ':completion:*' complete-options true
 
+# Better SSH/Rsync/SCP Autocomplete
+#zstyle ':completion:*:(scp|rsync):*' tag-order ' hosts:-ipaddr:ip\ address hosts:-host:host files'
+#zstyle ':completion:*:(ssh|scp|rsync):*:hosts-host' ignored-patterns '*(.|:)*' loopback ip6-loopback localhost ip6-localhost broadcasthost
+#zstyle ':completion:*:(ssh|scp|rsync):*:hosts-ipaddr' ignored-patterns '^(<->.<->.<->.<->|(|::)([[:xdigit:].]##:(#c,2))##(|%*))' '127.0.0.<->' '255.255.255.255' '::1' 'fe80::*'
+
+# Allow for autocomplete to be case insensitive
+#zstyle ':completion:*' matcher-list '' 'm:{[:lower:][:upper:]}={[:upper:][:lower:]}' '+l:|?=** r:|?=**'
+
 # Use complist to create navigation in completion menu
 zmodload zsh/complist
 bindkey -M menuselect 'h' vi-backward-char
@@ -184,9 +185,4 @@ bindkey -M menuselect 'l' vi-forward-char
 bindkey -M menuselect '^xi' vi-insert
 
 # It's annoying to always have to type a slash before tabbing
-setopt AUTO_PARAM_SLASH
-
-# If this is the only instance of zsh, source zprofile
-if [[ "$(pgrep -fc "/usr/bin/zsh")" -eq 1 ]]; then
-    . ~/.zprofile
-fi  
+# setopt AUTO_PARAM_SLASH

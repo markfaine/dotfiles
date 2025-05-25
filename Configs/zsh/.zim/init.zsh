@@ -1,8 +1,9 @@
 zimfw() { source $HOME/.zim/zimfw.zsh "${@}" }
 zmodule() { source $HOME/.zim/zimfw.zsh "${@}" }
-fpath=($HOME/.zim/modules/utility/functions $HOME/.zim/modules/duration-info/functions $HOME/.zim/modules/git-info/functions $HOME/.zim/modules/zsh-completions/src $HOME/.zim/modules/prompt-pwd/functions $HOME/.zim/modules/archive/functions $HOME/.zim/modules/asdf/functions $HOME/.zim/modules/zim-yq/functions ${fpath})
-autoload -Uz -- mkcd mkpw duration-info-precmd duration-info-preexec coalesce git-action git-info prompt-pwd archive lsarchive unarchive asdf
+fpath=($HOME/.zim/modules/utility/functions $HOME/.zim/modules/mise/functions $HOME/.zim/modules/duration-info/functions $HOME/.zim/modules/git-info/functions $HOME/.zim/modules/zsh-completions/src $HOME/.zim/modules/prompt-pwd/functions $HOME/.zim/modules/archive/functions $HOME/.zim/modules/zim-yq/functions ${fpath})
+autoload -Uz -- mise mkcd mkpw duration-info-precmd duration-info-preexec coalesce git-action git-info prompt-pwd archive lsarchive unarchive 
 source $HOME/.zim/modules/environment/init.zsh
+source $HOME/.zim/modules/mise/init.zsh
 source $HOME/.zim/modules/input/init.zsh
 source $HOME/.zim/modules/termtitle/init.zsh
 source $HOME/.zim/modules/utility/init.zsh
