@@ -13,6 +13,7 @@ path=($path "$HOME/.local/share/nvim/mason/bin")
 path=($path $HOME/.local/bin)
 
 # # Export path changes
+path=(. $path)
 export PATH
 
 # # Setup trash
