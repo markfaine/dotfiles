@@ -1,3 +1,4 @@
+# Firewall is currently breaking this.  Need a workaround.
 #if ! usbipd.exe list | grep -qi attached; then
 #    usbipd.exe attach --busid 5-1 --wsl || true
 #fi
