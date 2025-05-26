@@ -1,11 +1,11 @@
-if ! usbipd.exe list | grep -qi attached; then
-    usbipd.exe attach --busid 5-1 --wsl || true
-fi
+#if ! usbipd.exe list | grep -qi attached; then
+#    usbipd.exe attach --busid 5-1 --wsl || true
+#fi
 
 function ssh_load(){
     eval "$(ssh-agent -s; SSH_ASKPASS=$SSH_ASKPASS)"
-    ssh-add -K || true
-    #ssh-add ~/.ssh/id_rsa
-    #ssh-add ~/.ssh/id_bean-rsa
+    #ssh-add -K || true
+    ssh-add ~/.ssh/id_rsa 
+    ssh-add ~/.ssh/id_bean-rsa 
 }
 ssh_load

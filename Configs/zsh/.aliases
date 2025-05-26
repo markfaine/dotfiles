@@ -24,11 +24,8 @@ if command -v tmuxinator &>/dev/null; then
     alias mux="tmuxinator"
 fi
 
-# Alias rm to trash-put
-if command -v trash &>/dev/null; then
-    alias rm='printf "Use trm to delete to trash or bypass alias by prepending a backslash.\n"'; false
-    alias trm='trash-put'
-fi
+# Trash
+alias trm='trash-put'
 
 # ## Disk Space
 alias df='df -kTh'
