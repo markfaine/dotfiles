@@ -1,55 +1,3 @@
-# Start configuration added by Zim install {{{
-#
-# User configuration sourced by interactive shells
-#
-# -----------------
-# Zsh configuration
-# -----------------
-
-#
-# History
-#
-
-# ## History customization
-# ## See https://zsh.sourceforge.io/Doc/Release/Options.html
-# ## Seems ignoring in the current shell session isn't possible
-# ## but we can prevent saving to the history file.
-touch ~/.zsh_history
-export HIST_IGNORE_ALL_DUPS
-export HISTFILE=~/.zsh_history
-export HISTSIZE=1000
-export SAVEHIST=1000
-export APPEND_HISTORY=true
-export BANG_HISTORY=true
-export HIST_ALLOW_CLOBBER=true
-export HIST_IGNORE_SPACE=true
-export HIST_NO_FUNCTIONS=true
-export HIST_NO_STORE=true
-export HISTORY_IGNORE="(ls*|ll*|pwd|exit|cd*|vi|vim)"
-
-# ## To read the history file every time history is called upon,
-# ## as well as the functionality from inc_append_history
-setopt share_history
-
-#
-# Input/output
-#
-
-# ## This disables the stupid "File exists!" warning on redirection
-setopt clobber
-
-# Set editor default keymap to emacs (`-e`) or vi (`-v`)
-bindkey -e
-
-# Prompt for spelling correction of commands.
-#setopt CORRECT
-
-# Customize spelling correction prompt.
-#SPROMPT='zsh: correct %F{red}%R%f to %F{green}%r%f [nyae]? '
-
-# Remove path separator from WORDCHARS.
-WORDCHARS=${WORDCHARS//[\/]}
-
 # -----------------
 # Zim configuration
 # -----------------
@@ -121,6 +69,7 @@ ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)
 # ------------------
 
 ZIM_HOME=${ZDOTDIR:-${HOME}}/.zim
+mkdir -p "$ZIM_HOME"
 # Download zimfw plugin manager if missing.
 if [[ ! -e ${ZIM_HOME}/zimfw.zsh ]]; then
   if (( ${+commands[curl]} )); then
@@ -153,40 +102,3 @@ for key ('^[[B' '^N' ${terminfo[kcud1]}) bindkey ${key} history-substring-search
 for key ('k') bindkey -M vicmd ${key} history-substring-search-up
 for key ('j') bindkey -M vicmd ${key} history-substring-search-down
 unset key
-# }}} End configuration added by Zim install
-
-
-# Completions
-
-# group completions by type
-zstyle ':completion:*' group-name ''
-
-# Nicer completion listing
-zstyle ':completion:*' file-list all
-
-# Show colors in completion
-zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
-
-# // will become /
-zstyle ':completion:*' squeeze-slashes true
-
-# Match on options not dirs
-zstyle ':completion:*' complete-options true
-
-# Use complist to create navigation in completion menu
-zmodload zsh/complist
-bindkey -M menuselect 'h' vi-backward-char
-bindkey -M menuselect 'k' vi-up-line-or-history
-bindkey -M menuselect 'j' vi-down-line-or-history
-bindkey -M menuselect 'l' vi-forward-char
-
-# CTRL+X i will allow editing completion
-bindkey -M menuselect '^xi' vi-insert
-
-# It's annoying to always have to type a slash before tabbing
-setopt AUTO_PARAM_SLASH
-
-# If this is the only instance of zsh, source zprofile
-if [[ "$(pgrep -fc "/usr/bin/zsh")" -eq 1 ]]; then
-    . ~/.zprofile
-fi  

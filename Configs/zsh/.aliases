@@ -1,5 +1,3 @@
-# ## Ansible managed
-#shellcheck shell=bash
 # ## Clear + typos
 alias c='clear'
 alias claer='clear'
@@ -13,19 +11,13 @@ alias cd..='cd ..'
 
 # Configure editor
 alias svim="/usr/bin/vi" # stock vim
-if command -v nvim &>/dev/null; then
-   export EDITOR=nvim
-   alias vim="\$EDITOR"
-   alias vi="\$EDITOR"
-fi
 
 # Tmux alias
 if command -v tmuxinator &>/dev/null; then
     alias mux="tmuxinator"
 fi
 
-# Alias rm to trash-put
-alias rm='printf "Use trm to delete to trash or bypass alias by prepending a backslash.\n"'; false
+# Trash
 alias trm='trash-put'
 
 # ## Disk Space
@@ -68,9 +60,6 @@ alias git='git --no-pager'
 alias gits='git status'                                     # Git Status
 alias gitcfg='git config --list --show-origin --show-scope' #Show config options
 
-# ## Vim check for errors
-alias checkvimrc="vim -q fakefile >/dev/null 2>/tmp/checkforerrors; grep -q -F 'Error detected while processing ' /tmp/checkforerrors && echo '.vimrc syntax is bad' || echo '.vimrc syntax is good!!'; rm -f /tmp/checkforerrors"
-
 # ## Grep
 alias grep='rg -IN -uuu'
 
@@ -80,6 +69,9 @@ alias tmux='tmux -T 256'
 
 # ## Docker
 alias dockerps='docker ps -a --format="table {{.ID}}\t{{.Names}}\t{{.Image}}\t{{.Command}}\t{{.Status}}"'
+
+# ## Aliases for npx
+alias prettier='npx prettier'
 
 # ## Restart shell
 alias sbrc='exec bash'
