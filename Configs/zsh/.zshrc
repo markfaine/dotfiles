@@ -13,12 +13,6 @@
 # ## See https://zsh.sourceforge.io/Doc/Release/Options.html
 # ## Seems ignoring in the current shell session isn't possible
 # ## but we can prevent saving to the history file.
-touch ~/.zsh_history
-
-# Source.env if it exists
-if [[ -f .env ]]; then
-    . .env
-fi
 
 # ## To read the history file every time history is called upon,
 # ## as well as the functionality from inc_append_history
@@ -28,28 +22,6 @@ setopt share_history
 # Input/output
 #
 
-# ## This disables the stupid "File exists!" warning on redirection
-setopt clobber
-
-# Set editor default keymap to emacs (`-e`) or vi (`-v`)
-bindkey -e
-
-# Prompt for spelling correction of commands.
-#setopt CORRECT
-
-# Customize spelling correction prompt.
-#SPROMPT='zsh: correct %F{red}%R%f to %F{green}%r%f [nyae]? '
-
-# Remove path separator from WORDCHARS.
-WORDCHARS=${WORDCHARS//[\/]}
-
-# Include Zim configuration
-if [[ -f ~/.zimsh ]]; then
-    . ~/.zimsh
-fi
-
-# Completions
-# group completions by type
 zstyle ':completion:*' group-name ''
 
 # Nicer completion listing
@@ -83,4 +55,31 @@ bindkey -M menuselect 'l' vi-forward-char
 bindkey -M menuselect '^xi' vi-insert
 
 # It's annoying to always have to type a slash before tabbing
-# setopt AUTO_PARAM_SLASH
+setopt AUTO_PARAM_SLASH
+
+# Set editor default keymap to emacs (`-e`) or vi (`-v`)
+bindkey -e
+
+# Prompt for spelling correction of commands.
+setopt CORRECT
+
+# Customize spelling correction prompt.
+SPROMPT='zsh: correct %F{red}%R%f to %F{green}%r%f [nyae]? '
+
+# Remove path separator from WORDCHARS.
+WORDCHARS=${WORDCHARS//[\/]}
+
+# Include Zim configuration
+if [[ -f ~/.zimsh ]]; then
+    . ~/.zimsh
+fi
+
+# Completions
+# group completions by type
+#
+# Actiate Mise
+eval "$(mise activate zsh)"
+
+# ## This disables the stupid "File exists!" warning on redirection
+# ## Something above is unsetting this so it has to be last
+setopt CLOBBER
