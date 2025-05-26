@@ -4,9 +4,6 @@
 # Sets sane Zsh built-in environment options.
 zmodule environment
 
-# Mise
-zmodule mise
-
 ## Git
 # Provides handy git aliases and functions.
 zmodule git
