@@ -3,8 +3,8 @@
 # # Configure editor
 alias oldvim='NVIM_APPNAME=oldvim nvim'
 export EDITOR=nvim
-alias vim="EDITOR"
-alias vi="EDITOR"
+alias vim="$EDITOR"
+alias vi="$EDITOR"
 
 # # Mason bin directory
 path=($path "$HOME/.local/share/nvim/mason/bin")
@@ -26,3 +26,14 @@ fi
 
 # SSH Load
 . "$HOME/.load_ssh"
+
+export PYENV_ROOT="$HOME/.pyenv"
+[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init - zsh)"
+
+export CONTROLLER_INVENTORY=7
+export CONTROLLER_HOST=n-msfc-aap.ndc.nasa.gov
+export CONTROLLER_PASSWORD="V4&R0mfQn#rJw%cVYZ"
+export CONTROLLER_USERNAME=bean
+export CONTROLLER_VERIFY_SSL=false
+export ZPROFILE_LOADED=1

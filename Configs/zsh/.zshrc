@@ -83,3 +83,8 @@ eval "$(mise activate zsh)"
 # ## This disables the stupid "File exists!" warning on redirection
 # ## Something above is unsetting this so it has to be last
 setopt CLOBBER
+
+# Load zprofile if not already loaded
+if [[ "${ZPROFILE_LOADED:-}" == "" ]]; then
+    . ~/.zprofile
+fi

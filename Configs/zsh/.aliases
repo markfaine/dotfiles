@@ -59,6 +59,9 @@ alias mypath='echo -e ${PATH//:/\\n}'
 alias git='git --no-pager'
 alias gits='git status'                                     # Git Status
 alias gitcfg='git config --list --show-origin --show-scope' #Show config options
+alias gls='doppler run --mount ~/.gitlabsearchrc --mount-template ~/.gitlabsearchrc.tmpl -- gitlab-search'
+alias gitlab-search='gls'
+
 
 # ## Grep
 alias grep='rg -IN -uuu'

@@ -10,3 +10,8 @@ function ssh_load(){
     ssh-add ~/.ssh/id_bean-rsa 
 }
 ssh_load
+
+# Set gpg tty
+GPG_TTY=$(tty)
+export GPG_TTY
+gpgconf --kill gpg-agent
