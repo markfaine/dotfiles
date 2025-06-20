@@ -41,6 +41,11 @@ set-option -g update-environment 'DBUS_SESSION_BUS_ADDRESS'
 # ## This fixes issues with keymappings with tmux and zsh
 set -g default-terminal "screen-256color"
 
+# ## Fix issues with windows terminal and garbage characters
+# https://github.com/microsoft/terminal/issues/18600
+set -g escape-time 500
+set -g focus-events off
+
 # ## Default overrides -------------------------------------------
 # ## History size
 set -g history-limit 5000000

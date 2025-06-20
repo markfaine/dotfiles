@@ -77,9 +77,6 @@ fi
 # Completions
 # group completions by type
 #
-# Actiate Mise
-eval "$(mise activate zsh)"
-
 # ## This disables the stupid "File exists!" warning on redirection
 # ## Something above is unsetting this so it has to be last
 setopt CLOBBER
@@ -88,3 +85,6 @@ setopt CLOBBER
 if [[ "${ZPROFILE_LOADED:-}" == "" ]]; then
     . ~/.zprofile
 fi
+
+# Actiate Mise
+eval "$(mise activate zsh)"

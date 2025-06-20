@@ -47,6 +47,8 @@ vim.keymap.set('n', '<leader>/', 'gcc', { desc = 'toggle comment', remap = true 
 vim.keymap.set('v', '<leader>/', 'gc', { desc = 'toggle comment', remap = true })
 -- -- Buffers
 vim.keymap.set('n', '<leader>b', '<cmd>enew<CR>', { desc = 'buffer new' })
+vim.keymap.set('n', '<leader>bn', '<cmd>bn<CR>', { desc = 'buffer next' })
+vim.keymap.set('n', '<leader>bp', '<cmd>bp<CR>', { desc = 'buffer previous' })
 vim.keymap.set('n', '<leader>x', '<cmd>bd<CR>', { desc = 'close buffer' })
 vim.keymap.set('n', '<leader>X', '<cmd>bw<CR>', { desc = 'close buffer' })
 vim.keymap.set('n', '<leader>Q', '<cmd>:w | %bd | e#<CR>', { desc = 'close all buffers' })

@@ -1,13 +1,14 @@
+local HOME = os.getenv 'HOME'
 return {
-
   { -- Linting
     'mfussenegger/nvim-lint',
     event = { 'BufReadPre', 'BufNewFile' },
     config = function()
       local lint = require 'lint'
-      lint.linters_by_ft = {
-        markdown = { 'markdownlint' },
-      }
+      local mdlint = lint.linters['markdownlint-cli2']
+      mdlint.args = { '--config', HOME .. '.markdownlint-cli2.yaml', '--fix', '--' }
+      mdlint.stdin = false
+      lint.linters_by_ft = { markdown = { 'markdownlint-cli2' } }
 
       -- To allow other plugins to add linters to require('lint').linters_by_ft,
       -- instead set linters_by_ft like this:

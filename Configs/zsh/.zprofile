@@ -12,6 +12,9 @@ path=($path "$HOME/.local/share/nvim/mason/bin")
 # # Prepend ~/.local/bin to path
 path=($path $HOME/.local/bin)
 
+# # Add npm modules to path
+path=($path "$HOME/.config/node_modules/.bin")
+
 # # Export path changes
 path=(. $path)
 export PATH
@@ -27,9 +30,6 @@ fi
 # SSH Load
 . "$HOME/.load_ssh"
 
-export PYENV_ROOT="$HOME/.pyenv"
-[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
-eval "$(pyenv init - zsh)"
 
 export CONTROLLER_INVENTORY=7
 export CONTROLLER_HOST=n-msfc-aap.ndc.nasa.gov

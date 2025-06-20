@@ -60,3 +60,4 @@ stylua = "latest"
 [settings]
 env_file = '.env'
 plugin_autoupdate_last_check_duration = '1 week'
+activate_aggressive = true
