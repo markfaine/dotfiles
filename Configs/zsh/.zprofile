@@ -26,12 +26,12 @@ if [[ ! -d "$HOME/.Trash" ]]; then
 fi
 
 # # Source aliases
-if [[ -d "$HOME/.aliases" ]]; then
+if [[ -f "$HOME/.aliases" ]]; then
   . "$HOME/.aliases"
 fi
 
 # SSH Load
-if [[ -d "$HOME/.load_ssh" ]]; then
+if [[ -f "$HOME/.load_ssh" ]]; then
   . "$HOME/.load_ssh"
 fi
 
