@@ -1,149 +1,397 @@
-# : << EOF
-# https://github.com/gpakosz/.tmux
-# (‑●‑●)> dual licensed under the WTFPL v2 license and the MIT license,
-#         without any warranty.
-#         Copyright 2012— Gregory Pakosz (@gpakosz).
+# Custom configuration overrides
+# Mark Faine - Last Updated: 6/25/25
 
 
-# ## Window & Pane Creation
-tmux_conf_new_window_retain_current_path=false
-tmux_conf_new_pane_retain_current_path=true
-tmux_conf_new_pane_reconnect_ssh=false
-tmux_conf_new_session_prompt=false
+# Override Defaults Options  {{{
 
-# ## Clipboard
-tmux_conf_24b_colour=true
+# Override prefix set to CTRL-j {{{
+unbind C-a
+unbind C-b
+unbind C-z
+unbind C-j
+set -g prefix C-j
+bind C-j send-prefix
+# End Override prefix set to CTRL-j }}}
 
-# Clipboard # requires xsel or xclip
-tmux_conf_copy_to_os_clipboard=true
+# Set default history size {{{
+set -g history-limit 5000000 # Set to a very large number
+# End Override history size }}}
 
-# ## User Customizations ------------------------------------------
+# Start with mouse mode disabled {{{
+set -g mouse off 
+# End Start with mouse mode disabled }}}
 
-# ## TPM Config options -------------------------------------------
-tmux_conf_update_plugins_on_launch=true
-tmux_conf_update_plugins_on_reload=true
-tmux_conf_uninstall_plugins_on_reload=true
+# TODO: revisit occasionally to see if these are still an issue
+# Fixes and Workarounds {{{
 
-# ## TPM Plugins --------------------------------------------------
-set -g @plugin 'seebi/tmux-colors-solarized'
-set -g @plugin 'nhdaly/tmux-better-mouse-mode'
-set -g @plugin 'tmux-plugins/tmux-yank'
-set -g @plugin 'tmux-plugins/tmux-copycat'
-set -g @plugin 'tmux-plugins/tmux-cpu'
-set -g @plugin 'tmux-plugins/tmux-resurrect'
-set -g @plugin 'tmux-plugins/tmux-continuum'
-set -g @continuum-restore 'on'
-
-# ## Fixes --------------------------------------------------------
-# ## Fix tmux issue with gpg
-set-option -g update-environment 'DBUS_SESSION_BUS_ADDRESS'
-
-# ## This fixes issues with keymappings with tmux and zsh
-set -g default-terminal "screen-256color"
-
-# ## Fix issues with windows terminal and garbage characters
-# https://github.com/microsoft/terminal/issues/18600
+# Fix issues with windows terminal and garbage characters {{{
 set -g escape-time 500
 set -g focus-events off
+# End Fix issues with windows terminal and garbage characters }}}
 
-# ## Default overrides -------------------------------------------
-# ## History size
-set -g history-limit 5000000
+# Fix tmux issue with gpg {{{
+set-option -g update-environment 'DBUS_SESSION_BUS_ADDRESS'
+# End Fix tmux issue with gpg }}}
 
-# ## Start with mouse mode enabled
-set -g mouse on
+# Fixes issue with tmux breaking vim theme colors  {{{
+# See https://old.reddit.com/r/neovim/comments/uanvdw/neovimtmux_color_problem/
+# Also set COLORTERM=truecolor
+set -ga terminal-overrides ",xterm-256color:Tc"
+set -as terminal-overrides ',*:Smulx=\E[4::%p1%dm'
+# underscore colours - needs tmux-3.0
+set -as terminal-overrides ',*:Setulc=\E[58::2::%p1%{65536}%/%d::%p1%{256}%/%{255}%&%d::%p1%{255}%&%d%;m'
+# End Fixes issue with tmux breaking vim theme colors  }}}
 
-# ## Appearance --------------------------------------------------
-# ## Themes
-set -g @plugin 'jimeh/tmux-themepack'
-set -g @themepack 'powerline/block/cyan'
-# set -g @plugin 'seebi/tmux-colors-solarized'
-# set -g @colors-solarized 'dark'
-# set -g @plugin 'wfxr/tmux-power'
-# set -g @tmux_power_theme 'redwine'
-# set -g @plugin 'dracula/tmux'
-# set -g @dracula-show-powerline true
-# set -g @dracula-git-disable-status true
-# set -g @plugin 'o0th/tmux-nova'
+# Fix Undercurls not showing in tmux {{{
+# https://github.com/folke/tokyonight.nvim/tree/main?tab=readme-ov-file#night
+set -g default-terminal "${TERM}"
+set -as terminal-overrides ',*:Smulx=\E[4::%p1%dm'  # undercurl support
+set -as terminal-overrides ',*:Setulc=\E[58::2::::%p1%{65536}%/%d::%p1%{256}%/%{255}%&%d::%p1%{255}%&%d%;m'  # underscore colours - needs tmux-3.0
+# End Fix Undercurls not showing in tmux }}}
+
+# End Fixes and Workarounds }}}
+
+# Window & Pane Creation {{{
+
+# Paths for new windows and panes {{{
+tmux_conf_new_window_retain_current_path=false
+tmux_conf_new_pane_retain_current_path=true
+# End Keep path for new windows and panes }}}
+
+# Relogin SSH on new pane {{{
+tmux_conf_new_pane_reconnect_ssh=false
+# End Don't attempt to relogin SSH  on new pane }}}
+
+# Prompt for new session {{{
+tmux_conf_new_session_prompt=false
+# End Prompt for new session }}}
+
+# Set pane titles  {{{
+set -g pane-border-format "#{pane_index} #{pane_title}"
+set -g pane-border-status bottom
+# End Set pane titles  }}}
+
+# Renumber windows {{{
+set-option -g renumber-windows on
+# End Renumber windows }}}
+
+# End Window & Pane Creation }}}
+
+# Themes are configured in the Plugins section
+
+# Status Bar Configuration {{{
+
+# Update interval for status bar {{{
+set -g @status-interval 10
+# End update for status bar }}}
+
+# Git stats for statusbar (for current dir) and Tmux mode indicator {{{
+set -g status-right "#(gitmux '#{pane_current_path}') #{tmux_mode_indicator}"
+# End Git stats (for current dir) and Tmux mode indicator }}}
+
+# End Status Bar Configuration }}}
+
+# Scrolling Configuration {{{
+
+# Exit copy-mode at bottom of the scroll-back history {{{
+set -g @scroll-down-exit-copy-mode "on"
+# End Exit copy-mode at bottom of the scroll-back history }}}
+
+# Scroll without changing panes {{{
+# true - Scroll events are sent to moused-over pane.
+# false (default) - Scroll events stay in currently selected pane.
+set -g @scroll-without-changing-pane "on"
+# End Scroll without changing panes }}}
+
+# Scroll in moused over pane {{{
+# true (default) - Scroll events select and scroll the moused-over pane.
+# false - Scroll events are ingored unless the mouse is over the currently selected pane.
+set -g @scroll-in-moused-over-pane "off"
+# End Scroll in moused over pane }}}
+
+# Number of lines to scroll per mouse scroll event {{{
+set -g @scroll-speed-num-lines-per-scroll 3
+# End Number of lines to scroll per mouse scroll event }}}
+
+# Emulate scrolling for "full-screen" {{{
+# For alternate buffer programs, such as less, man, or vi that don't themselves already
+# support mouse interactions.
+# true - ↑ and ↓ keys are passed to the alternate buffer program on scroll events.
+# false (default) - Scroll event causes scrollback in pane output.
+set -g @emulate-scroll-for-no-mouse-alternate-buffer "on"
+# End Emulate scrolling for "full-screen" }}}
+
+# End Scrolling Configuration }}}
+
+# Color Configuration {{{
+# Set tmux to use 24-bit truecolor
+set -g @tmux_conf_24b_colour true
+# End Color Configuration }}}
+
+# Clipboard Configuration {{{
+# requires xsel, xclip, clip.exe, anything that copies from the clipboard
+set -g @tmux_conf_copy_to_os_clipboard true
+# End Clipboard Configuration  }}}
+
+# Uncomment only if not using tmux-sensible, see above {{{
+# set-option -g default-command "reattach-to-user-namespace -l $SHELL"
+# End Uncomment only if not using tmux-sensible plugin }}}
+
+# End Override Defaults Options  }}}
+
+# Tmux Plugin Manager (TPM) {{{
+
+# TPM Config options  {{{
+set -g @tmux_conf_update_plugins_on_launch true
+set -g @tmux_conf_update_plugins_on_reload true
+set -g @tmux_conf_uninstall_plugins_on_reload true
+# End TPM Config options   }}}
+
+# End Tmux Plugin Manager (TPM) }}}
+
+# Plugins  {{{
+
+# Better mouse mode - improves mouse functionality {{{
+set -g @plugin 'nhdaly/tmux-better-mouse-mode'
+# End Better mouse mode - improves mouse functionality }}}
+
+# tmux sensible - Sets a bunch of sane defaults for tmux {{{
+# See: https://github.com/tmux-plugins/tmux-sensible
+set -g @plugin 'tmux-plugins/tmux-sensible'
+# End tmux sensible - Sets a bunch of sane defaults for tmux }}}
+
+# tmux yank - This plugin makes copying from the clipboard possible {{{
+# mostly useful on servers with a x server
+# since a system clipboard is needed
+set -g @plugin 'tmux-plugins/tmux-yank'
+# End tmux yank - This plugin makes copying from the clipboard possible }}}
+
+# tmux-normalmode - Makes copying more like copying in vim {{{
+set -g @plugin 'jabirali/tmux-normalmode'
+# End tmux-normalmode - Makes copying more like copying in vim }}}
+
+# tmux-copycat - Provides file, git, url, regex search, copy/paste, and result highlighting {{{
+set -g @plugin 'tmux-plugins/tmux-copycat'
+# End tmux-copycat - Provides file, git, url, regex search, copy/paste, and result highlighting }}}
+
+# tmux-resurrect - Automatically restore last saved environment when tmux is started. {{{
+set -g @plugin 'tmux-plugins/tmux-resurrect'
+set -g @resurrect-strategy-nvim 'session'
+# End tmux-resurrect - Automatically restore last saved environment when tmux is started. }}}
+
+# tmux-continuum - Continuously save environment and session with tmux-resurrect {{{
+set -g @plugin 'tmux-plugins/tmux-continuum'
+set -g @continuum-boot 'on'
+set -g @continuum-restore 'on'
+# End tmux-continuum - Continuously save environment and session with tmux-resurrect }}}
+
+# tmux-named-snapshot - Allows names for session save and restore {{{
+set -g @plugin 'spywhere/tmux-named-snapshot'
+set -g @named-snapshot-save 'C-m:manual M:*'
+set -g @named-snapshot-restore 'C-n:manual N:*'
+# End tmux-named-snapshot - Allows names for session save and restore }}}
+
+# tmux-mode-indicator - Show the tmux mode in the statusbar {{{
+set -g @plugin 'dominikduda/tmux_mode_indicator'
+set -g @tmux_mode_indicator_left_edge_character ""
+set -g @tmux_mode_indicator_separator "✤"
+# End tmux-mode-indicator - Show the tmux mode in the statusbar }}}
+
+# tmux-sessionlist - Show a session list menu {{{
+set -g @plugin 'tmux-plugins/tmux-sessionist'
+# End tmux-sessionlist - Show a session list menu }}}
+
+# End Plugins }}}
+
+# Themes {{{
+
+# tmux-nerd-font-window-name Add Nerdfonts support to statusbar and windows {{{ 
 # set -g @nova-nerdfonts true
+set -g @plugin 'joshmedeski/tmux-nerd-font-window-name'
+# End tmux-nerd-font-window-name Add Nerdfonts support to statusbar and windows }}}
 
-# Term
-set -g default-terminal "xterm-256color"
+# Tokyo-Night Theme {{{
 
-# ## Status Bar --------------------------------------------------
+set -g @plugin "janoamaral/tokyo-night-tmux"
+set -g @tokyo-night-tmux_theme night   # storm | day | default to 'night'
+set -g @tokyo-night-tmux_transparent 0  # 1 or 0
 
-# ## Update interval for status bar
-# set status-interval 10
-# ## Gitmux
-set -g status-right '#(gitmux "#{pane_current_path}")'
+# Tokyo-Night theme - Icon styles {{{
+set -g @tokyo-night-tmux_terminal_icon 
+set -g @tokyo-night-tmux_active_terminal_icon 
+# End Tokyo-Night theme - Icon styles }}}
 
+# Tokyo-Night theme - No extra spaces between icons {{{
+set -g @tokyo-night-tmux_window_tidy_icons 0
+# Tokyo-Night theme - No extra spaces between icons }}}
 
-# ## Bindings ----------------------------------------------------
+# Tokyo-Night Theme - Disable date time widget {{{
+set -g @tokyo-night-tmux_show_datetime 0
+# End Tokyo-Night Theme - Disable date time widget }}}
 
-# ## Panes -----------------------------------------
-# ## Synchronize panes toggle
+# Tokyo-Night - Enable path widget {{{
+set -g @tokyo-night-tmux_show_path 1
+set -g @tokyo-night-tmux_path_format relative # 'relative' or 'full'
+# End Tokyo-Night - Enable path widget }}}
+
+# Tokyo-Night - Enable hostname widget {{{
+set -g @tokyo-night-tmux_show_hostname 1
+# End Tokyo-Night Enable hostname widget }}}
+
+# Tokyo-Night - Enable netspeed widget {{{
+set -g @tokyo-night-tmux_show_netspeed 1
+#set -g @tokyo-night-tmux_netspeed_iface "wlan0" # Detected via default route
+set -g @tokyo-night-tmux_netspeed_showip 1      # Display IPv4 address (default 0)
+set -g @tokyo-night-tmux_netspeed_refresh 1     # Update interval in seconds (default 1)
+# End Tokyo-Night Enable netspeed widget }}}
+
+# End Tokyo-Night Theme }}}
+
+# End Themes }}}
+
+# Custom keybinds {{{
+
+# Tmux Configuration {{{
+
+# Edit Tmux Configuration `prefix+e` {{{
+bind e new-window -n "~/.tmux.conf.local" sh -c '${EDITOR:-vim} ~/.tmux.conf.local && tmux source ~/.tmux.conf && tmux display "~/.tmux.conf sourced"'
+# End Edit Tmux Configuration }}}
+
+# Reload Tmux Configuration  `prefix+r` {{{
+bind r source-file ~/.tmux.conf \; display 'Config Reloaded'
+# End Reload Tmux Configuration }}}
+
+# Clear scrollback `prefix+C-k` {{{
+bind -n C-k send-keys -R \; send-keys C-l \; clear-history
+# End Clear screen and history (scrollback) }}}
+
+# End Tmux Configuration }}}
+
+# Mouse Bindings {{{
+ # Toggle mouse on with `prefix+m`
+ bind m set -g mouse on \; display 'Mouse: ON'
+  
+ # Toggle mouse off with `prefix+M`
+ bind M set -g mouse off \; display 'Mouse: OFF'
+# End Mouse Bindings }}}
+
+# Session Bindings  {{{
+
+# Create a new session `prefix+C-c` {{{
+bind C-c new-session
+# End Create a new session }}}
+
+# Find existing session `prefix+C-x` {{{
+# The mapping C-f is used by tmux-copycat, so we remap it to C-x here
+bind C-x command-prompt -p find-session 'switch-client -t %%'
+# End Find existing session }}}
+
+# Move to last session `prefix+Shift-Tab` {{{
+bind BTab switch-client -l  # move to last session
+# End Move to last session }}}
+
+# End Session Bindings  }}}
+
+# Pane Bindings {{{
+
+# Synchronize panes `prefix+a`  {{{
 bind-key a set-window-option synchronize-panes\; display-message "synchronize-panes is now #{?pane_synchronized,on,off}"
+# End Synchronize panes `prefix+a`  }}}
 
-# Set pane titles # might not work with different themes, needs testing
-# set -g pane-border-format "#{pane_index} #{pane_title}"
-# set -g pane-border-status bottom
-
-# ## Toggle pane title visibility
+# Toggle pane title visibility `prefix+T` {{{
 bind T run 'bash -c "arr=( off top ) && tmux setw pane-border-status \${arr[\$(( \${arr[(I)#{pane-border-status}]} % 2 + 1 ))]}"'
+# End Toggle pane title visibility }}}
 
-# ## Rename pane
+# Rename pane `prefix+t` {{{
 bind t command-prompt -p "(rename-pane)" -I "#T" "select-pane -T '%%'"
+# End Rename pane }}}
 
-# ## Windows --------------------------------------
+# End Pane Bindings }}}
 
-# ## Move between Widow
+# Window Bindings {{{
+
+# Move between Widow {{{
 bind -n S-down new-window
 bind -n S-left prev
 bind -n S-right next
+# End Move between Widow }}}
 
-# ## Split Window
+# Split Window {{{
 bind V split-window -h
 bind H split-window
+# End Split Window }}}
 
-# ## Reorder window tabs
+# Reorder window tabs {{{
+
 bind-key -n C-M-Left swap-window -t -1
 bind-key -n C-M-Right swap-window -t +1
+
+# Reorder window tabs }}}
+
+# Navigating Windows {{{
+
 bind-key -n C-Left previous-window
 bind-key -n C-Right next-window
 
-# ## Buffer ------------------------------------------------------
-# Capture scrollback to a file
+# End Navigating Windows }}}
+
+# End Window Bindings }}}
+
+# Buffer Key bindings  {{{
+# Capture scrollback to a file `prefix+P` {{{
 bind-key P command-prompt -p 'save history to filename:' -I '~/tmux.history' 'capture-pane -S -32768 ; save-buffer %1 ; delete-buffer'
+# End Capture scrollback to a file }}}
 
-# Clear scrollback
-bind -n C-k send-keys -R \; send-keys C-l \; clear-history
+# End Buffer Key bindings  }}}
 
-# ## Session ----------------------------------------------------
-bind-key q      confirm-before kill-session
-bind-key Q      confirm-before kill-server
+# Tmux Server {{{
 
-# ## Session menu
-bind-key ` run-shell -b "~/.tmux/session-menu"
+# Kill Server (confirm) `prefix+Q`  {{{
+bind-key Q  confirm-before kill-server
+# End Kill Server (confirm) `prefix+Q`  }}}
 
-# ## Help -------------------------------------------------------
-# ## List bound keys
+# Kill Server (no confirm) `prefix+Alt-Q`  {{{
+bind-key -n m-Q kill-server
+# End Kill Server (no confirm) `prefix+Alt-Q` }}}
+
+# End Tmux Server }}}
+
+# Session {{{
+
+#  Session Menu: `prefix+Alt-s`  {{{
+bind-key -n m-s choose-tree -s
+# End Session Menu: prefix+`  }}}
+
+# Kill Session - `prefix+q`  {{{
+# This is 
+# bind-key -n q kill-window
+# End Kill Session: `prefix+q`  }}}
+
+# End Session }}}
+
+# Help  {{{
+
+# List bound keys `prefix+?` {{{
 bind-key -n '?' list-keys
+# End List bound keys `prefix+?` }}}
 
-# ## Toggle mouse with notification
-bind m run "cut -c3- ~/.tmux.conf | sh -s _toggle_mouse \; display-message 'Mouse #{?mouse,on,off}'"
-# # /!\ do not remove the following line
-# EOF
-#
-# # /!\ do not "uncomment" the functions: the leading "# " characters are needed
-#
-# weather() {                                         # see https://github.com/chubin/wttr.in#one-line-output
-#   curl -f -s -m 2 'wttr.in?format=3' || printf '\n' # /!\ make sure curl is installed
-#   sleep 900                                         # sleep for 15 minutes, throttle network requests whatever the value of status-interval
-# }
-#
-# online() {
-#   ping -c 1 1.1.1.1 >/dev/null 2>&1 && printf '✔' || printf '✘'
-# }
-#
-# "$@"
-# # /!\ do not remove the previous line
+# Remind users of the correct prefix {{{
+bind-key -n C-a  display-message "Prefix is #{prefix}"
+bind-key -n C-b  display-message "Prefix is #{prefix}"
+# End Remind users of the correct prefix }}}
+
+# End Help  }}}
+
+# End Custom keybinds }}}
+
+# Install TPM and plugins if they aren't present {{{
+if "test ! -d ~/.tmux/plugins/tpm" \
+   "run 'git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm && ~/.tmux/plugins/tpm/bin/install_plugins'"
+# End TPM and plugins if they aren't present  }}}
+
+# Initialize tpm {{{
+# This needs to be at the bottom of the file
+run '~/.tmux/plugins/tpm/tpm'
+# End Initialize tpm }}}
+
+# vim:syntax=tmux

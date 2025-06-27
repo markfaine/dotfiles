@@ -9,6 +9,9 @@ return {
         styles = {
           comments = { italic = true }, -- Disable italics in comments
         },
+        on_colors = function(colors)
+          colors.comment = '#5e7b8c'
+        end,
       }
       -- Load the colorscheme here.
       -- Like many other themes, this one has different styles, and you could load

@@ -4,4 +4,5 @@ vim.schedule(function()
 end)
 require 'core.autocmds'
 require 'core.lazy'
+require 'core.lsp'
 require 'core.health'

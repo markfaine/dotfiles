@@ -1,4 +1,5 @@
 # # Completion for tmuxinator
+# shellcheck shell=zsh
 
 # # Configure editor
 alias oldvim='NVIM_APPNAME=oldvim nvim'
@@ -21,7 +22,7 @@ export PATH
 
 # # Setup trash
 if [[ ! -d "$HOME/.Trash" ]]; then
-    mkdir -p "$HOME/.Trash"
+  mkdir -p "$HOME/.Trash"
 fi
 
 # # Source aliases
@@ -29,7 +30,6 @@ fi
 
 # SSH Load
 . "$HOME/.load_ssh"
-
 
 export CONTROLLER_INVENTORY=7
 export CONTROLLER_HOST=n-msfc-aap.ndc.nasa.gov

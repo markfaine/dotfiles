@@ -12,6 +12,6 @@ function ssh_load(){
 ssh_load
 
 # Set gpg tty
-GPG_TTY=$(tty)
-export GPG_TTY
-gpgconf --kill gpg-agent
+#GPG_TTY=$(tty)
+#export GPG_TTY
+#gpgconf --kill gpg-agent

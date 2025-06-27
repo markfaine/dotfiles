@@ -30,7 +30,7 @@ require('lazy').setup {
     notify = false,
     enabled = true,
   },
-  install = { colorscheme = { 'catppuccin' } },
+  install = { colorscheme = { 'tokyonight-night' } },
   performance = {
     cache = { enabled = true },
     performance = {

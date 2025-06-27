@@ -1,58 +1,59 @@
-# Start configuration added by Zim install {{{
-#
+# ZSH Configuration {{{
+# shellcheck shell=zsh
 # User configuration sourced by interactive shells
-#
-# -----------------
-# Zsh configuration
-# -----------------
-#
-# History
-#
 
-# ## History customization
 # ## See https://zsh.sourceforge.io/Doc/Release/Options.html
 # ## Seems ignoring in the current shell session isn't possible
 # ## but we can prevent saving to the history file.
 
+# History Customization  {{{
 # ## To read the history file every time history is called upon,
 # ## as well as the functionality from inc_append_history
 setopt share_history
+# End History Customization  }}}
 
-#
-# Input/output
-#
-
+# Group the different type of completion matches under their descriptions  {{{
 zstyle ':completion:*' group-name ''
+# End Group the different type of completion matches under their descriptions  }}}
 
-# Nicer completion listing
+# Display the list of files and folder matched with more details  {{{
 zstyle ':completion:*' file-list all
+# End Display the list of files and folder matched with more details  }}}
 
-# Show colors in completion
+# Show colors in completion {{{
 zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
+# End Show colors in completion }}}
 
-# // will become /
+# Squeeze slashes in matches so // will become / {{{
 zstyle ':completion:*' squeeze-slashes true
+# End Squeeze slashes in matches so // will become / }}}
 
-# Match on options not dirs
+# Match on options not dirs {{{
 zstyle ':completion:*' complete-options true
+# End Match on options not dirs }}}
 
-# Better SSH/Rsync/SCP Autocomplete
+# Better SSH/Rsync/SCP Autocomplete {{{
 #zstyle ':completion:*:(scp|rsync):*' tag-order ' hosts:-ipaddr:ip\ address hosts:-host:host files'
 #zstyle ':completion:*:(ssh|scp|rsync):*:hosts-host' ignored-patterns '*(.|:)*' loopback ip6-loopback localhost ip6-localhost broadcasthost
 #zstyle ':completion:*:(ssh|scp|rsync):*:hosts-ipaddr' ignored-patterns '^(<->.<->.<->.<->|(|::)([[:xdigit:].]##:(#c,2))##(|%*))' '127.0.0.<->' '255.255.255.255' '::1' 'fe80::*'
+# End Better SSH/Rsync/SCP Autocomplete }}}
 
-# Allow for autocomplete to be case insensitive
-#zstyle ':completion:*' matcher-list '' 'm:{[:lower:][:upper:]}={[:upper:][:lower:]}' '+l:|?=** r:|?=**'
+# Allow for autocomplete to be case insensitive {{{
+# zstyle ':completion:*' matcher-list '' 'm:{[:lower:][:upper:]}={[:upper:][:lower:]}' '+l:|?=** r:|?=**'
+# End Allow for autocomplete to be case insensitive }}}
 
-# Use complist to create navigation in completion menu
+# Use complist to create navigation in completion menu {{{
 zmodload zsh/complist
 bindkey -M menuselect 'h' vi-backward-char
 bindkey -M menuselect 'k' vi-up-line-or-history
 bindkey -M menuselect 'j' vi-down-line-or-history
 bindkey -M menuselect 'l' vi-forward-char
+# End Use complist to create navigation in completion menu }}}
 
-# CTRL+X i will allow editing completion
+# CTRL+X i will allow editing completion {{{
 bindkey -M menuselect '^xi' vi-insert
+# End CTRL+X i will allow editing completion }}}
+
 
 # It's annoying to always have to type a slash before tabbing
 setopt AUTO_PARAM_SLASH
@@ -88,3 +89,4 @@ fi
 
 # Actiate Mise
 eval "$(mise activate zsh)"
+# End Zsh Configuration  }}}
