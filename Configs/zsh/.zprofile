@@ -36,7 +36,7 @@ if [[ -d "$HOME/.load_ssh" ]]; then
 fi
 
 # Ansible
-if [[ -d "$HOME/.work" ]]; then
+if [[ -f "$HOME/.work" ]]; then
   . "$HOME/.work"
 fi
 export ZPROFILE_LOADED=1
