@@ -26,14 +26,17 @@ if [[ ! -d "$HOME/.Trash" ]]; then
 fi
 
 # # Source aliases
-. "$HOME/.aliases"
+if [[ -d "$HOME/.aliases" ]]; then
+  . "$HOME/.aliases"
+fi
 
 # SSH Load
-. "$HOME/.load_ssh"
+if [[ -d "$HOME/.load_ssh" ]]; then
+  . "$HOME/.load_ssh"
+fi
 
-export CONTROLLER_INVENTORY=7
-export CONTROLLER_HOST=n-msfc-aap.ndc.nasa.gov
-export CONTROLLER_PASSWORD="V4&R0mfQn#rJw%cVYZ"
-export CONTROLLER_USERNAME=bean
-export CONTROLLER_VERIFY_SSL=false
+# Ansible
+if [[ -d "$HOME/.work" ]]; then
+  . "$HOME/.work"
+fi
 export ZPROFILE_LOADED=1
