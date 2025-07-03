@@ -372,7 +372,7 @@ bind-key -n m-s choose-tree -s
 # Help  {{{
 
 # List bound keys `prefix+?` {{{
-bind-key -n '?' list-keys
+#bind-key -n '<prefix>-?' list-keys
 # End List bound keys `prefix+?` }}}
 
 # Remind users of the correct prefix {{{
