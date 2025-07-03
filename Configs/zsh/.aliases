@@ -1,81 +1,139 @@
-# ## Clear + typos
+# User Command Aliases File {{{
+
+# Neovim/Vim {{{
+
+# Configure vim as equivalent to EDITOR value  {{{
+alias vim="$EDITOR"
+alias vi="$EDITOR"
+# End Configure vim as equivalent to EDITOR value }}}
+
+# Configure a backup neovim config {{{
+# I always have an old config that I use as a backup in case I break something
+alias oldvim='NVIM_APPNAME=oldvim nvim'
+# End Configure a backup neovim config }}}
+
+# Configure stock nvim editor alias {{{
+# This allows me to use stock vim 
+alias svim="/usr/bin/vi" # stock vim
+# End Configure stock nvim editor alias }}}
+
+# End Neovim/Vim }}}
+
+# Alias for cd command + typo protection {{{
+alias cd..='cd ..'
+# End Alias for cd command + typo protection }}}
+
+# Alias for clear command + typo protection {{{
 alias c='clear'
 alias claer='clear'
 alias clar='clear'
+# End Alias for clear command + typo protection }}}
 
-# ## MV
-alias mv='mv -i'
-
-# Typo or cd
-alias cd..='cd ..'
-
-# Configure editor
-alias svim="/usr/bin/vi" # stock vim
-
-# Tmux alias
-if command -v tmuxinator &>/dev/null; then
-    alias mux="tmuxinator"
-fi
-
-# Trash
-alias trm='trash-put'
-
-# ## Disk Space
+# Disk Space related command aliases {{{
 alias df='df -kTh'
 alias du='du -kh'       # Makes a more readable output.
+# End Disk Space related command aliases }}}
 
-# ## History
+# History related command aliases {{{
 alias h='history'
+# End History related command aliases }}}
 
-# ## Jobs
+# Job related command aliases {{{
 alias j='jobs -l'
+# End Job related command aliases }}}
 
-# ## Paging + typos
+# systemctl/journalctl related command aliases {{{
+alias journalctl='journalctl'
+if [[ "${WT_SESSION:-}" != "" ]]; then
+    alias journalctl='journalctl --no-pager -xeu'
+fi
+function jcu(){
+    local unit
+    unit="$1"
+    if [[ -z "$unit" ]]; then
+      printf "Need a service name\n"
+    else 
+        journalctl -xfu "$unit"
+    fi
+
+}
+alias jc='journalctl -xn'
+alias jcf='journalctl -xf'
+# End Journalctl related command aliases }}}
+
+# Aliases for pager command + typo protection {{{
 alias moer='more'
 alias moew='more'
 alias more='less'
 alias tial='tail'
+# End Aliases for pager command + typo protection }}}
 
-# ## LS + typos
+# Alias for ls command + typo protection {{{
 alias ls='ls --color'
 alias kk='ll'
 alias ls-la='ls -la'
+# End Alias for ls command + typo protection }}}
 
-# ## Processes + typos
+# Alias for mv command + typo protection {{{
+alias mv='mv -i'
+# End Alias for mv command + typo protection }}}
+
+# Alias for ps command + typo protection {{{
 alias ps='ps -ef'
+# End Alias for ps command + typo protection }}}
 
-# ## Command is better
+# Aliases for trash commands {{{
+alias trm='trash-put'
+alias trl='trash-list'
+# End Aliases for trash commands }}}
+
+# Command is better than which {{{
 alias which='command -v'
+# End Command is better than which }}}
 
-# ## Gawk if better, if available
+# Gawk if better, if available {{{
 if command -v gawk >/dev/null 2>&1; then
     alias awk='gawk'
 fi
+# End Gawk if better, if available }}}
 
-# ## What is my path?
+# Print my path {{{
 alias mypath='echo -e ${PATH//:/\\n}'
+# End Print my path }}}
 
-# ## Git
+# Alias for git/gh/gitlab-search commands + typo protection {{{
 alias git='git --no-pager'
-alias gits='git status'                                     # Git Status
+alias gits='git status' # Git Status
 alias gitcfg='git config --list --show-origin --show-scope' #Show config options
-alias gls='doppler run --mount ~/.gitlabsearchrc --mount-template ~/.gitlabsearchrc.tmpl -- gitlab-search'
 alias gitlab-search='gls'
 
+# Requires doppler and a template
+alias gls='doppler run --mount ~/.gitlabsearchrc --mount-template ~/.gitlabsearchrc.tmpl -- gitlab-search'
 
-# ## Grep
+# End Alias for git/gh/gitlab-search commands + typo protection }}}
+
+# Alias for grep-like commands + typo protection {{{
 alias grep='rg -IN -uuu'
+# End Alias for grep-like commands + typo protection }}}
 
-# ## TMUX
-# ## Tmux should always be tmux -2
+# Tmux should always be started as 'tmux -2' {{{
 alias tmux='tmux -T 256'
+# End Tmux should always be started as 'tmux -2' }}}
 
-# ## Docker
+# Alias for docker commands + typo protection {{{
 alias dockerps='docker ps -a --format="table {{.ID}}\t{{.Names}}\t{{.Image}}\t{{.Command}}\t{{.Status}}"'
+# End Alias for docker commands + typo protection }}}
 
-# ## Aliases for npx
+# Alias for npx-based commands + typo protection {{{
+
+# File Formatting commands + typo protection {{{
 alias prettier='npx prettier'
+# End File Formatting commands + typo protection }}}
 
-# ## Restart shell
-alias sbrc='exec bash'
+# End Alias for npx-based commands + typo protection }}}
+
+# Restart shell {{{
 alias zbrc='exec zsh'
+# End Restart shell }}}
+
+# End User Aliases File }}}

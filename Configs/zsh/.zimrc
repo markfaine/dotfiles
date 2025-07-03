@@ -1,61 +1,162 @@
-# Start configuration added by Zim install {{{
+# Zim Module Configuration {{{
+# See: https://zimfw.sh/docs/modules/
 
-# Modules
-# Sets sane Zsh built-in environment options.
+# Zim Modules {{{
+
+# Zim Mise module - needs to be loaded as early as possible {{{
+# Initializes mise
+# See: https://github.com/joke/zim-mise
+if command -v mise &>/dev/null; then
+    zmodule joke/zim-mise
+fi
+# End Zim Mise module - needs to be loaded as early as possible }}}
+
+# Figures out where to get the best help, and gets it. Uses Zsh's provided run-help function {{{
+# Press ESC-H to get help for the current command
+zmodule run-help
+# End Figures out where to get the best help, and gets it. Uses Zsh's provided run-help function }}}
+
+# Set sane Zsh built-in environment options {{{
 zmodule environment
+# End Sets sane Zsh built-in environment options }}}
 
-## Git
-# Provides handy git aliases and functions.
+# Git Modules {{{
+
+# Provides handy git aliases and functions {{{
 zmodule git
-# Exposes git repository status information to prompts, used by asciiship.
+# End Provides handy git aliases and functions }}}
+
+# Exposes git repository status information to prompts, used by asciiship. {{{
 zmodule git-info
+# End Exposes git repository status information to prompts, used by asciiship. }}}
 
-# Applies correct bindkeys for input events.
+# End Git Modules }}}
+
+# Apply correct bindkeys for input events {{{
+# See: https://github.com/zimfw/input
 zmodule input
+# End Apply correct bindkeys for input events }}}
 
-# Sets a custom terminal title.
+# Sets a custom terminal title {{{
 zmodule termtitle
+# End Sets a custom terminal title }}}
 
-# Utility aliases and functions. Adds colour to ls, grep and less.
+# Utility aliases and functions. Adds colour to ls, grep and less {{{
 zmodule utility
+# End Utility aliases and functions. Adds colour to ls, grep and less }}}
 
-# Ruby
+# Add aliases for ruby {{{
 zmodule ruby
+# End Add aliases for ruby }}}
 
-# Exposes to prompts how long the last command took to execute, used by asciiship.
+# Exposes to prompts how long the last command took to execute, used by asciiship {{{ 
 zmodule duration-info
+# End Exposes to prompts how long the last command took to execute, used by asciiship }}}
 
-# Fish-like autosuggestions for Zsh.
+# Fish-like autosuggestions for Zsh {{{
 zmodule zsh-users/zsh-autosuggestions
+# End Fish-like autosuggestions for Zsh }}}
 
-# Additional completion definitions for Zsh.
+# Additional completion definitions for Zsh {{{
 zmodule zsh-users/zsh-completions --fpath src
+# End Additional completion definitions for Zsh }}}
 
-# Should be initialized almost last 
+# *Note* The following should be initialized almost last 
+
+# Formats the current working directory to be used by prompts. {{{
 zmodule prompt-pwd
+# End Formats the current working directory to be used by prompts. }}}
+
+# Customizes the prompt for git, based on the gitster theme {{{
 zmodule gitster
+# End Customizes the prompt for git, based on the gitster theme }}}
+
+# Zim module for gopass password manager {{{
 zmodule joke/zim-gopass
-zmodule ssh
+# End Zim module for gopass password manager }}}
+
+# Load ssh-agent with keys listed in ~/.zshrc. One-time login and caching of ssh credentials per session {{{ 
+# I currenlty only use files in WSL so this is disabled for non Windows Terminal sessions where I would use yubikey keys
+if [[ "${WT_SESSION:-}" != "" ]]; then
+    zmodule ssh
+fi
+# End Load ssh-agent with keys listed in ~/.zshrc. One-time login and caching of ssh credentials per session }}}
+
+# Configures fzf for faster fetching of files and directories names {{{
 zmodule fzf
+# End Configures fzf for faster fetching of files and directories names }}}
+
+# Abstract the archive, unarchiving, and listing commands with functions {{{
+# See: https://github.com/zimfw/archive
 zmodule archive
+# End Abstract the archive, unarchiving, and listing commands with functions }}}
+
+# Print default context sensitve info when enter is pressed on an empty line {{{
 zmodule magic-enter
-zmodule joke/zim-yq
+# End Print default context sensitve info when enter is pressed on an empty line }}}
 
-# Syntax highlighting
-#zsh-users/zsh-syntax-highlighting must be sourced after completion
-#zmodule zsh-users/zsh-syntax-highlighting
+# Zim module for the yq command {{{
+if command -v yq &>/dev/null; then
+    zmodule joke/zim-yq
+fi
+# End Zim module for the yq command }}}
 
+# Themes {{{
+
+# Bira theme {{{
+# All themes: https://zimfw.sh/docs/themes/
+zmodule bira
+# End Bira theme }}}
+
+# End Themes }}}
+
+# Zoxide module {{{
+# Initializes zoxide, requires zoxide to be installed
+# See: https://github.com/ajeetdsouza/zoxide
+if command -v zoxide &>/dev/null; then
+    zmodule kiesman99/zim-zoxide
+fi
+# End Zoxide module }}}
+
+# direnv module {{{
+# Initializes direnv, requires direnv to be installed
+if command -v direnv &>/dev/null; then
+    zmodule direnv
+fi
+# End direnv module }}}
+
+# pvenv module {{{
+# Initializes pvenv, requires pvenv to be installed
+if command -v pvenv &>/dev/null; then
+    zmodule pvenv
+fi
+# End pvenv module }}}
+
+# zim-github-cli module {{{
+# Initializes zim-github-cli, requires github-cli to be installed
+if command -v gh &>/dev/null; then
+    zmodule joke/zim-github-cli
+fi
+# End zim-github-cli module }}}
+
+
+# Enables and configures smart and extensive tab completion {{{
+# Completion must be sourced after all modules that add completion definitions.
+zmodule completion
+# End Enables and configures smart and extensive tab completion }}}
+
+# Syntax highlighting {{{
+# zsh-users/zsh-syntax-highlighting must be sourced after completion
+# See: https://github.com/zsh-users/zsh-syntax-highlighting
+zmodule zsh-users/zsh-syntax-highlighting
+# End Syntax highlighting }}}
+
+# History search - modeled after Fish shell's feature {{{
+# See: https://github.com/zsh-users/zsh-history-substring-search
 # zsh-users/zsh-history-substring-search must be sourced after zsh-users/zsh-syntax-highlighting
 zmodule zsh-users/zsh-history-substring-search
+# End History search - modeled after Fish shell's feature }}}
 
-# Theme
-zmodule bira
+# End Zim Modules }}}
 
-# Zoxide
-zmodule kiesman99/zim-zoxide
-
-# Enables and configures smart and extensive tab completion.
-# completion must be sourced after all modules that add completion definitions.
-zmodule completion
-
-# }}} End configuration added by Zim install
+# End configuration added by Zim install }}}

@@ -58,6 +58,8 @@ stylua = "latest"
 python = "latest"
 marksman = "latest"
 "pipx:python-lsp-server" = "latest"
+"pipx:autopep8" = "latest"
+"pipx:pylint" = "latest"
 
 [settings]
 env_file = '.env'
