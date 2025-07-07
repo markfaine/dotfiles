@@ -92,17 +92,19 @@ bindkey -M menuselect '^xi' vi-insert
 bindkey -v
 # End Set editor default keymap to emacs (`-e`) or vi (`-v`) }}}
 
+# Possibly not needed with zim input module {{{
 # Make home key go to the beginning of the line  {{{
-bindkey "^[[1~" beginning-of-line
+#bindkey "^[[1~" beginning-of-line
 # End Make home key go to the beginning of the line  }}}
 
 # Make end key go to the end of the line {{{
-bindkey "^[[4~" end-of-line
+#bindkey "^[[4~" end-of-line
 # End Make end key go to the end of the line }}}
 
 # Make delete key delete a character {{{
-bindkey "^[[3~" delete-char
+#bindkey "^[[3~" delete-char
 # End Make delete key delete a character }}}
+# End Possibly not needed with zim input module }}}
 
 # End Key mapping/remapping }}}
 
