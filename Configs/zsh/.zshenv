@@ -89,6 +89,9 @@ export SYSTEMD_PAGERSECURE=true
 export SYSTEMD_COLORS=true
 # End Pager Configuration }}}
 
+# Ripgrep config path {{{
+RIPGREP_CONFIG_PATH=~/.ripgreprc
+export RIPGREP_CONFIG_PATH
 # End Common User Preference Environment Variables }}}
 
 # Git environment variables {{{
@@ -96,5 +99,21 @@ export SYSTEMD_COLORS=true
 export GIT_SSL_NO_VERIFY=true
 # End Don't verify SSL certificates }}}
 # End Git environment variables }}}
+
+# Function to load ssh-agent from yubikey {{{
+function ssh_load() {
+  eval "$(
+    ssh-agent -s
+    SSH_ASKPASS=$SSH_ASKPASS
+  )"
+  ssh-add -K || true
+}
+# End Function to load ssh-agent from yubikey }}}
+
+# Load ssh-agent with keys from yubikey, if not already loaded {{{
+if [[ "${SSH_AUTH_SOCK:-}" == "" ]]; then
+  ssh_load
+fi
+# End Load ssh-agent if not already loaded }}}
 
 # End Environment - loaded for all types of shell sessions }}}
