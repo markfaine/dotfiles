@@ -1,0 +1,71 @@
+# Ripgrep Configuration {{{
+
+# Search case insensitively if the pattern is all lowercase {{{
+--smart-case 
+# End Search case insensitively if the pattern is all lowercase }}}
+
+# Search in compressed files {{{ 
+--search-zip
+# End Search in compressed files }}}
+
+# Automatically select the best regex engine {{{
+--engine=auto
+# End Automatically select the best regex engine }}}
+
+# Follow symlinks {{{
+--follow
+# End Follow symlinks }}}
+
+# Glob settings {{{
+
+# Ignore .git
+--glob
+!.git
+
+# Ignore *.bak
+--glob
+!.bak
+
+# Ignore */backup/*
+--glob
+!*/backup/*
+
+# Globs are not case sensitive
+--glob-case-insensitive
+
+# End Glob settings }}}
+
+# Include hidden files {{{
+--hidden
+# End Include hidden files }}}
+
+# Ignore file {{{
+--ignore-file ~/.gitignore
+# End Ignore file }}}
+
+# Stay on one file system {{{
+--one-file-system
+# End Stay on one file system }}}
+
+# Search all types by default {{{
+--type=all
+# End Search all types by default }}}
+
+# Show file path above matches {{{
+--heading
+# End Show file path above matches }}}
+
+# Don't show line numbers by default {{{
+--no-line-number
+# End Don't show line numbers by default }}}
+
+# Enable Max columns preview {{{
+# Prints a preview for lines exceeding the configured max column limit.
+--max-columns-preview
+# End Enable Max columns preview }}}
+
+# Trim whitespace from matches {{{
+--trim
+# End Trim whitespace from matches }}}
+
+# End Ripgrep Configuration }}}
