@@ -109,12 +109,12 @@ ZIM_HOME=${ZDOTDIR:-${HOME}}/.zim
 mkdir -p "$ZIM_HOME"
 
 # Download zimfw plugin manager if missing. {{{
-if [[ ! -e ${ZIM_HOME}/zimfw.zsh ]]; then
+if [[ ! -e ${HOME}/zimfw.zsh ]]; then
   if (( ${+commands[curl]} )); then
-    curl -fsSL --create-dirs -o ${ZIM_HOME}/zimfw.zsh \
+    curl -fsSL -o ${HOME}/zimfw.zsh \
         https://github.com/zimfw/zimfw/releases/latest/download/zimfw.zsh
   else
-    mkdir -p ${ZIM_HOME} && wget -nv -O ${ZIM_HOME}/zimfw.zsh \
+    wget -nv -O ${HOME}/zimfw.zsh \
         https://github.com/zimfw/zimfw/releases/latest/download/zimfw.zsh
   fi
 fi
@@ -122,7 +122,7 @@ fi
 
 # Install missing modules, and update ${ZIM_HOME}/init.zsh if missing or outdated. {{{
 if [[ ! ${ZIM_HOME}/init.zsh -nt ${ZDOTDIR:-${HOME}}/.zimrc ]]; then
-  source ${ZIM_HOME}/zimfw.zsh init -q
+  source ${HOME}/zimfw.zsh init -q
 fi
 # End Install missing modules, and update ${ZIM_HOME}/init.zsh if missing or outdated. }}}
 #
