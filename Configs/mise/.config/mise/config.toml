@@ -55,11 +55,12 @@ gh = "latest"
 stylua = "latest"
 "npm:yaml-language-server" = "latest"
 "npm:bash-language-server" = "latest"
-python = "latest"
+python = "3.12.11"
 marksman = "latest"
 "pipx:python-lsp-server" = "latest"
 "pipx:autopep8" = "latest"
 "pipx:pylint" = "latest"
+direnv = "latest"
 
 [settings]
 env_file = '.env'

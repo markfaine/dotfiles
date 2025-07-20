@@ -3,8 +3,8 @@
 # Neovim/Vim {{{
 
 # Configure vim as equivalent to EDITOR value  {{{
-alias vim="$EDITOR"
-alias vi="$EDITOR"
+alias vim="${EDITOR:-nvim}"
+alias vi="${EDITOR:-nvim}"
 # End Configure vim as equivalent to EDITOR value }}}
 
 # Configure a backup neovim config {{{

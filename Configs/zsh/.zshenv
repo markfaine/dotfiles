@@ -6,6 +6,7 @@
 # Disable system-wide compinit, let zim handle completion  {{{
 # Zim requires this to be set
 skip_global_compinit=1
+
 # End Disable system-wide compinit, let zim handle completion  }}}
 
 # End Dependencies for other tools }}}
@@ -31,6 +32,10 @@ path=($path $HOME/.local/bin)
 path=(. $path)
 # End Add dot to path }}}
 
+# Add python virtualenv to path {{{
+path=($path "$(mise where python)")
+# End Add python virtualenv to path }}}
+
 # Export PATH so it will be inherited by child processes {{{
 export PATH
 # End Export PATH so it will be inherited by child processes }}}
@@ -50,6 +55,7 @@ fi
 # End Setup trash folder if it doesn't exist }}}
 
 # Fixes {{{
+
 # Disable auto title for Microsoft Terminal auto title issue {{{
 if [[ "${WT_SESSION:-}" != "" ]]; then
   export DISABLE_AUTO_TITLE=true
@@ -81,7 +87,7 @@ export EDITOR=nvim
 # End Editor Configuration }}}
 
 # Pager Configuration {{{
-export PAGER=bat
+# export PAGER=bat
 export MANPAGER=$PAGER
 export GIT_PAGER=$PAGER
 export SYSTEMD_PAGER=$PAGER
@@ -111,9 +117,17 @@ function ssh_load() {
 # End Function to load ssh-agent from yubikey }}}
 
 # Load ssh-agent with keys from yubikey, if not already loaded {{{
-if [[ "${SSH_AUTH_SOCK:-}" == "" ]]; then
-  ssh_load
-fi
+#if [[ "${SSH_AUTH_SOCK:-}" == "" ]]; then
+#  ssh_load
+#fi
 # End Load ssh-agent if not already loaded }}}
+
+# Set default virtual environment for python {{{
+export PVENV_HOME=~/.venvs
+# End Set default virtual environment for python }}}
+
+if [[ -f ~/.ansible.sh ]]; then
+  . ~/.ansible.sh
+fi
 
 # End Environment - loaded for all types of shell sessions }}}

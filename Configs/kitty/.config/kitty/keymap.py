@@ -3,6 +3,7 @@
 sequences).
 """
 
+import os
 import re
 from collections import defaultdict
 from collections.abc import Sequence
@@ -33,8 +34,7 @@ ActionMap: TypeAlias = dict[str, list[ShortcutRepr]]
 
 
 def main(args: list[str]) -> Union[str, None]:
-    pass
-
+    os.environ["PAGER"] = 'fzf --ansi'
 
 @result_handler(no_ui=True)
 def handle_result(args: list[str], answer: str, target_window_id: int, boss: Boss):

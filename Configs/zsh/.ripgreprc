@@ -9,7 +9,8 @@
 # End Search in compressed files }}}
 
 # Automatically select the best regex engine {{{
---engine=auto
+--engine
+auto
 # End Automatically select the best regex engine }}}
 
 # Follow symlinks {{{
@@ -40,7 +41,8 @@
 # End Include hidden files }}}
 
 # Ignore file {{{
---ignore-file ~/.gitignore
+--ignore-file
+.gitignore
 # End Ignore file }}}
 
 # Stay on one file system {{{
@@ -48,7 +50,8 @@
 # End Stay on one file system }}}
 
 # Search all types by default {{{
---type=all
+--type
+all
 # End Search all types by default }}}
 
 # Show file path above matches {{{

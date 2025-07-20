@@ -106,6 +106,12 @@ bindkey -v
 # End Make delete key delete a character }}}
 # End Possibly not needed with zim input module }}}
 
+# Disable mappings for zle {{{
+bindkey -e -r '^[x'
+bindkey -a -r ':'
+# End Disable mappings for zle }}}
+
+
 # End Key mapping/remapping }}}
 
 # Include Zim configuration {{{
