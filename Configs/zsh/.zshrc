@@ -16,6 +16,7 @@ zdebug "Sourcing ~/.zshrc"
 # Use ZSH complist module to create navigation in completion menu {{{
 zdebug "Loading zsh/complist"
 zmodload zsh/complist
+autoload -U compinit
 compinit
 _comp_options+=(globdots)		# Include hidden files.
 # End Use ZSH complist module to create navigation in completion menu }}}
