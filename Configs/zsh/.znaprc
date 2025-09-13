@@ -1,0 +1,117 @@
+# znap configuration {{{
+
+# Source shared functions {{{
+source ~/.zshared || return
+zdebug "Sourcing ~/.znaprc"
+# End Source shared functions }}}
+
+# Download Znap, if it's not there yet. {{{
+ZNAP_HOME="$HOME/.config/repos/znap"
+zdebug "ZNAP_HOME: $ZNAP_HOME"
+zstyle ':znap:*' "$ZNAP_HOME"
+export ZNAP_HOME
+if [[ ! -d "$ZNAP_HOME" ]]; then
+    zdebug "$ZNAP_HOME does not exist cloning the repo"
+    git clone --depth 1 -- "https://github.com/marlonrichert/zsh-snap.git" "$ZNAP_HOME"
+fi
+# End Download Znap, if it's not there yet. }}}
+
+# Start znap {{{
+# Source znap.zsh
+if [[ -f "$ZNAP_HOME/znap.zsh" ]]; then
+  zdebug "Sourcing $ZNAP_HOME/znap.zsh"
+  source "$ZNAP_HOME/znap.zsh"
+else
+  zdebug "Failed to source $ZNAP_HOME/znap.zsh!"
+  printf "See log file at '%s'\n" "$ZLOG_FILE"
+  return
+fi
+
+# End Start znap }}}
+
+# Load plugins {{{
+# This function loads plugins
+# See ~/.zplugins
+function load_plugins(){
+    local plugins_file repo repo_array plugin include_path completion_path
+    plugins_file="${1:-$HOME/.zplugins}"
+    if [[ ! -e "$plugins_file" ]]; then
+        printf "Plugins file '%s' was not found!\n" "$plugins_file"
+        return
+    fi
+    while IFS=',' read -r repo include_path completion_path; do
+        line="$repo$include_path$completion_path"
+        [[ -z "$line" ]] && continue
+        [[ "$line" =~ '^#[[:space:]]*' ]] && continue
+        zdebug "Loading plugin '$repo'"
+        repo_array=(${(s:/:)repo})
+        plugin="$repo_array[2]"
+        # Source plugin config file
+        if [[ -e "$HOME/.config/zplugin.d/$plugin.zsh" ]]; then
+            zdebug "Sourcing $HOME/.config/zplugin.d/$plugin.zsh"
+            source "$HOME/.config/zplugin.d/$plugin.zsh"
+        fi
+        znap clone "$repo"
+        if [[ "${include_path:-}" != "" ]]; then
+            zdebug "Adding [$repo]/$include_path to the PATH"
+            path=( ~[$repo]/$include_path $path )
+        fi
+        if [[ "${completion_path:-}" != "" ]]; then
+            zdebug "Adding [$repo]/$completion_path to the FPATH"
+            fpath=( ~[$repo]/$completion_path $fpath )
+        fi
+        zdebug "Sourcing $repo"
+        if ! znap source "$repo" &>/dev/null; then
+            zdebug "Failed to source '$repo'"
+        fi
+    done < "$plugins_file"
+}
+load_plugins
+
+# End Load plugins }}}
+
+# Manage extra paths {{{
+#typeset -aU path
+
+# Function to append paths to $PATH from a file
+function append_to_path() {
+  local dir
+  dir="$1"
+  realdir="$(readlink -f "$dir")"
+  [[ -d "$realdir" ]] || return
+  path=($path "$dir")
+}
+
+# Function to prepend paths to $PATH from a file
+function prepend_to_path() {
+  local dir
+  dir="$1"
+  realdir="$(readlink -f "$dir")"
+  [[ -d "$realdir" ]] || return
+  path=("$dir" $path)
+}
+
+# Function to prepend paths to $PATH from a file
+function add_to_path() {
+    paths_file="${1:-$HOME/.paths}"
+    if [[ ! -e "$paths_file" ]]; then return; fi
+    while IFS=',' read -r append prepend; do
+        line="${append}${prepend}"
+        [[ -z ${(S)line} ]] && continue
+        [[ "$line" = \#* ]] && continue
+        if [[ "${append:-}" != "" ]]; then
+          zdebug "Appending $append to PATH"
+          append_to_path "$append"
+        fi
+        if [[ "${prepend:-}" != "" ]]; then
+          zdebug "Prepending $prepend to PATH"
+          prepend_to_path "$prepend"
+        fi
+    done < "$paths_file" | sort -r
+}
+add_to_path
+
+# End Manage extra paths }}}
+
+
+# End znap configuration }}}

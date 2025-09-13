@@ -1,48 +1,44 @@
 # Ripgrep Configuration {{{
 
 # Search case insensitively if the pattern is all lowercase {{{
---smart-case 
+--smart-case
 # End Search case insensitively if the pattern is all lowercase }}}
 
-# Search in compressed files {{{ 
---search-zip
+# Search in compressed files {{{
+#--search-zip
 # End Search in compressed files }}}
 
 # Automatically select the best regex engine {{{
---engine
-auto
+#--engine auto
 # End Automatically select the best regex engine }}}
 
 # Follow symlinks {{{
---follow
+#--follow
 # End Follow symlinks }}}
 
 # Glob settings {{{
 
 # Ignore .git
---glob
-!.git
+#--glob !.git
 
 # Ignore *.bak
---glob
-!.bak
+#--glob !.bak
 
 # Ignore */backup/*
---glob
-!*/backup/*
+#--glob !*/backup/*
 
 # Globs are not case sensitive
---glob-case-insensitive
+#--glob-case-insensitive
 
 # End Glob settings }}}
 
 # Include hidden files {{{
---hidden
+#--hidden
 # End Include hidden files }}}
 
 # Ignore file {{{
---ignore-file
-.gitignore
+#--ignore-file
+#.gitignore
 # End Ignore file }}}
 
 # Stay on one file system {{{
@@ -50,8 +46,7 @@ auto
 # End Stay on one file system }}}
 
 # Search all types by default {{{
---type
-all
+#--type all
 # End Search all types by default }}}
 
 # Show file path above matches {{{

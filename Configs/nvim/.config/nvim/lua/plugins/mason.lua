@@ -1,15 +1,11 @@
 return {
-  -- Package management mason and mason-tool-installer
-  -- https://github.com/williamboman/mason.nvim
-  -- https://github.com/WhoIsSethDaniel/mason-tool-installer.nvim
-  --
-  --  Package installer
+  -- Mason core
   {
     'williamboman/mason.nvim',
     cmd = { 'Mason', 'MasonInstall', 'MasonUpdate' },
     lazy = false,
     opts = {
-      PATH = 'skip',
+      PATH = 'prepend', -- ensure mason bin comes first
       ui = {
         icons = {
           package_pending = ' ',
@@ -20,24 +16,54 @@ return {
       max_concurrent_installers = 10,
     },
   },
-  -- Ensure packages (command line tools) are installed
+
+  -- Ensure CLI tools and LSP servers
   {
     'WhoIsSethDaniel/mason-tool-installer.nvim',
-    config = function()
-      require('mason-tool-installer').setup {
-        ensure_installed = {
-          'ansible-language-server',
-        },
-      }
-    end,
     lazy = false,
+    opts = {
+      ensure_installed = {
+        -- LSP servers (match your core/lsp.lua)
+        'lua-language-server',
+        'bash-language-server',
+        "gitlab-ci-ls",
+        'yaml-language-server',
+        'ansible-language-server',
+        'marksman',
+        'vscode-html-language-server',
+        -- Diagnostics via none-ls and ftplugins
+        'yamllint',
+        'shellcheck',
+        'hadolint',
+        'markdownlint',
+        'rstcheck',
+        'sphinx-lint',
+        -- Formatters used by Conform
+        'stylua',
+        'isort',
+        'black',
+        'shfmt',
+        'yamlfmt',
+        'mdformat',
+      },
+      auto_update = true,
+      run_on_start = true,
+      start_delay = 200,
+      debounce_hours = 24,
+    },
+    config = function(_, opts)
+      require('mason-tool-installer').setup(opts)
+    end,
   },
-  -- linting/tools --  See: https://github.com/jay-babu/mason-null-ls.nvim
+
+  -- none-ls (lazy)
   {
     'nvimtools/none-ls.nvim',
-    lazy = false,
+    lazy = true,
     config = true,
   },
+
+  -- mason-null-ls wiring (opt-in diagnostics)
   {
     'jay-babu/mason-null-ls.nvim',
     event = { 'BufReadPre', 'BufNewFile' },
@@ -45,25 +71,33 @@ return {
       'williamboman/mason.nvim',
       'nvimtools/none-ls.nvim',
     },
-    handlers = {
-      function() end, -- disables automatic setup of all null-ls sources
-      methods = { diagnostics = true }, -- only diagnostic methods
+    opts = {
+      automatic_installation = false,
+      handlers = {
+        function() end, -- no blanket auto-setup
 
-      -- Use yamllint to check yaml files
-      yamllint = function(source_name, methods)
-        require('mason-null-ls').default_setup(source_name, methods)
-      end,
-
-      -- Use rstcheck to check rst files
-      rstcheck = function(source_name, methods)
-        require('mason-null-ls').default_setup(source_name, methods)
-      end,
-
-      -- Use sphinx-lint to check sphinx files
-      sphinx_lint = function(source_name, methods)
-        require('mason-null-ls').default_setup(source_name, methods)
-      end,
+        yamllint = function(source_name, methods)
+          require('mason-null-ls').default_setup(source_name, methods)
+        end,
+        shellcheck = function(source_name, methods)
+          require('mason-null-ls').default_setup(source_name, methods)
+        end,
+        hadolint = function(source_name, methods)
+          require('mason-null-ls').default_setup(source_name, methods)
+        end,
+        markdownlint = function(source_name, methods)
+          require('mason-null-ls').default_setup(source_name, methods)
+        end,
+        rstcheck = function(source_name, methods)
+          require('mason-null-ls').default_setup(source_name, methods)
+        end,
+        sphinx_lint = function(source_name, methods)
+          require('mason-null-ls').default_setup(source_name, methods)
+        end,
+      },
     },
-    lazy = false,
+    config = function(_, opts)
+      require('mason-null-ls').setup(opts)
+    end,
   },
 }

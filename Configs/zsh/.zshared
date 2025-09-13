@@ -1,0 +1,43 @@
+# A collection of shared functions
+# shellcheck shell=zsh
+export ZLOG_FILE="$HOME/.zshlog"
+export TRASH_DIR_LOCAL="$HOME/.Trash"
+TRASH_MOUNT="/mnt/d"
+export TRASH_DIR="$TRASH_MOUNT/.Trash"
+
+/usr/bin/rm -f "$ZLOG_FILE"
+touch "$ZLOG_FILE"
+
+function zdebug() {
+  if [[ -n $ZSH_DEBUG ]]; then
+    echo "DEBUG: $*" >>"$ZLOG_FILE"
+  fi
+}
+
+function ztrace() {
+  if [[ -n $ZSH_TRACE ]]; then
+    set -x
+  fi
+}
+
+function is_mounted() {
+  local mount_point="$1"
+  # Strip trailing slash for consistency
+  mount_point="${mount_point%/}"
+  # Check if mount_point is present in the output of mount
+  mount | grep -q " on $mount_point "
+}
+
+# TODO: Make a $HOME/.Trash that is mounted from /mnt/d
+function trm() {
+  if command -v trash-put &>/dev/null; then
+    recycle_bin="$TRASH_DIR_LOCAL"
+    if is_mounted "$TRASH_MOUNT"; then
+      zdebug "$TRASH_MOUNT is mounted"
+      recycle_bin="$TRASH_DIR"
+    fi
+    trash-put --trash-dir "$recycle_bin" "$@"
+  else
+    /usr/bin/rm "$@"
+  fi
+}

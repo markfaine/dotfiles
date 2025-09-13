@@ -1,43 +1,104 @@
+-- vim: foldmethod=marker foldlevel=1
+
 -- autopairs
 -- https://github.com/windwp/nvim-autopairs
-
 return {
   'windwp/nvim-autopairs',
-  event = 'InsertEnter',
+  event = 'InsertEnter', -- load only when typing
   config = function()
-    local npairs = require 'nvim-autopairs'
+    local npairs = require('nvim-autopairs')
 
-    npairs.setup {
-      check_ts = true, -- Enable Treesitter if available
-      fast_wrap = {},
-      disable_filetype = { 'TelescopePrompt', 'vim' },
-    }
+    npairs.setup({
+      check_ts = true,
+      ts_config = {
+        lua        = { 'string' },
+        javascript = { 'template_string' },
+        typescript = { 'template_string' },
+        python     = { 'string' },
+        markdown   = { 'fenced_code_block' },
+      },
+      disable_in_macro = true,
+      disable_in_replace_mode = true,
+      enable_check_bracket_line = true,
+      ignored_next_char = string.gsub([[ [%w%%%'%[%"%.] ]], '%s+', ''),
+      disable_filetype = { 'TelescopePrompt', 'vim', 'snacks_input', 'snacks_picker' },
+      fast_wrap = {
+        map = '<M-e>',
+        chars = { '{', '[', '(', '"', "'", '`' },
+        pattern = [=[[%'%"%>%]%)%}%,]]=],
+        end_key = '$',
+        keys = 'qwertyuiopasdfghjklzxcvbnm',
+        check_comma = true,
+        highlight = 'Search',
+        highlight_grey = 'Comment',
+      },
+    })
 
-    -- Custom rule for quotes: don't add pair if already inside a string
-    local Rule = require 'nvim-autopairs.rule'
+    -- nvim-cmp integration
+    local has_cmp, cmp = pcall(require, 'cmp')
+    if has_cmp then
+      local cmp_ap = require('nvim-autopairs.completion.cmp')
+      cmp.event:on('confirm_done', cmp_ap.on_confirm_done())
+    end
 
-    npairs.add_rules {
-      Rule('"', '"'):with_pair(function(opts)
-        local line = opts.line
-        local col = opts.col
+    -- Custom rules
+    local Rule = require('nvim-autopairs.rule')
+    local cond = require('nvim-autopairs.conds')
 
-        local before = line:sub(1, col - 1)
-        local quote_count = select(2, before:gsub('"', ''))
+    npairs.add_rules({
+      Rule('"', '"')
+        :with_pair(function(opts)
+          local line, col = opts.line, opts.col
+          local before = line:sub(1, col - 1)
+          local count = select(2, before:gsub('"', ''))
+          return (count % 2 == 0) and line:sub(col, col) ~= '"'
+        end)
+        :with_move(cond.none()),
+      Rule("'", "'")
+        :with_pair(function(opts)
+          local line, col = opts.line, opts.col
+          local before = line:sub(1, col - 1)
+          local count = select(2, before:gsub("'", ''))
+          return (count % 2 == 0) and line:sub(col, col) ~= "'"
+        end)
+        :with_move(cond.none()),
+    })
 
-        -- only insert pair if we're outside a string (even number of quotes)
-        -- and next char isn't already a quote
-        return (quote_count % 2 == 0) and line:sub(col, col) ~= '"'
-      end),
+    npairs.add_rules({
+      Rule('`', '`')
+        :with_pair(function(opts)
+          local line, col = opts.line, opts.col
+          return line:sub(col, col) ~= '`'
+        end)
+        :with_move(cond.none()),
+    }, { 'markdown', 'md', 'gitcommit' })
 
-      Rule("'", "'"):with_pair(function(opts)
-        local line = opts.line
-        local col = opts.col
+    local function space_in_pair(open, close)
+      return Rule(' ', ' ')
+        :with_pair(function(opts)
+          local pair = opts.line:sub(opts.col - 1, opts.col)
+          return pair == open .. close
+        end)
+        :with_move(cond.none())
+        :with_cr(cond.none())
+        :with_del(function(opts)
+          local col = opts.col
+          return opts.line:sub(col - 1, col + 1) == open .. ' ' and opts.line:sub(col, col + 1) == ' ' .. close
+        end)
+        :use_key(' ')
+    end
 
-        local before = line:sub(1, col - 1)
-        local quote_count = select(2, before:gsub("'", ''))
+    npairs.add_rules({
+      space_in_pair('(', ')'),
+      space_in_pair('[', ']'),
+      space_in_pair('{', '}'),
+    })
 
-        return (quote_count % 2 == 0) and line:sub(col, col) ~= "'"
-      end),
-    }
+    npairs.add_rules({
+      Rule('<', '>')
+        :with_pair(function(opts)
+          return opts.line:sub(opts.col, opts.col) ~= '>'
+        end),
+    }, { 'html', 'xml', 'markdown' })
   end,
 }

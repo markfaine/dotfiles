@@ -1,78 +1,24 @@
 # shellcheck shell=zsh
 # Environment - loaded for all types of shell sessions {{{
-
-# Dependencies for other tools {{{
-
-# Disable system-wide compinit, let zim handle completion  {{{
-# Zim requires this to be set
-skip_global_compinit=1
-
-# End Disable system-wide compinit, let zim handle completion  }}}
-
-# End Dependencies for other tools }}}
-
-# PATH configuration {{{
-
-# Dedup the path {{{
-typeset -U PATH
-# End Dedup the path }}}
-
-# Add Mason bin directory to path {{{
-# mason is a package manager used by neovim,
-# it installs packages to the path below.
-path=($path "$HOME/.local/share/nvim/mason/bin")
-# End Add Mason bin directory to path }}}
-
-# Add user bin directory to the path {{{
-# See: ~/.local/bin
-path=($path $HOME/.local/bin)
-# End Add user bin directory to the path }}}
-
-# Add dot to path {{{
-path=(. $path)
-# End Add dot to path }}}
-
-# Add python virtualenv to path {{{
-path=($path "$(mise where python)")
-# End Add python virtualenv to path }}}
-
-# Export PATH so it will be inherited by child processes {{{
-export PATH
-# End Export PATH so it will be inherited by child processes }}}
-
-# End PATH configuration }}}
-
-# Source aliases {{{
-if [[ -f "$HOME/.aliases" ]]; then
-  . "$HOME/.aliases"
-fi
-# End Source aliases }}}
-
-# Setup trash folder if it doesn't exist {{{
-if [[ ! -d "$HOME/.Trash" ]]; then
-  mkdir -p "$HOME/.Trash"
-fi
-# End Setup trash folder if it doesn't exist }}}
+# Source shared functions {{{
+source ~/.zshared || return
+# End Source shared functions }}}
 
 # Fixes {{{
-
 # Disable auto title for Microsoft Terminal auto title issue {{{
-if [[ "${WT_SESSION:-}" != "" ]]; then
+if [[ "${WSL_DISTRO_NAME:-}" != "" ]]; then
+  zdebug "Windows terminal detected, disabling auto title"
   export DISABLE_AUTO_TITLE=true
 fi
 # End Disable auto title for Microsoft Terminal auto title issue }}}
 
-# Set colorterm, work-around for tmux issue with true color {{{
-export COLORTERM=truecolor
-# Set colorterm, work-around for tmux issue with true color }}}
-
 # WSL all shells are login shells {{{
 # In WSL there doesn't seem to be a 'login-shell' concept
 # all shells seem to be login shells, as far as I can tell.
-# This makes standard linux practice of adding only login
+# The below makes standard linux practice of adding only login
 # shell configuration to .zprofile work in wsl
 # Doesn't affect any other linux based distro
-if [[ "${WT_SESSION:-}" != "" ]]; then
+if [[ "${WSL_DISTRO_NAME:-}" != "" ]]; then
   if [[ "${ZPROFILE_LOADED:-}" == "" ]]; then
     . ~/.zprofile
   fi
@@ -81,10 +27,6 @@ fi
 # End Fixes }}}
 
 # Common User Preference Environment Variables {{{
-
-# Editor Configuration {{{
-export EDITOR=nvim
-# End Editor Configuration }}}
 
 # Pager Configuration {{{
 # export PAGER=bat
@@ -114,20 +56,28 @@ function ssh_load() {
   )"
   ssh-add -K || true
 }
+if [[ "${WSL_DISTRO_NAME:-}" == "" ]]; then
+  zdebug "Loading SSL keys from yubikey"
+  ssh_load
+fi
 # End Function to load ssh-agent from yubikey }}}
 
-# Load ssh-agent with keys from yubikey, if not already loaded {{{
-#if [[ "${SSH_AUTH_SOCK:-}" == "" ]]; then
-#  ssh_load
-#fi
-# End Load ssh-agent if not already loaded }}}
+# Doppler scope {{{
+doppler-scope() {
+  perform_reset=$1
+  if [ "$perform_reset" = "reset" ]; then
+    unset D_SCOPE
+    unset DOPPLER_TOKEN
+  else
+    export D_SCOPE="$(find ~/doppler/scopes -maxdepth 2 | fzf)"
+    export DOPPLER_TOKEN=$(doppler --scope "$D_SCOPE" configure get token --plain)
+  fi
+}
+# End Doppler scope }}}
 
-# Set default virtual environment for python {{{
-export PVENV_HOME=~/.venvs
-# End Set default virtual environment for python }}}
-
-if [[ -f ~/.ansible.sh ]]; then
-  . ~/.ansible.sh
-fi
+# Add ansible-language-server to path {{{
+path=($path "$HOME/.local/share/nvim/mason/packages/ansible-language-server/node_modules/@ansible/ansible-language-server/bin")
+export PATH
+# End Add ansible-language-server to path }}}
 
 # End Environment - loaded for all types of shell sessions }}}

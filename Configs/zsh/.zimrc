@@ -34,6 +34,7 @@ zmodule asciiship
 # Completion
 #
 
+zmodule Nhqml/penv-zsh-plugin
 # Additional completion definitions for Zsh.
 zmodule zsh-users/zsh-completions --fpath src
 # Enables and configures smart and extensive tab completion.

@@ -3,8 +3,12 @@
 # Neovim/Vim {{{
 
 # Configure vim as equivalent to EDITOR value  {{{
-alias vim="${EDITOR:-nvim}"
-alias vi="${EDITOR:-nvim}"
+export EDITOR=vi
+if command -v nvim &>/dev/null; then
+    alias vim='nvim'
+    alias vi='nvim'
+    export EDITOR=nvim
+fi
 # End Configure vim as equivalent to EDITOR value }}}
 
 # Configure a backup neovim config {{{
@@ -69,6 +73,10 @@ alias tial='tail'
 # End Aliases for pager command + typo protection }}}
 
 # Alias for ls command + typo protection {{{
+if command -v exa &>/dev/null; then
+    alias ls='exa'
+fi
+alias ll='ls -la'
 alias ls='ls --color'
 alias kk='ll'
 alias ls-la='ls -la'
@@ -113,7 +121,7 @@ alias gls='doppler run --mount ~/.gitlabsearchrc --mount-template ~/.gitlabsearc
 # End Alias for git/gh/gitlab-search commands + typo protection }}}
 
 # Alias for grep-like commands + typo protection {{{
-alias grep='rg -IN -uuu'
+alias rgrep='rg -IN -uuu'
 # End Alias for grep-like commands + typo protection }}}
 
 # Tmux should always be started as 'tmux -2' {{{

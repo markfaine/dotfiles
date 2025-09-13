@@ -1,6 +1,5 @@
 --- Blatantly ripped off from https://github.com/terrortylor/nvim-comment/blob/main/lua/nvim_comment.lua
 --- I don't really need the full plugin but the wrapper function could be useful in a lot of places
-
 local M = {}
 -- Comment Wrapper }}}
 function M.get_comment_wrapper()

@@ -1,140 +1,136 @@
 # ZSH Configuration {{{
+
 # shellcheck shell=zsh
 # User configuration sourced by interactive shells
 # ## See https://zsh.sourceforge.io/Doc/Release/Options.html
 
-# Misc Options {{{
+# Source shared functions {{{
+export ZSH_DEBUG=1
+source ~/.zshared || return
+zdebug "Sourcing ~/.zshrc"
+# End Source shared functions }}}
 
-# History Customization  {{{
-# ## To read the history file every time history is called upon,
-# ## as well as the functionality from inc_append_history
-setopt share_history
-# End History Customization  }}}
-
-# Prompt for spelling correction of commands. {{{
-# setopt CORRECT
-# Customize spelling correction prompt.
-# SPROMPT='zsh: correct %F{red}%R%f to %F{green}%r%f [nyae]? '
-# End Prompt for spelling correction of commands. }}}
-
-# It's annoying to always have to type a slash before tabbing {{{
-setopt AUTO_PARAM_SLASH
-# End It's annoying to always have to type a slash before tabbing }}}
-
-# Remove path separator from WORDCHARS {{{
-# This makes it so that / doen't count as part of a word in line editors
-# For example, CTRL-W or ALT-Backspace
-WORDCHARS=${WORDCHARS//[\/]}
-# End Remove path separator from WORDCHARS }}}
-
-# End Misc Options }}}
-
-# Completion configuration {{{
-
-# Group the different type of completion matches under their descriptions  {{{
-zstyle ':completion:*' group-name ''
-# End Group the different type of completion matches under their descriptions  }}}
-
-# Display the list of files and folder matched with more details  {{{
-zstyle ':completion:*' file-list all
-# End Display the list of files and folder matched with more details  }}}
-
-# Show colors in completion {{{
-zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
-# End Show colors in completion }}}
-
-# Squeeze slashes in matches so // will become / {{{
-zstyle ':completion:*' squeeze-slashes true
-# End Squeeze slashes in matches so // will become / }}}
-
-# Match on options not dirs {{{
-zstyle ':completion:*' complete-options true
-# End Match on options not dirs }}}
-
-# Better SSH/Rsync/SCP Autocomplete {{{
-zstyle ':completion:*:(scp|rsync):*' tag-order ' hosts:-ipaddr:ip\ address hosts:-host:host files'
-zstyle ':completion:*:(ssh|scp|rsync):*:hosts-host' ignored-patterns '*(.|:)*' loopback ip6-loopback localhost ip6-localhost broadcasthost
-zstyle ':completion:*:(ssh|scp|rsync):*:hosts-ipaddr' ignored-patterns '^(<->.<->.<->.<->|(|::)([[:xdigit:].]##:(#c,2))##(|%*))' '127.0.0.<->' '255.255.255.255' '::1' 'fe80::*'
-# End Better SSH/Rsync/SCP Autocomplete }}}
-
-# Allow for autocomplete to be case insensitive {{{
-# zstyle ':completion:*' matcher-list '' 'm:{[:lower:][:upper:]}={[:upper:][:lower:]}' '+l:|?=** r:|?=**'
-# End Allow for autocomplete to be case insensitive }}}
-
-# End Completion configuration }}}
-
-# ZSH Module configuration {{{
+# ZSH Module configuration (built-in) {{{
+# See: https://zsh.sourceforge.io/Doc/Release/Zsh-Modules.html
 
 # Use ZSH complist module to create navigation in completion menu {{{
+zdebug "Loading zsh/complist"
 zmodload zsh/complist
+compinit
+_comp_options+=(globdots)		# Include hidden files.
 # End Use ZSH complist module to create navigation in completion menu }}}
 
 # ZSH Terminal Info module (dependency for zim) {{{
+zdebug "Loading zsh/terminfo"
 zmodload -F zsh/terminfo +p:terminfo
 # End ZSH Terminal Info module (dependency for zim) }}}
+
+# Include znap configuration {{{
+if [[ -f ~/.znaprc ]]; then
+  zdebug "~/.znaprc exists!"
+  . ~/.znaprc
+else
+  zdebug "~/.znaprc was not found!"
+fi
+# End Include znap configuration }}}
 
 # End ZSH Module configuration }}}
 
 # Key mapping/remapping {{{
-
-# Navigation Mappings {{{
-bindkey -M menuselect 'h' vi-backward-char
-bindkey -M menuselect 'k' vi-up-line-or-history
-bindkey -M menuselect 'j' vi-down-line-or-history
-bindkey -M menuselect 'l' vi-forward-char
-# End Navigation Mappings }}}
-
 # CTRL+X i will allow editing completion {{{
+zdebug "Mapping ctrl-x to allow editing completions"
 bindkey -M menuselect '^xi' vi-insert
 # End CTRL+X i will allow editing completion }}}
 
 # Set editor default keymap to emacs (`-e`) or vi (`-v`) {{{
+zdebug "Set editor to vi style command line editing"
 bindkey -v
 # End Set editor default keymap to emacs (`-e`) or vi (`-v`) }}}
 
-# Possibly not needed with zim input module {{{
-# Make home key go to the beginning of the line  {{{
-#bindkey "^[[1~" beginning-of-line
-# End Make home key go to the beginning of the line  }}}
+# vi mode mappings for line editor{{{
+bindkey -v
+export KEYTIMEOUT=1
 
-# Make end key go to the end of the line {{{
-#bindkey "^[[4~" end-of-line
-# End Make end key go to the end of the line }}}
+# Enable searching through history
+bindkey '^R' history-incremental-pattern-search-backward
 
-# Make delete key delete a character {{{
-#bindkey "^[[3~" delete-char
-# End Make delete key delete a character }}}
-# End Possibly not needed with zim input module }}}
+# Edit line in vim buffer ctrl-v
+autoload edit-command-line; zle -N edit-command-line
+bindkey '^v' edit-command-line
 
-# Disable mappings for zle {{{
-bindkey -e -r '^[x'
-bindkey -a -r ':'
-# End Disable mappings for zle }}}
+# Enter vim buffer from normal mode
+autoload -U edit-command-line && zle -N edit-command-line && bindkey -M vicmd "^v" edit-command-line
+
+# Use vim keys in tab complete menu:
+bindkey -M menuselect 'h' vi-backward-char
+bindkey -M menuselect 'j' vi-down-line-or-history
+bindkey -M menuselect 'k' vi-up-line-or-history
+bindkey -M menuselect 'l' vi-forward-char
+
+# Fix backspace bug when switching modes
+bindkey "^?" backward-delete-char
+
+# End vi mode mappings for line editor{{{
 
 
 # End Key mapping/remapping }}}
 
-# Include Zim configuration {{{
-# Zim is a zsh framework that simplifies some of the 
-# boilerplate configuration for zsh
-# https://zimfw.sh/
-# By default it modifies the zsh file but I'd prefer it only
-# source a separate file
-# To disable zim comment out this section
-if [[ -f ~/.zimsh ]]; then
-    . ~/.zimsh
-fi
-# End Include Zim configuration }}}
+# Change cursor for different vi modes in line editor {{{
+function zle-keymap-select {
+  if [[ ${KEYMAP} == vicmd ]] ||
+     [[ $1 = 'block' ]]; then
+    echo -ne '\e[1 q'
+  elif [[ ${KEYMAP} == main ]] ||
+       [[ ${KEYMAP} == viins ]] ||
+       [[ ${KEYMAP} = '' ]] ||
+       [[ $1 = 'beam' ]]; then
+    echo -ne '\e[5 q'
+  fi
+}
+zle -N zle-keymap-select
 
-# ## This disables the stupid "File exists!" warning on redirection {{{
-# ## Something above is unsetting this so it has to be last
-setopt CLOBBER
-# ## This disables the stupid "File exists!" warning on redirection }}}
+# ci", ci', ci`, di", etc
+autoload -U select-quoted
+zle -N select-quoted
+for m in visual viopp; do
+  for c in {a,i}{\',\",\`}; do
+    bindkey -M $m $c select-quoted
+  done
+done
 
-# Override options from zim zoxide module {{{
-# Replace 'cd' command with zoxide
-# Update weight of directory with every prompt
-eval "$(zoxide init zsh --hook prompt --cmd cd)"
-# End Override options from zim zoxide module }}}
+# ci{, ci(, ci<, di{, etc
+autoload -U select-bracketed
+zle -N select-bracketed
+for m in visual viopp; do
+  for c in {a,i}${(s..)^:-'()[]{}<>bB'}; do
+    bindkey -M $m $c select-bracketed
+  done
+done
 
+zle-line-init() {
+    zle -K viins # initiate `vi insert` as keymap (can be removed if `bindkey -V` has been set elsewhere)
+    echo -ne "\e[5 q"
+}
+zle -N zle-line-init
+
+echo -ne '\e[5 q' # Use beam shape cursor on startup.
+precmd() { echo -ne '\e[5 q' ;} # Use beam shape cursor for each new prompt.
+
+# End Change cursor for different vi modes in line editor }}}
+
+# Dedup the path {{{
+zdebug "Deduping \$PATH"
+#typeset -U PATH
+# End Dedup the path }}}
+
+# Export path to child processes
+zdebug "Exporting PATH: $PATH"
+export PATH
+
+
+alias oldvim='NVIM_APPNAME=old-vim nvim'
+alias vi=nvim
+alias vim=nvim
 # End Zsh Configuration  }}}
+
+. "$HOME/.local/share/../bin/env"

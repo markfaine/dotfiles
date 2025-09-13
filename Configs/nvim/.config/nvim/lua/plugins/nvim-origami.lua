@@ -1,20 +1,50 @@
--- This is the eonfiguration for nvim-origami - a plugin that enhances folding.
--- https://github.com/chrisgrieser/nvim-origami
+-- vim: foldmethod=marker foldlevel=1
+
+--[[ nvim-origami — folding ergonomics {{{1
+Lightweight, conflict-free setup: lazy-load by keys, keep native foldtext, no h/l remaps.
+Integrates with core/extras/folds.lua per-window fold selection.
+}}}1 --]]
+
 return {
-  enabled = true,
   'chrisgrieser/nvim-origami',
-  event = 'VeryLazy',
+  enabled = true,
+
+  -- Keys {{{1
+  -- Lazy-load on first actual use; avoids loading at startup
+  keys = {
+    {
+      'zL',
+      function()
+        require('origami').l()
+      end,
+      desc = 'Origami: open fold at cursor',
+    },
+    {
+      'zH',
+      function()
+        require('origami').h()
+      end,
+      desc = 'Origami: close fold at cursor',
+    },
+  },
+  -- }}}1
+
+  -- Options {{{1
+  -- Keep Origami focused: no auto-folding, no foldtext override, no h/l remaps
   opts = {
-    useLspFoldsWithTreesitterFallback = false,
-    foldtext = { enabled = false },
-    autofold = { enabled = false },
+    useLspFoldsWithTreesitterFallback = false, -- let core/extras/folds.lua pick method
+    foldtext = { enabled = false }, -- keep custom/native foldtext
+    autofold = { enabled = false }, -- no surprise auto-closing
     foldKeymaps = {
-      setup = true, -- modifies `h` and `l`
+      setup = false, -- don’t remap h/l
       hOnlyOpensOnFirstColumn = true,
     },
-    init = function()
-      vim.opt.foldlevel = 99
-      vim.opt.foldlevelstart = 99
-    end,
   },
+  -- }}}1
+
+  -- Setup {{{1
+  config = function(_, opts)
+    require('origami').setup(opts)
+  end,
+  -- }}}1
 }
