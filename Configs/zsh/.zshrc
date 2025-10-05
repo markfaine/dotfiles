@@ -1,85 +1,142 @@
-# Start configuration added by Zim install {{{
-#
+# ZSH Configuration {{{
+
+# shellcheck shell=zsh
 # User configuration sourced by interactive shells
-#
-# -----------------
-# Zsh configuration
-# -----------------
-#
-# History
-#
-
-# ## History customization
 # ## See https://zsh.sourceforge.io/Doc/Release/Options.html
-# ## Seems ignoring in the current shell session isn't possible
-# ## but we can prevent saving to the history file.
 
-# ## To read the history file every time history is called upon,
-# ## as well as the functionality from inc_append_history
-setopt share_history
+# Source shared functions {{{
+export ZSH_DEBUG=1
+source ~/.zshared || return
+zdebug "Sourcing ~/.zshrc"
+# End Source shared functions }}}
 
-#
-# Input/output
-#
+# ZSH Module configuration (built-in) {{{
+# See: https://zsh.sourceforge.io/Doc/Release/Zsh-Modules.html
 
-zstyle ':completion:*' group-name ''
-
-# Nicer completion listing
-zstyle ':completion:*' file-list all
-
-# Show colors in completion
-zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
-
-# // will become /
-zstyle ':completion:*' squeeze-slashes true
-
-# Match on options not dirs
-zstyle ':completion:*' complete-options true
-
-# Better SSH/Rsync/SCP Autocomplete
-#zstyle ':completion:*:(scp|rsync):*' tag-order ' hosts:-ipaddr:ip\ address hosts:-host:host files'
-#zstyle ':completion:*:(ssh|scp|rsync):*:hosts-host' ignored-patterns '*(.|:)*' loopback ip6-loopback localhost ip6-localhost broadcasthost
-#zstyle ':completion:*:(ssh|scp|rsync):*:hosts-ipaddr' ignored-patterns '^(<->.<->.<->.<->|(|::)([[:xdigit:].]##:(#c,2))##(|%*))' '127.0.0.<->' '255.255.255.255' '::1' 'fe80::*'
-
-# Allow for autocomplete to be case insensitive
-#zstyle ':completion:*' matcher-list '' 'm:{[:lower:][:upper:]}={[:upper:][:lower:]}' '+l:|?=** r:|?=**'
-
-# Use complist to create navigation in completion menu
+# Use ZSH complist module to create navigation in completion menu {{{
+zdebug "Loading zsh/complist"
 zmodload zsh/complist
+autoload -U compinit
+compinit
+_comp_options+=(globdots)		# Include hidden files.
+# End Use ZSH complist module to create navigation in completion menu }}}
+
+# ZSH Terminal Info module (dependency for zim) {{{
+zdebug "Loading zsh/terminfo"
+zmodload -F zsh/terminfo +p:terminfo
+# End ZSH Terminal Info module (dependency for zim) }}}
+
+# Include znap configuration {{{
+if [[ -f ~/.znaprc ]]; then
+  zdebug "~/.znaprc exists!"
+  . ~/.znaprc
+else
+  zdebug "~/.znaprc was not found!"
+fi
+# End Include znap configuration }}}
+
+# End ZSH Module configuration }}}
+
+# Key mapping/remapping {{{
+# CTRL+X i will allow editing completion {{{
+zdebug "Mapping ctrl-x to allow editing completions"
+bindkey -M menuselect '^xi' vi-insert
+# End CTRL+X i will allow editing completion }}}
+
+# Set editor default keymap to emacs (`-e`) or vi (`-v`) {{{
+zdebug "Set editor to vi style command line editing"
+bindkey -v
+# End Set editor default keymap to emacs (`-e`) or vi (`-v`) }}}
+
+# vi mode mappings for line editor{{{
+bindkey -v
+export KEYTIMEOUT=1
+
+# Enable searching through history
+bindkey '^R' history-incremental-pattern-search-backward
+
+# Edit line in vim buffer ctrl-v
+autoload edit-command-line; zle -N edit-command-line
+bindkey '^v' edit-command-line
+
+# Enter vim buffer from normal mode
+autoload -U edit-command-line && zle -N edit-command-line && bindkey -M vicmd "^v" edit-command-line
+
+# Use vim keys in tab complete menu:
 bindkey -M menuselect 'h' vi-backward-char
-bindkey -M menuselect 'k' vi-up-line-or-history
 bindkey -M menuselect 'j' vi-down-line-or-history
+bindkey -M menuselect 'k' vi-up-line-or-history
 bindkey -M menuselect 'l' vi-forward-char
 
-# CTRL+X i will allow editing completion
-bindkey -M menuselect '^xi' vi-insert
+# Fix backspace bug when switching modes
+bindkey "^?" backward-delete-char
 
-# It's annoying to always have to type a slash before tabbing
-setopt AUTO_PARAM_SLASH
+# End vi mode mappings for line editor{{{
 
-# Set editor default keymap to emacs (`-e`) or vi (`-v`)
-bindkey -e
 
-# Prompt for spelling correction of commands.
-setopt CORRECT
+# End Key mapping/remapping }}}
 
-# Customize spelling correction prompt.
-SPROMPT='zsh: correct %F{red}%R%f to %F{green}%r%f [nyae]? '
+# Change cursor for different vi modes in line editor {{{
+function zle-keymap-select {
+  if [[ ${KEYMAP} == vicmd ]] ||
+     [[ $1 = 'block' ]]; then
+    echo -ne '\e[1 q'
+  elif [[ ${KEYMAP} == main ]] ||
+       [[ ${KEYMAP} == viins ]] ||
+       [[ ${KEYMAP} = '' ]] ||
+       [[ $1 = 'beam' ]]; then
+    echo -ne '\e[5 q'
+  fi
+}
+zle -N zle-keymap-select
 
-# Remove path separator from WORDCHARS.
-WORDCHARS=${WORDCHARS//[\/]}
+# ci", ci', ci`, di", etc
+autoload -U select-quoted
+zle -N select-quoted
+for m in visual viopp; do
+  for c in {a,i}{\',\",\`}; do
+    bindkey -M $m $c select-quoted
+  done
+done
 
-# Include Zim configuration
-if [[ -f ~/.zimsh ]]; then
-    . ~/.zimsh
-fi
+# ci{, ci(, ci<, di{, etc
+autoload -U select-bracketed
+zle -N select-bracketed
+for m in visual viopp; do
+  for c in {a,i}${(s..)^:-'()[]{}<>bB'}; do
+    bindkey -M $m $c select-bracketed
+  done
+done
 
-# Completions
-# group completions by type
-#
-# Actiate Mise
-eval "$(mise activate zsh)"
+zle-line-init() {
+    zle -K viins # initiate `vi insert` as keymap (can be removed if `bindkey -V` has been set elsewhere)
+    echo -ne "\e[5 q"
+}
+zle -N zle-line-init
 
-# ## This disables the stupid "File exists!" warning on redirection
-# ## Something above is unsetting this so it has to be last
-setopt CLOBBER
+echo -ne '\e[5 q' # Use beam shape cursor on startup.
+precmd() { echo -ne '\e[5 q' ;} # Use beam shape cursor for each new prompt.
+
+# End Change cursor for different vi modes in line editor }}}
+
+# Dedup the path {{{
+zdebug "Deduping \$PATH"
+#typeset -U PATH
+# End Dedup the path }}}
+
+# Export path to child processes
+zdebug "Exporting PATH: $PATH"
+export PATH
+
+
+alias oldvim='NVIM_APPNAME=old-vim nvim'
+alias vi=nvim
+alias vim=nvim
+# End Zsh Configuration  }}}
+
+# Add this here for now
+eval "$(gh copilot alias -- zsh)"
+
+path=('.' $path)
+export PATH="$HOME/.local/bin:$PATH"
+export PATH="$HOME/.doppler/bin:$PATH"

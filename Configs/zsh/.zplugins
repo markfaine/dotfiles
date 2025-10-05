@@ -1,0 +1,46 @@
+# The function load_plugin in ~/.znaprc
+# will do the following for each uncommented, non-blank line
+# 1. Clone the plugin, if it doesn't exist
+# 1. add second command-separated arg to the path
+# 3. Add thrid comma-separated arg to the fpath
+# 4. Source the plugin
+#
+# Configuration for each plugin can be found
+# in ~/.config/zplugin.d/plugin-name
+# Format:
+# github-repo-path,path,fpath
+
+# Order sort of matters here but mostly only that
+# completions should go last
+
+zimfw/environment
+zimfw/utility,functions
+zimfw/prompt-pwd
+chrissicool/zsh-256color
+zimfw/input
+zimfw/termtitle
+zimfw/run-help
+zsh-users/zsh-autosuggestions
+zsh-users/zsh-history-substring-search
+zsh-users/zsh-syntax-highlighting
+zimfw/duration-info,functions
+zimfw/git,functions
+zimfw/git-info,,functions
+zimfw/fzf
+joke/zim-github-cli
+joke/zim-gopass
+joke/zim-mise
+joke/zim-yq
+kiesman99/zim-zoxide
+zimfw/archive,functions
+zimfw/magic-enter
+zimfw/ruby
+zimfw/ssh
+jeffreytse/zsh-vi-mode
+#olets/zsh-abbr
+#Nhqml/penv-zsh-plugin
+zimfw/direnv
+zsh-users/zsh-completions,,src
+Freed-Wu/zsh-command-not-found
+zimfw/bira
+loiccoyle/zsh-github-copilot

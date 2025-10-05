@@ -1,5 +1,6 @@
 [alias]
-	lg = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+  lg = log -10 --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+  slg = log --reverse -10 --pretty=format:"%h%x09%an%x09%ad%x09%s"
 	pl = pull
 	pu = push
 	st = status -s
@@ -56,3 +57,6 @@
 [credential "https://gist.github.com"]
 	helper = 
 	helper = !/usr/bin/gh auth git-credential
+[safe]
+	directory = /home/mfaine/.config/dotfiles
+	directory = /home/mfaine/.config/dotfiles

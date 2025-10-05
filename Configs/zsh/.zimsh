@@ -1,32 +1,49 @@
-# -----------------
-# Zim configuration
-# -----------------
+# Module configuration {{{
 
-# Use degit instead of git as the default tool to install and update modules.
-#zstyle ':zim:zmodule' use 'degit'
+# Configure terminal title module {{{
+# Requires termtitle module in .zimrc
+zstyle ':zim:termtitle' hooks 'preexec' 'precmd'
+zstyle ':zim:termtitle:preexec' format '${${(A)=1}[1]}'
+zstyle ':zim:termtitle:precmd'  format '%1~'
+# End Configure terminal title mddule }}}
 
-# --------------------
-# Module configuration
-# --------------------
+# Configure git-info module {{{
+# Requires git-info module in .zimrc
+# See: https://github.com/zimfw/git-info
+setopt nopromptbang prompt{cr,percent,sp,subst}
+zstyle ':zim:git-info:branch' format 'branch:%b'
+zstyle ':zim:git-info:commit' format 'commit:%c'
+zstyle ':zim:git-info:remote' format 'remote:%R'
+zstyle ':zim:git-info:keys' format \
+    'prompt'  'git(%b%c)' \
+    'rprompt' '[%R]'
+autoload -Uz add-zsh-hook && add-zsh-hook precmd git-info
+PS1='${(e)git_info[prompt]}%# '
+RPS1='${(e)git_info[rprompt]}'
+# End Configure git-info module }}}
 
-#
-# git
-#
+# Configure prompt-pwd {{{
+# See: https://github.com/zimfw/prompt-pwd
+# Requires prompt-pwd module in .zimrc
+setopt nopromptbang prompt{cr,percent,sp,subst}
 
+zstyle ':zim:prompt-pwd' git-root yes
+zstyle ':zim:prompt-pwd:fish-style' dir-length 1
+zstyle ':zim:prompt-pwd:separator' format '❯'
+PS1='$(prompt-pwd)❯ '
+# End Configure prompt-pwd }}}
+
+# Git module configuration {{{
 # Set a custom prefix for the generated aliases. The default prefix is 'G'.
-zstyle ':zim:git' aliases-prefix 'g'
+zstyle ':zim:git' aliases-prefix 'G'
+# End Git Module configuration }}}
 
-#
-# input
-#
-
+# Input module configuration {{{
 # Append `../` to your input for each `.` you type after an initial `..`
 zstyle ':zim:input' double-dot-expand yes
+# End Input module configuration }}}
 
-#
-# termtitle
-#
-
+# Term title module configuration {{{
 # Set a custom terminal title format using prompt expansion escape sequences.
 # See http://zsh.sourceforge.net/Doc/Release/Prompt-Expansion.html#Simple-Prompt-Escapes
 # If none is provided, the default '%n@%m: %~' is used.
@@ -34,71 +51,10 @@ zstyle ':zim:input' double-dot-expand yes
 zstyle ':zim:termtitle' hooks 'preexec' 'precmd'
 zstyle ':zim:termtitle:preexec' format '${${(A)=1}[1]}'
 zstyle ':zim:termtitle:precmd'  format '%1~'
+# End Term title module configuration }}}
 
-#
-# zsh-autosuggestions
-#
+# zsh-syntax-highlighting module configuration {{{
 
-# Disable automatic widget re-binding on each precmd. This can be set when
-# zsh-users/zsh-autosuggestions is the last module in your ~/.zimrc.
-ZSH_AUTOSUGGEST_MANUAL_REBIND=1
-
-# Set color for zsh-autosuggestions
-ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=23'
-
-# Customize the style that the suggestions are shown with.
-# See https://github.com/zsh-users/zsh-autosuggestions/blob/master/README.md#suggestion-highlight-style
-#ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=242'
-
-#
-# zsh-syntax-highlighting
-#
-
-# Set what highlighters will be used.
+# Set what highlighters will be used. {{{
 # See https://github.com/zsh-users/zsh-syntax-highlighting/blob/master/docs/highlighters.md
 ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)
-
-# Customize the main highlighter styles.
-# See https://github.com/zsh-users/zsh-syntax-highlighting/blob/master/docs/highlighters/main.md#how-to-tweak-it
-#typeset -A ZSH_HIGHLIGHT_STYLES
-#ZSH_HIGHLIGHT_STYLES[comment]='fg=242'
-
-
-# ------------------
-# Initialize modules
-# ------------------
-
-ZIM_HOME=${ZDOTDIR:-${HOME}}/.zim
-mkdir -p "$ZIM_HOME"
-# Download zimfw plugin manager if missing.
-if [[ ! -e ${ZIM_HOME}/zimfw.zsh ]]; then
-  if (( ${+commands[curl]} )); then
-    curl -fsSL --create-dirs -o ${ZIM_HOME}/zimfw.zsh \
-        https://github.com/zimfw/zimfw/releases/latest/download/zimfw.zsh
-  else
-    mkdir -p ${ZIM_HOME} && wget -nv -O ${ZIM_HOME}/zimfw.zsh \
-        https://github.com/zimfw/zimfw/releases/latest/download/zimfw.zsh
-  fi
-fi
-# Install missing modules, and update ${ZIM_HOME}/init.zsh if missing or outdated.
-if [[ ! ${ZIM_HOME}/init.zsh -nt ${ZDOTDIR:-${HOME}}/.zimrc ]]; then
-  source ${ZIM_HOME}/zimfw.zsh init -q
-fi
-# Initialize modules.
-source ${ZIM_HOME}/init.zsh
-
-# ------------------------------
-# Post-init module configuration
-# ------------------------------
-
-#
-# zsh-history-substring-search
-#
-
-zmodload -F zsh/terminfo +p:terminfo
-# Bind ^[[A/^[[B manually so up/down works both before and after zle-line-init
-for key ('^[[A' '^P' ${terminfo[kcuu1]}) bindkey ${key} history-substring-search-up
-for key ('^[[B' '^N' ${terminfo[kcud1]}) bindkey ${key} history-substring-search-down
-for key ('k') bindkey -M vicmd ${key} history-substring-search-up
-for key ('j') bindkey -M vicmd ${key} history-substring-search-down
-unset key

@@ -1,0 +1,10 @@
+# This is the configuration file for zimfw/prompt-pwd
+# See: https://github.com/zimfw/prompt-pwd
+
+# Configure prompt-pwd {{{
+#setopt nopromptbang prompt{cr,percent,sp,subst}
+#zstyle ':zim:prompt-pwd' git-root yes
+#zstyle ':zim:prompt-pwd:fish-style' dir-length 1
+#zstyle ':zim:prompt-pwd:separator' format '❯'
+#PS1='$(prompt-pwd)❯ '
+# End Configure prompt-pwd }}}
