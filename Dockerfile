@@ -23,10 +23,16 @@ WORKDIR /home/testuser
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 
 # Set a clean PATH
-ENV PATH="/home/testuser/.cargo/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+ENV PATH="/home/testuser/.local/bin:/home/testuser/.cargo/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
 # Install Tuckr as testuser
 RUN /home/testuser/.cargo/bin/cargo install tuckr
+
+# Install mise as testuser
+RUN curl https://mise.run | sh
+
+# Install zim as testuser
+RUN curl -fsSL https://raw.githubusercontent.com/zimfw/install/master/install.zsh | zsh
 
 # Create a dummy .zshrc to prevent interactive setup
 RUN touch /home/testuser/.zshrc

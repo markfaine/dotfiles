@@ -40,7 +40,11 @@ exec_in_container "rm -f /home/testuser/.z*"
 
 # Use Tuckr to set up the dotfiles and run hooks
 echo "Setting up dotfiles with Tuckr..."
-exec_in_container "cd /home/testuser/.config/dotfiles && tuckr set '*'"
+exec_in_container "cd /home/testuser/.config/dotfiles && tuckr set '*]"
+
+# Manually activate mise
+echo "Activating mise..."
+exec_in_container "eval \"$(mise activate zsh)\""
 
 # Run tests
 echo "Running tests..."

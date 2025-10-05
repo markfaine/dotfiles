@@ -1,4 +1,4 @@
-# The function load_plugin in ~/.znaprc 
+# The function load_plugin in ~/.znaprc
 # will do the following for each uncommented, non-blank line
 # 1. Clone the plugin, if it doesn't exist
 # 1. add second command-separated arg to the path
@@ -43,3 +43,4 @@ zimfw/direnv
 zsh-users/zsh-completions,,src
 Freed-Wu/zsh-command-not-found
 zimfw/bira
+loiccoyle/zsh-github-copilot

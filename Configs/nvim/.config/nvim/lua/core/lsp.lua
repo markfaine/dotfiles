@@ -555,7 +555,7 @@ local servers = {
     settings = {
       yaml = {
         keyOrdering = false,
-        format = { enable = true, singleQuote = false, bracketSpacing = true },
+        format = { enable = false, singleQuote = false, bracketSpacing = true },
         validate = true,
         completion = true,
         hover = true,
