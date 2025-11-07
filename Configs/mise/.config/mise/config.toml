@@ -61,6 +61,8 @@ node = "latest"
 glab = "latest"
 "npm:@google/gemini-cli" = "latest"
 "npm:vscode-langservers-extracted" = "latest"
+"npm:copilot" = "latest"
+"npm:gitlab-search" = "latest"
 
 [env]
 _.source = '.env'
