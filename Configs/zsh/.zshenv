@@ -50,14 +50,27 @@ export GIT_SSL_NO_VERIFY=true
 
 # Function to load ssh-agent from yubikey {{{
 function ssh_load() {
-  eval "$(
-    ssh-agent -s
-    SSH_ASKPASS=$SSH_ASKPASS
-  )"
-  ssh-add -K || true
+  local agent_env="$HOME/.ssh/agent_env"
+  # Reuse existing agent if possible
+  if [[ -f "$agent_env" ]]; then
+    . "$agent_env" 2>/dev/null || true
+  fi
+  # If existing agent socket works and has identities, skip starting a new one
+  if [[ -S "$SSH_AUTH_SOCK" ]] && ssh-add -l >/dev/null 2>&1; then
+    return
+  fi
+  # Start agent and add default identities only once
+  eval "$(ssh-agent -s)" >/dev/null
+  if ssh-add -h 2>&1 | grep -q ' -K'; then
+    ssh-add -K || true
+  else
+    ssh-add || true
+  fi
+  umask 077
+  printf 'export SSH_AUTH_SOCK=%q\nexport SSH_AGENT_PID=%q\n' "$SSH_AUTH_SOCK" "$SSH_AGENT_PID" >| "$agent_env"
 }
 if [[ "${WSL_DISTRO_NAME:-}" == "" ]]; then
-  zdebug "Loading SSL keys from yubikey"
+  zdebug "Loading SSH agent (one-time per session)"
   ssh_load
 fi
 # End Function to load ssh-agent from yubikey }}}
