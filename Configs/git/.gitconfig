@@ -60,3 +60,6 @@
 [safe]
 	directory = /home/mfaine/.config/dotfiles
 	directory = /home/mfaine/.config/dotfiles
+[user]
+	email = mark.faine@pm.me
+	name = Mark Faine
