@@ -134,9 +134,6 @@ alias vi=nvim
 alias vim=nvim
 # End Zsh Configuration  }}}
 
-# Add this here for now
-eval "$(gh copilot alias -- zsh)"
-
 path=('.' $path)
 export PATH="$HOME/.local/bin:$PATH"
 export PATH="$HOME/.doppler/bin:$PATH"
