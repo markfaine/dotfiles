@@ -49,7 +49,7 @@ gh = "latest"
 stylua = "latest"
 "npm:yaml-language-server" = "latest"
 "npm:bash-language-server" = "latest"
-python = "latest"
+python = "3.12.11"
 marksman = "latest"
 "pipx:python-lsp-server" = "latest"
 "pipx:autopep8" = "latest"
@@ -61,6 +61,7 @@ node = "latest"
 glab = "latest"
 "npm:@google/gemini-cli" = "latest"
 "npm:vscode-langservers-extracted" = "latest"
+"npm:copilot" = "latest"
 
 [env]
 _.source = '.env'

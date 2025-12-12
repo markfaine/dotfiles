@@ -17,7 +17,7 @@ alias oldvim='NVIM_APPNAME=oldvim nvim'
 # End Configure a backup neovim config }}}
 
 # Configure stock nvim editor alias {{{
-# This allows me to use stock vim 
+# This allows me to use stock vim
 alias svim="/usr/bin/vi" # stock vim
 # End Configure stock nvim editor alias }}}
 
@@ -56,7 +56,7 @@ function jcu(){
     unit="$1"
     if [[ -z "$unit" ]]; then
       printf "Need a service name\n"
-    else 
+    else
         journalctl -xfu "$unit"
     fi
 
