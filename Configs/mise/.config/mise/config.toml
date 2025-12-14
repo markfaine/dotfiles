@@ -56,12 +56,16 @@ marksman = "latest"
 "pipx:pylint" = "latest"
 rg = "latest"
 "ubi:ogham/exa" = "latest"
-rclone = "latest"
 node = "latest"
 glab = "latest"
 "npm:@google/gemini-cli" = "latest"
 "npm:vscode-langservers-extracted" = "latest"
 "npm:copilot" = "latest"
+"npm:vscode-html-languageservice" = "latest"
+gdu = "latest"
+eza = "latest"
+duf = "latest"
+"pipx:tldr" = "latest"
 
 [env]
 _.source = '.env'

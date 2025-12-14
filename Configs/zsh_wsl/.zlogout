@@ -4,8 +4,4 @@
 if [[ ! -o interactive ]]; then
   return
 fi
-
-# Clear the in-memory token (locks bw, removes file, signals other shells)
-zdebug "Clearing Bitwarden session on logout"
-unset BW_SESSION
 clear

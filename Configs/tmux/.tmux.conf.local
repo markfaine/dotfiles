@@ -18,7 +18,7 @@ set -g history-limit 5000000 # Set to a very large number
 # End Override history size }}}
 
 # Start with mouse mode disabled {{{
-set -g mouse off 
+set -g mouse off
 # End Start with mouse mode disabled }}}
 
 # TODO: revisit occasionally to see if these are still an issue
@@ -44,9 +44,10 @@ set -as terminal-overrides ',*:Setulc=\E[58::2::%p1%{65536}%/%d::%p1%{256}%/%{25
 
 # Fix Undercurls not showing in tmux {{{
 # https://github.com/folke/tokyonight.nvim/tree/main?tab=readme-ov-file#night
-set -g default-terminal "${TERM}"
-set -as terminal-overrides ',*:Smulx=\E[4::%p1%dm'  # undercurl support
-set -as terminal-overrides ',*:Setulc=\E[58::2::::%p1%{65536}%/%d::%p1%{256}%/%{255}%&%d::%p1%{255}%&%d%;m'  # underscore colours - needs tmux-3.0
+#set -g default-terminal "${TERM}"
+#set -as terminal-overrides ',*:Smulx=\E[4::%p1%dm'  # undercurl support
+#set -as terminal-overrides ',*:Setulc=\E[58::2::::%p1%{65536}%/%d::%p1%{256}%/%{255}%&%d::%p1%{255}%&%d%;m'  # underscore colours - needs tmux-3.0
+set -g default-terminal "screen-256color"
 # End Fix Undercurls not showing in tmux }}}
 
 # End Fixes and Workarounds }}}
@@ -205,7 +206,7 @@ set -g @plugin 'tmux-plugins/tmux-sessionist'
 
 # Themes {{{
 
-# tmux-nerd-font-window-name Add Nerdfonts support to statusbar and windows {{{ 
+# tmux-nerd-font-window-name Add Nerdfonts support to statusbar and windows {{{
 # set -g @nova-nerdfonts true
 set -g @plugin 'joshmedeski/tmux-nerd-font-window-name'
 # End tmux-nerd-font-window-name Add Nerdfonts support to statusbar and windows }}}
@@ -270,7 +271,7 @@ bind -n C-k send-keys -R \; send-keys C-l \; clear-history
 # Mouse Bindings {{{
  # Toggle mouse on with `prefix+m`
  bind m set -g mouse on \; display 'Mouse: ON'
-  
+
  # Toggle mouse off with `prefix+M`
  bind M set -g mouse off \; display 'Mouse: OFF'
 # End Mouse Bindings }}}
@@ -363,7 +364,7 @@ bind-key -n m-s choose-tree -s
 # End Session Menu: prefix+`  }}}
 
 # Kill Session - `prefix+q`  {{{
-# This is 
+# This is
 # bind-key -n q kill-window
 # End Kill Session: `prefix+q`  }}}
 

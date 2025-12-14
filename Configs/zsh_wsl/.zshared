@@ -78,12 +78,17 @@ doppler-scope() {
 }
 
 
-# Default secrets, safe to export
-function dotfiles(){
-  local token DOPPLER_TOKEN project
-  project="dotfiles"
-  token="$(bw get notes doppler_personal)"
-  source <(DOPPLER_TOKEN="$token" doppler secrets download -p dotfiles -c default_personal --no-file | jq -r '. | to_entries[] | "export \(.key)=\"\(.value)\""')
+# For WSL Environments
+function setup_wsl(){
+  zdebug ".zshared: Windows terminal detected, disabling auto title"
+  export DISABLE_AUTO_TITLE=true
+  if [[ "${ZPROFILE_LOADED:-}" == "" ]]; then
+    if source ~/.zprofile; then
+        zdebug ".zshard: Sourced ~/.zprofile"
+    else
+        zdebug ".zhsared: Failed to source ~/.zprofile"
+        return 1
+    fi
+  fi
 }
-
 export _zhared_loaded=1

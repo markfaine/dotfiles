@@ -16,9 +16,11 @@ function _load_znaprc(){
 _load_znaprc
 
 # Setup prompt
-znap prompt sindresorhus/pure
+# znap prompt sindresorhus/pure
+
+# Load ssh
+# ssh_load
 
 # Export path to child processes
 zdebug ".zshrc: Exporting PATH: $PATH"
 export PATH
-

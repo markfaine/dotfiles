@@ -1,52 +1,48 @@
-# User Command Aliases File {{{
+# User Command Aliases File
 
-# Neovim/Vim {{{
-
-# Configure vim as equivalent to EDITOR value  {{{
+# Neovim/Vim
+# Configure vim as equivalent to EDITOR value
 export EDITOR=vi
 if command -v nvim &>/dev/null; then
     alias vim='nvim'
     alias vi='nvim'
     export EDITOR=nvim
+else
+  zdebug "Failed to find nvim"
 fi
-# End Configure vim as equivalent to EDITOR value }}}
+# End Configure vim as equivalent to EDITOR value
 
-# Configure a backup neovim config {{{
-# I always have an old config that I use as a backup in case I break something
-alias oldvim='NVIM_APPNAME=oldvim nvim'
-# End Configure a backup neovim config }}}
-
-# Configure stock nvim editor alias {{{
+# Configure stock nvim editor alias
 # This allows me to use stock vim
 alias svim="/usr/bin/vi" # stock vim
-# End Configure stock nvim editor alias }}}
+# End Configure stock nvim editor alias
 
-# End Neovim/Vim }}}
+# End Neovim/Vim
 
-# Alias for cd command + typo protection {{{
+# Alias for cd command + typo protection
 alias cd..='cd ..'
-# End Alias for cd command + typo protection }}}
+# End Alias for cd command + typo protection
 
-# Alias for clear command + typo protection {{{
+# Alias for clear command + typo protection
 alias c='clear'
 alias claer='clear'
 alias clar='clear'
-# End Alias for clear command + typo protection }}}
+# End Alias for clear command + typo protection
 
-# Disk Space related command aliases {{{
+# Disk Space related command aliases
 alias df='df -kTh'
 alias du='du -kh'       # Makes a more readable output.
-# End Disk Space related command aliases }}}
+# End Disk Space related command aliases
 
-# History related command aliases {{{
+# History related command aliases
 alias h='history'
-# End History related command aliases }}}
+# End History related command aliases
 
-# Job related command aliases {{{
+# Job related command aliases
 alias j='jobs -l'
-# End Job related command aliases }}}
+# End Job related command aliases
 
-# systemctl/journalctl related command aliases {{{
+# systemctl/journalctl related command aliases
 alias journalctl='journalctl'
 if [[ "${WT_SESSION:-}" != "" ]]; then
     alias journalctl='journalctl --no-pager -xeu'
@@ -63,53 +59,53 @@ function jcu(){
 }
 alias jc='journalctl -xn'
 alias jcf='journalctl -xf'
-# End Journalctl related command aliases }}}
+# End Journalctl related command aliases
 
-# Aliases for pager command + typo protection {{{
+# Aliases for pager command + typo protection
 alias moer='more'
 alias moew='more'
 alias more='less'
 alias tial='tail'
-# End Aliases for pager command + typo protection }}}
+# End Aliases for pager command + typo protection
 
-# Alias for ls command + typo protection {{{
-if command -v exa &>/dev/null; then
-    alias ls='exa'
+# Alias for ls command + typo protection
+if command -v eza &>/dev/null; then
+    alias ls='eza'
 fi
 alias ll='ls -la'
 alias ls='ls --color'
 alias kk='ll'
 alias ls-la='ls -la'
-# End Alias for ls command + typo protection }}}
+# End Alias for ls command + typo protection
 
-# Alias for mv command + typo protection {{{
+# Alias for mv command + typo protection
 alias mv='mv -i'
-# End Alias for mv command + typo protection }}}
+# End Alias for mv command + typo protection
 
-# Alias for ps command + typo protection {{{
+# Alias for ps command + typo protection
 alias ps='ps -ef'
-# End Alias for ps command + typo protection }}}
+# End Alias for ps command + typo protection
 
-# Aliases for trash commands {{{
+# Aliases for trash commands
 alias trm='trash-put'
 alias trl='trash-list'
-# End Aliases for trash commands }}}
+# End Aliases for trash commands
 
-# Command is better than which {{{
+# Command is better than which
 alias which='command -v'
-# End Command is better than which }}}
+# End Command is better than which
 
-# Gawk if better, if available {{{
+# Gawk if better, if available
 if command -v gawk >/dev/null 2>&1; then
     alias awk='gawk'
 fi
-# End Gawk if better, if available }}}
+# End Gawk if better, if available
 
-# Print my path {{{
+# Print my path
 alias mypath='echo -e ${PATH//:/\\n}'
-# End Print my path }}}
+# End Print my path
 
-# Alias for git/gh/gitlab-search commands + typo protection {{{
+# Alias for git/gh/gitlab-search commands + typo protection
 alias git='git --no-pager'
 alias gits='git status' # Git Status
 alias gitcfg='git config --list --show-origin --show-scope' #Show config options
@@ -118,30 +114,44 @@ alias gitlab-search='gls'
 # Requires doppler and a template
 alias gls='doppler run --mount ~/.gitlabsearchrc --mount-template ~/.gitlabsearchrc.tmpl -- gitlab-search'
 
-# End Alias for git/gh/gitlab-search commands + typo protection }}}
+# End Alias for git/gh/gitlab-search commands + typo protection
 
-# Alias for grep-like commands + typo protection {{{
+# Alias for grep-like commands + typo protection
 alias rgrep='rg -IN -uuu'
-# End Alias for grep-like commands + typo protection }}}
+# End Alias for grep-like commands + typo protection
 
-# Tmux should always be started as 'tmux -2' {{{
+# Tmux should always be started as 'tmux -2'
 alias tmux='tmux -T 256'
-# End Tmux should always be started as 'tmux -2' }}}
+# End Tmux should always be started as 'tmux -2'
 
-# Alias for docker commands + typo protection {{{
+# Alias for docker commands + typo protection
 alias dockerps='docker ps -a --format="table {{.ID}}\t{{.Names}}\t{{.Image}}\t{{.Command}}\t{{.Status}}"'
-# End Alias for docker commands + typo protection }}}
+# End Alias for docker commands + typo protection
 
-# Alias for npx-based commands + typo protection {{{
+# Alias for npx-based commands + typo protection
 
-# File Formatting commands + typo protection {{{
+# File Formatting commands + typo protection
 alias prettier='npx prettier'
-# End File Formatting commands + typo protection }}}
+# End File Formatting commands + typo protection
 
-# End Alias for npx-based commands + typo protection }}}
+# End Alias for npx-based commands + typo protection
 
-# Restart shell {{{
+# Restart shell
 alias zbrc='exec zsh'
-# End Restart shell }}}
+# End Restart shell
 
-# End User Aliases File }}}
+# Better versions of classic utils
+function top(){if command -v htop &>/dev/null; then htop; else top; fi}
+function find(){
+  if command -v fd &>/dev/null; then
+    fd "$@"
+  else
+    find "$@"
+  fi
+}
+alias ls='eza -la --icons'
+alias df='duf'
+function man(){
+  if tldr --search "$1" &>/dev/null; then tldr "$1"; else /usr/bin/man "$1"; fi
+}
+# End User Aliases File
