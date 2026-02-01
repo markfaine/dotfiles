@@ -7,7 +7,8 @@ if [[ ! -o interactive ]]; then
 fi
 
 # Load ssh
-if [[ -h ~/.load_ssh ]]; then
+if [[ -h ~/.load_ssh && -z "$_ssh_loaded" ]]; then
   # shellcheck source=/dev/null
   . ~/.load_ssh
+  export _ssh_loaded=1
 fi
