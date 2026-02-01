@@ -32,6 +32,5 @@ joke/zim-mise
 joke/zim-yq
 kiesman99/zim-zoxide
 thetic/extract
-#sdiebolt/zsh-ssh-agent
 zsh-users/zsh-completions,,src
 Freed-Wu/zsh-command-not-found

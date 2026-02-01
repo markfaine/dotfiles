@@ -2,6 +2,4 @@
 "$HOME/.local/share/nvim/mason/packages/ansible-language-server/node_modules/@ansible/ansible-language-server/bin",
 "/home/mfaine/.local/share/mise/installs/npm-vscode-langservers-extracted/latest/bin",
 ,"/usr/local/bin"
-,"$HOME/.doppler/bin"
 ,"$HOME/.local/bin"
-,"."

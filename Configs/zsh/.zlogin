@@ -6,12 +6,8 @@ if [[ ! -o interactive ]]; then
   return
 fi
 
-if [[ -f "$HOME/.bw-login" ]]; then
-  source "$HOME/.bw-login"
-fi
-
-# Retrieve and export personal secrets
-dotfiles "default_personal"
-
 # Load ssh
-. .load-ssh
+if [[ -h ~/.load_ssh ]]; then
+  # shellcheck source=/dev/null
+  . ~/.load_ssh
+fi

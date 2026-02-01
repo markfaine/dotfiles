@@ -60,6 +60,7 @@
 [safe]
 	directory = /home/mfaine/.config/dotfiles
 	directory = /home/mfaine/.config/dotfiles
+	directory = /volume1/tools/plexupdate
 [user]
 	email = mark.faine@pm.me
 	name = Mark Faine

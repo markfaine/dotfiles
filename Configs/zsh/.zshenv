@@ -6,9 +6,12 @@
 ZSH_DEBUG="${ZSH_DEBUG:-1}"
 ZSH_TRACE="${ZSH_TRACE:-}"
 
+# Clobber
+setopt clobber
+
 # Setup log file
 export ZLOG_FILE="$HOME/.zshlog"
-: > "$HOME/.zshlog"
+: >| "$HOME/.zshlog"
 
 function zdebug() {
   if [[ -n $ZSH_DEBUG ]]; then
@@ -80,26 +83,19 @@ function _load_cursor(){
 _load_cursor
 
 # Setup ripgrep
+export RIPGREP_CONFIG_PATH="$HOME/.ripgreprc"
 function _load_ripgrep(){
-  if ! command -v rg &>/dev/null; then return; fi
-  RIPGREP_CONFIG_PATH="$HOME/.ripgreprc"
 if [[ ! -f "$RIPGREP_CONFIG_PATH" ]]; then
-cat <<-EOF > "$RIPGREP_CONFIG_PATH"
---smart-case
---one-file-system
---heading
---no-line-number
---max-columns-preview
---trim
-EOF
+  printf "The ripgreprc is not present at %s\n" "$RIPGREP_CONFIG_PATH"
+  zdebug ".zshenv: No Ripgrep Config was found at $RIPGREP_CONFIG_PATH"
 fi
-zdebug ".zshenv: Configured Ripgrep"
 }
 
 function _load_aliases(){
   ZALIASES="$HOME/.aliases"
-  if [[ -f "$ZALIASES" ]]; then
-    source "$ZALIASES"
+  if [[ -e "$ZALIASES" ]]; then
+    #shellcheck source=/dev/null
+    . "$ZALIASES"
     zdebug ".zshenv: Sourcing $ZALIASES"
   else
     zdebug ".zshenv: Failed to source $ZALIASES"
@@ -120,29 +116,6 @@ fi
 if [[ ! -f "$HOME/.zsh-dircolors.config" ]]; then
   _load_zcolors
 fi
-
-# Function to load ssh-agent from yubikey
-# Load ssh-key into agent
-function ssh_load() {
-  local agent_env="$HOME/.ssh/agent_env"
-  # Reuse existing agent if possible
-  if [[ -f "$agent_env" ]]; then
-    source "$agent_env" 2>/dev/null || true
-  fi
-  # If existing agent socket works and has identities, skip starting a new one
-  if [[ -S "$SSH_AUTH_SOCK" ]] && ssh-add -l >/dev/null 2>&1; then
-    return
-  fi
-  # Start agent and add default identities only once
-  eval "$(ssh-agent -s)" >/dev/null
-  if [[ "${IS_WSL:-}" == "" ]]; then
-    ssh-add -K || true
-  else
-    ssh-add || true
-  fi
-  umask 077
-  printf 'export SSH_AUTH_SOCK=%q\nexport SSH_AGENT_PID=%q\n' "$SSH_AUTH_SOCK" "$SSH_AGENT_PID" >| "$agent_env"
-}
 
 # Function to append paths to $PATH from a file
 function _append_to_path() {
@@ -166,7 +139,7 @@ function _add_to_path() {
     paths_file="${1:-$HOME/.paths}"
     while IFS=',' read -r append prepend; do
         line="${append}${prepend}"
-        [[ -z ${(S)line} ]] && continue
+        [[ -z $line ]] && continue
         [[ "$line" = \#* ]] && continue
         if [[ "${append:-}" != "" ]]; then
           zdebug ".zshenv: Appending $append to PATH"
@@ -176,7 +149,7 @@ function _add_to_path() {
           zdebug ".zshenv: Prepending $prepend to PATH"
           _prepend_to_path "$prepend"
         fi
-    done < "$paths_file" | sort -r
+    done < <(tac "$paths_file")
 }
 
 function _load_paths(){
@@ -198,7 +171,8 @@ _load_paths
 function _load_zhared(){
   zhared="$HOME/.zshared"
   if [[ -f "$zhared" ]]; then
-    source "$zhared"
+    #shellcheck source=/dev/null
+    . "$zhared"
     zdebug ".zshenv: Sourcing $zhared"
   else
     zdebug ".zshenv: Failed to source $zhared"

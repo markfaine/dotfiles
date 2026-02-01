@@ -10,7 +10,7 @@ export TRASH_DIR="$TRASH_MOUNT/.Trash"
 function trm() {
   if command -v trash-put &>/dev/null; then
     recycle_bin="$TRASH_DIR_LOCAL"
-    if is_mounted "$TRASH_MOUNT"; then
+    if _is_mounted "$TRASH_MOUNT"; then
       zdebug ".zshared: $TRASH_MOUNT is mounted"
       recycle_bin="$TRASH_DIR"
     fi
@@ -65,25 +65,4 @@ shell(){
   docker exec -it "$ctnr_ids" "$cmd"
 }
 
-# Doppler scope
-doppler-scope() {
-  perform_reset=$1
-  if [ "$perform_reset" = "reset" ]; then
-    unset D_SCOPE
-    unset DOPPLER_TOKEN
-  else
-    export D_SCOPE="$(find ~/doppler/scopes -maxdepth 2 | fzf)"
-    export DOPPLER_TOKEN=$(doppler --scope "$D_SCOPE" configure get token --plain)
-  fi
-}
-
-
-# Default secrets, safe to export
-function dotfiles(){
-  local token DOPPLER_TOKEN project
-  project="dotfiles"
-  token="$(bw get notes doppler_personal)"
-  source <(DOPPLER_TOKEN="$token" doppler secrets download -p dotfiles -c default_personal --no-file | jq -r '. | to_entries[] | "export \(.key)=\"\(.value)\""')
-}
-
-export _zhared_loaded=1
+export _zshared_loaded=1

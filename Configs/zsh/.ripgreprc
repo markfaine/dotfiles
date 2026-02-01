@@ -33,7 +33,7 @@
 # End Glob settings }}}
 
 # Include hidden files {{{
-#--hidden
+--hidden
 # End Include hidden files }}}
 
 # Ignore file {{{

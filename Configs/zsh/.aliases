@@ -1,16 +1,9 @@
 # User Command Aliases File
 
 # Neovim/Vim
-# Configure vim as equivalent to EDITOR value
-export EDITOR=vi
-if command -v nvim &>/dev/null; then
-    alias vim='nvim'
-    alias vi='nvim'
-    export EDITOR=nvim
-else
-  zdebug "Failed to find nvim"
-fi
-# End Configure vim as equivalent to EDITOR value
+export EDITOR=nvim
+alias vim='nvim'
+alias vi='nvim'
 
 # Configure stock nvim editor alias
 # This allows me to use stock vim
@@ -69,11 +62,11 @@ alias tial='tail'
 # End Aliases for pager command + typo protection
 
 # Alias for ls command + typo protection
+alias ls='ls --color'
 if command -v eza &>/dev/null; then
-    alias ls='eza'
+    alias ls='eza -la --icons'
 fi
 alias ll='ls -la'
-alias ls='ls --color'
 alias kk='ll'
 alias ls-la='ls -la'
 # End Alias for ls command + typo protection
@@ -109,10 +102,6 @@ alias mypath='echo -e ${PATH//:/\\n}'
 alias git='git --no-pager'
 alias gits='git status' # Git Status
 alias gitcfg='git config --list --show-origin --show-scope' #Show config options
-alias gitlab-search='gls'
-
-# Requires doppler and a template
-alias gls='doppler run --mount ~/.gitlabsearchrc --mount-template ~/.gitlabsearchrc.tmpl -- gitlab-search'
 
 # End Alias for git/gh/gitlab-search commands + typo protection
 
@@ -121,7 +110,7 @@ alias rgrep='rg -IN -uuu'
 # End Alias for grep-like commands + typo protection
 
 # Tmux should always be started as 'tmux -2'
-alias tmux='tmux -T 256'
+alias tmux='tmux -2'
 # End Tmux should always be started as 'tmux -2'
 
 # Alias for docker commands + typo protection
@@ -141,17 +130,11 @@ alias zbrc='exec zsh'
 # End Restart shell
 
 # Better versions of classic utils
-function top(){if command -v htop &>/dev/null; then htop; else top; fi}
-function find(){
-  if command -v fd &>/dev/null; then
-    fd "$@"
-  else
-    find "$@"
-  fi
-}
-alias ls='eza -la --icons'
+function top(){if command -v htop &>/dev/null; then htop; else /usr/bin/top; fi}
+alias ff='fd'
+alias f='fd -HI'
 alias df='duf'
 function man(){
-  if tldr --search "$1" &>/dev/null; then tldr "$1"; else /usr/bin/man "$1"; fi
+  if tldr --search "$*" &>/dev/null; then tldr "$*"; else /usr/bin/man "$@"; fi
 }
 # End User Aliases File
