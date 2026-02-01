@@ -1,83 +1,183 @@
 # shellcheck shell=zsh
-# Environment - loaded for all types of shell sessions {{{
-# Source shared functions {{{
-source ~/.zshared || return
-# End Source shared functions }}}
+# Environment - loaded for all types of shell sessions
+# Source shared functions
 
-# Fixes {{{
-# Disable auto title for Microsoft Terminal auto title issue {{{
-if [[ "${WSL_DISTRO_NAME:-}" != "" ]]; then
-  zdebug "Windows terminal detected, disabling auto title"
-  export DISABLE_AUTO_TITLE=true
-fi
-# End Disable auto title for Microsoft Terminal auto title issue }}}
+# Debug
+ZSH_DEBUG="${ZSH_DEBUG:-1}"
+ZSH_TRACE="${ZSH_TRACE:-}"
 
-# WSL all shells are login shells {{{
-# In WSL there doesn't seem to be a 'login-shell' concept
-# all shells seem to be login shells, as far as I can tell.
-# The below makes standard linux practice of adding only login
-# shell configuration to .zprofile work in wsl
-# Doesn't affect any other linux based distro
-if [[ "${WSL_DISTRO_NAME:-}" != "" ]]; then
-  if [[ "${ZPROFILE_LOADED:-}" == "" ]]; then
-    . ~/.zprofile
+# Clobber
+setopt clobber
+
+# Setup log file
+export ZLOG_FILE="$HOME/.zshlog"
+: >| "$HOME/.zshlog"
+
+function zdebug() {
+  if [[ -n $ZSH_DEBUG ]]; then
+    echo "DEBUG: $*" >>"$ZLOG_FILE"
   fi
-fi
-# End WSL all shells are login shells }}}
-# End Fixes }}}
-
-# Common User Preference Environment Variables {{{
-
-# Pager Configuration {{{
-# export PAGER=bat
-export MANPAGER=$PAGER
-export GIT_PAGER=$PAGER
-export SYSTEMD_PAGER=$PAGER
-export SYSTEMD_PAGERSECURE=true
-export SYSTEMD_COLORS=true
-# End Pager Configuration }}}
-
-# Ripgrep config path {{{
-RIPGREP_CONFIG_PATH=~/.ripgreprc
-export RIPGREP_CONFIG_PATH
-# End Common User Preference Environment Variables }}}
-
-# Git environment variables {{{
-# Don't verify SSL certificates {{{
-export GIT_SSL_NO_VERIFY=true
-# End Don't verify SSL certificates }}}
-# End Git environment variables }}}
-
-# Function to load ssh-agent from yubikey {{{
-function ssh_load() {
-  eval "$(
-    ssh-agent -s
-    SSH_ASKPASS=$SSH_ASKPASS
-  )"
-  ssh-add -K || true
 }
-if [[ "${WSL_DISTRO_NAME:-}" == "" ]]; then
-  zdebug "Loading SSL keys from yubikey"
-  ssh_load
-fi
-# End Function to load ssh-agent from yubikey }}}
 
-# Doppler scope {{{
-doppler-scope() {
-  perform_reset=$1
-  if [ "$perform_reset" = "reset" ]; then
-    unset D_SCOPE
-    unset DOPPLER_TOKEN
+function ztrace() {
+  if [[ -n $ZSH_TRACE ]]; then
+    set -x
+  fi
+}
+
+# Export a variable if this is WSL
+function _is_wsl(){
+  if grep -q Microsoft /proc/version; then
+    zdebug ".zshenv: Session is in WSL"
+    export IS_WSL=1
+  fi
+}
+_is_wsl
+
+# Check if mount point is mounted
+function _is_mounted() {
+  local mount_point="$1"
+  # Strip trailing slash for consistency
+  mount_point="${mount_point%/}"
+  # Check if mount_point is present in the output of mount
+  mount | grep -q " on $mount_point "
+}
+
+# ZSH Module configuration (built-in) {{{
+# See: https://zsh.sourceforge.io/Doc/Release/Zsh-Modules.html
+function _load_complist(){
+  zdebug ".zshenv: Loading zsh/complist"
+  zmodload zsh/complist
+  autoload -U compinit
+  compinit
+  _comp_options+=(globdots)		# Include hidden files.
+}
+_load_complist
+
+# ZSH Terminal Info module (dependency for zim) {{{
+function _load_terminfo(){
+  zdebug ".zshenv: Loading zsh/terminfo"
+  zmodload -F zsh/terminfo +p:terminfo
+}
+_load_terminfo
+
+# Keymaps
+function _load_keybinds(){
+  ## Use vim keys in tab complete menu:
+  bindkey -M menuselect 'h' vi-backward-char
+  bindkey -M menuselect 'j' vi-down-line-or-history
+  bindkey -M menuselect 'k' vi-up-line-or-history
+  bindkey -M menuselect 'l' vi-forward-char
+
+  # Fix backspace bug when switching modes
+  bindkey "^?" backward-delete-char
+
+}
+_load_keybinds
+
+# Cursor customization
+function _load_cursor(){
+  echo -ne '\e[5 q' # Use beam shape cursor on startup.
+  precmd() { echo -ne '\e[5 q' ;} # Use beam shape cursor for each new prompt.
+}
+_load_cursor
+
+# Setup ripgrep
+export RIPGREP_CONFIG_PATH="$HOME/.ripgreprc"
+function _load_ripgrep(){
+if [[ ! -f "$RIPGREP_CONFIG_PATH" ]]; then
+  printf "The ripgreprc is not present at %s\n" "$RIPGREP_CONFIG_PATH"
+  zdebug ".zshenv: No Ripgrep Config was found at $RIPGREP_CONFIG_PATH"
+fi
+}
+
+function _load_aliases(){
+  ZALIASES="$HOME/.aliases"
+  if [[ -e "$ZALIASES" ]]; then
+    #shellcheck source=/dev/null
+    . "$ZALIASES"
+    zdebug ".zshenv: Sourcing $ZALIASES"
   else
-    export D_SCOPE="$(find ~/doppler/scopes -maxdepth 2 | fzf)"
-    export DOPPLER_TOKEN=$(doppler --scope "$D_SCOPE" configure get token --plain)
+    zdebug ".zshenv: Failed to source $ZALIASES"
   fi
 }
-# End Doppler scope }}}
+_load_aliases
 
-# Add ansible-language-server to path {{{
-path=($path "$HOME/.local/share/nvim/mason/packages/ansible-language-server/node_modules/@ansible/ansible-language-server/bin")
-export PATH
-# End Add ansible-language-server to path }}}
+# Load zcolors, requires znap zcolors plugin
+function _load_zcolors(){
+  znap eval LS_COLORS 'dircolors -b LS_COLORS'
+  zstyle \":completion:*:default\" list-colors \"${(s.:.)LS_COLORS}\"
+  znap eval zcolors "zcolors ${(q)LS_COLORS}"
+  zdebug ".zshenv: Setting up dircolors solarized"
+}
+if [ -x /usr/bin/dircolors ]; then
+  test -r "$HOME/.dircolors" && eval "$(dircolors -b "$HOME/.dircolors")" || eval "$(dircolors -b)"
+fi
+if [[ ! -f "$HOME/.zsh-dircolors.config" ]]; then
+  _load_zcolors
+fi
 
-# End Environment - loaded for all types of shell sessions }}}
+# Function to append paths to $PATH from a file
+function _append_to_path() {
+  local dir
+  dir="$1"
+  realdir="$(readlink -f "$dir")"
+  [[ -d "$realdir" ]] || return
+  path=($path "$dir")
+}
+
+# Function to prepend paths to $PATH from a file
+function _prepend_to_path() {
+  local dir
+  dir="$1"
+  realdir="$(readlink -f "$dir")"
+  [[ -d "$realdir" ]] || return
+  path=("$dir" $path)
+}
+
+function _add_to_path() {
+    paths_file="${1:-$HOME/.paths}"
+    while IFS=',' read -r append prepend; do
+        line="${append}${prepend}"
+        [[ -z $line ]] && continue
+        [[ "$line" = \#* ]] && continue
+        if [[ "${append:-}" != "" ]]; then
+          zdebug ".zshenv: Appending $append to PATH"
+          _append_to_path "$append"
+        fi
+        if [[ "${prepend:-}" != "" ]]; then
+          zdebug ".zshenv: Prepending $prepend to PATH"
+          _prepend_to_path "$prepend"
+        fi
+    done < <(tac "$paths_file")
+}
+
+function _load_paths(){
+  ZPATHS="$HOME/.paths"
+  if [[ -f "$ZPATHS" ]]; then
+    _add_to_path
+    export PATH
+    zdebug ".zshenv: Adding paths from $ZPATHS"
+  else
+    zdebug ".zshenv: Failed to add paths from $ZPATHS"
+  fi
+  zdebug ".zshenv: Deduping \$PATH"
+  typeset -U PATH
+}
+_load_paths
+
+
+# Load shared functions
+function _load_zhared(){
+  zhared="$HOME/.zshared"
+  if [[ -f "$zhared" ]]; then
+    #shellcheck source=/dev/null
+    . "$zhared"
+    zdebug ".zshenv: Sourcing $zhared"
+  else
+    zdebug ".zshenv: Failed to source $zhared"
+  fi
+}
+if [[ -z "$_zshared_loaded" ]]; then
+  _load_zhared
+fi

@@ -1,19 +1,15 @@
-# shellcheck shell=zsh
-# Logout commands {{{
+# Source helpers and clear session on logout (lock and remove tmpfs token)
 
-# Source shared functions {{{
-source ~/.zshared || return
-# End Source shared functions }}}
-
-zdebug "Running ~/.zlogout"
-
-# Kill ssh-agent and remove socket if it exists {{{
-zdebug "Killing ssh-agent and deleting $SSH_AUTH_SOCK"
-eval "$(ssh-agent -k &>/dev/null)"
-if [[ -S "$SSH_AUTH_SOCK" ]]; then
-  rm -f "$SSH_AUTH_SOCK"
-  unset SSH_AUTH_SOCK
+# Only run on interactive logout shells
+if [[ ! -o interactive ]]; then
+  return
 fi
-# End Kill ssh-agent and remove socket if it exists }}}
 
-# End Logout commands }}}
+if [ -n "${SSH_AUTH_SOCK:-}" ] && [ -S "$SSH_AUTH_SOCK" ]; then
+  rm -f "$SSH_AUTH_SOCK"
+fi
+
+# Clear the in-memory token (locks bw, removes file, signals other shells)
+zdebug "Clearing Bitwarden session on logout"
+unset BW_SESSION
+clear

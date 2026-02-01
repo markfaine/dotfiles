@@ -4,13 +4,11 @@
 
 # Load znap
 function _load_znaprc(){
-  if [[ -n  $_znaprc_loaded ]]; then return; fi
+  if [[ -n  $_zshared_loaded ]]; then return; fi
   ZNAPRC="$HOME/.znaprc"
   if [[ -f "$ZNAPRC" ]]; then
-    # shellcheck source=/dev/null
     source "$ZNAPRC"
     zdebug ".zshrc: Sourcing $ZNAPRC"
-    export _znaprc_loaded=1
   else
     zdebug ".zshrc: Failed to source $ZNAPRC"
   fi
@@ -18,8 +16,11 @@ function _load_znaprc(){
 _load_znaprc
 
 # Setup prompt
-znap prompt sindresorhus/pure
+# znap prompt sindresorhus/pure
+
+# Load ssh
+# ssh_load
 
 # Export path to child processes
-#zdebug ".zshrc: Exporting PATH: $PATH"
-#export PATH
+zdebug ".zshrc: Exporting PATH: $PATH"
+export PATH
