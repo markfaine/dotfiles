@@ -105,6 +105,10 @@ _load_aliases
 
 # Load zcolors, requires znap zcolors plugin
 function _load_zcolors(){
+  if (( ! $+commands[znap] )) && ! typeset -f znap > /dev/null 2>&1; then
+    zdebug ".zshenv: Skipping zcolors - znap not available"
+    return
+  fi
   znap eval LS_COLORS 'dircolors -b LS_COLORS'
   zstyle \":completion:*:default\" list-colors \"${(s.:.)LS_COLORS}\"
   znap eval zcolors "zcolors ${(q)LS_COLORS}"
