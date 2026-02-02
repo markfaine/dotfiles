@@ -10,5 +10,5 @@ fi
 if [[ -h ~/.load_ssh && -z "$_ssh_loaded" ]]; then
   # shellcheck source=/dev/null
   . ~/.load_ssh
-  export _ssh_loaded=1
+  _ssh_loaded=1
 fi

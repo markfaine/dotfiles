@@ -4,15 +4,21 @@
 
 # Load znap
 function _load_znaprc(){
-  if [[ -n  $_znaprc_loaded ]]; then return; fi
+  zdebug ".zshrc: _load_znaprc called, _znaprc_loaded=$_znaprc_loaded"
+  if [[ -n  $_znaprc_loaded ]]; then 
+    zdebug ".zshrc: Skipping znaprc - already loaded"
+    return
+  fi
   ZNAPRC="$HOME/.znaprc"
+  zdebug ".zshrc: Checking for $ZNAPRC"
   if [[ -f "$ZNAPRC" ]]; then
+    zdebug ".zshrc: Sourcing $ZNAPRC"
     # shellcheck source=/dev/null
     source "$ZNAPRC"
-    zdebug ".zshrc: Sourcing $ZNAPRC"
-    export _znaprc_loaded=1
+    _znaprc_loaded=1
+    zdebug ".zshrc: Sourced $ZNAPRC successfully"
   else
-    zdebug ".zshrc: Failed to source $ZNAPRC"
+    zdebug ".zshrc: Failed to source $ZNAPRC - file not found"
   fi
 }
 _load_znaprc
