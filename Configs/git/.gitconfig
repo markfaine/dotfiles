@@ -40,17 +40,15 @@
 	eol = lf
 	whitespace = tab-in-indent
 	excludesFile = ~/.gitignore_global
-	editor = vim
-[preserve-permissions]
-	user = true
-	group = true
-	autosave = true
+	editor = nvim
+[preservePermissions]
+	enableForCommit = true
 [merge "ours"]
 	driver = true
 [init]
 	defaultBranch = main
 [http]
-	sslVerify = false
+	sslVerify = true
 [credential "https://github.com"]
 	helper =
 	helper = !/usr/bin/gh auth git-credential
@@ -58,9 +56,75 @@
 	helper =
 	helper = !/usr/bin/gh auth git-credential
 [safe]
-	directory = /home/mfaine/.config/dotfiles
 [user]
 	email = mark.faine@pm.me
 	name = Mark Faine
+[color "status"]
+	branch = 12 normal
+	added = 10 normal
+	updated = 10 normal
+	localbranch = 12 normal
+	changed = 11 normal
+	header = normal
+	remotebranch = 6 normal
+	nobranch = 1 normal
+	unmerged = 9 normal
+	untracked = 8 normal
+[color "branch"]
+	plain = normal
+	remote = 6 normal
+	current = 15 4
+	local = 12 normal
+	upstream = 6 normal
+[color "remote"]
+	hint = 8 normal
+	success = 10 normal
+	error = 9 normal
+	warning = 11 normal
+[color "interactive"]
+	header = 8 normal bold
+	prompt = 15 4
+	help = 8 normal
+	error = 9 normal
+[color "diff"]
+	commit = 3 normal
+	newMoved = 15 5
+	oldMovedAlternativeDimmed = 15 8 dim
+	frag = 8 normal
+	oldMovedAlternative = 15 8
+	contextBold = normal bold
+	newBold = 15 2 bold
+	context = normal
+	contextDimmed = normal dim
+	oldMoved = 15 3
+	oldBold = 15 1 bold
+	newMovedDimmed = 15 5 dim
+	func = 8 normal
+	meta = 8 normal
+	newDimmed = 15 2 dim
+	newMovedAlternative = 15 4
+	new = 15 2
+	newMovedAlternativeDimmed = 15 4 dim
+	whitespace = normal 9
+	oldMovedDimmed = 15 3 dim
+	oldDimmed = 15 1 dim
+  old = 15 1
+  # Muted Gray for headers
+  meta = 242
+  # Muted Red for deletions (no bright pink background)
+  old = "#f7768e"
+  # Muted Green for additions
+  new = "#9ece6a"
+  # Subtle Teal for hunk headers (@@ -1,4 +1,4 @@)
+  frag = "#2ac3de"
+  # Highlights whitespace errors in a deep red
+  whitespace = red reverse
+[color "decorate"]
+	branch = 12 normal
+	tag = 5 normal
+	remotebranch = 6 normal
+	stash = 3 normal
+	grafted = 1 normal
+	HEAD = 7 4
 [diff]
 	colorMoved = zebra

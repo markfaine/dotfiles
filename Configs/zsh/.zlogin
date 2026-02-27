@@ -1,12 +1,19 @@
 # shellcheck shell=zsh
-# Source helpers and perform single interactive unlock per login (stores token in tmpfs)
+# Login shell initialization (runs once per login session)
+# Performs setup tasks that should only run once at login
 
+# ==============================================================================
+# Execution Guard
+# ==============================================================================
 # Only run in interactive login shells
 if [[ ! -o interactive ]]; then
   return
 fi
 
-# Load ssh
+# ==============================================================================
+# SSH Agent Initialization
+# ==============================================================================
+# Initialize SSH agent and load keys for this session
 if [[ -h ~/.load_ssh && -z "$_ssh_loaded" ]]; then
   # shellcheck source=/dev/null
   . ~/.load_ssh

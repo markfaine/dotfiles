@@ -1,45 +1,112 @@
 # User Command Aliases File
+# Collection of shell aliases and functions for common tasks
 
-# Neovim/Vim
+# ==============================================================================
+# Editor Configuration
+# ==============================================================================
 export EDITOR=nvim
 alias vim='nvim'
 alias vi='nvim'
 
-# Configure stock nvim editor alias
-# This allows me to use stock vim
-alias svim="/usr/bin/vi" # stock vim
-# End Configure stock nvim editor alias
+# Stock vim/vi access (for when you really need the original)
+alias svim="/usr/bin/vi"
 
-# End Neovim/Vim
-
-# Alias for cd command + typo protection
+# ==============================================================================
+# Directory Navigation
+# ==============================================================================
+# typo protection
 alias cd..='cd ..'
-# End Alias for cd command + typo protection
 
-# Alias for clear command + typo protection
+# ==============================================================================
+# Screen/Terminal
+# ==============================================================================
+# Clear screen
 alias c='clear'
 alias claer='clear'
 alias clar='clear'
-# End Alias for clear command + typo protection
 
-# Disk Space related command aliases
+# ==============================================================================
+# Code Editors
+# ==============================================================================
+# VS Code Insiders with workaround for OS crypt module
+function code-insiders {
+  /usr/bin/code-insiders --vmodule="*/components/os_crypt/*=1" "$@"
+}
+alias code='code-insiders'
+alias ci='code-insiders'
+
+# ==============================================================================
+# Disk & File Management
+# ==============================================================================
 alias df='df -kTh'
-alias du='du -kh'       # Makes a more readable output.
-# End Disk Space related command aliases
+alias du='du -kh'
 
-# History related command aliases
-alias h='history'
-# End History related command aliases
+# List files (with modern alternatives)
+alias ls='ls --color'
+if command -v eza &>/dev/null; then
+    alias ls='eza -la --icons'
+fi
+alias ll='ls -la'
+alias kk='ll'
+alias ls-la='ls -la'
 
-# Job related command aliases
+# Move with safety confirmation
+alias mv='mv -i'
+
+# Pager alternatives
+alias moer='more'
+alias moew='more'
+alias more='less'
+alias tial='tail'
+
+# ==============================================================================
+# Process Management
+# ==============================================================================
+# Show all processes with full details
+alias ps='ps -ef'
+
+# Jobs management
 alias j='jobs -l'
-# End Job related command aliases
 
-# systemctl/journalctl related command aliases
+# Better process monitoring
+function top(){if command -v htop &>/dev/null; then htop; else /usr/bin/top; fi}
+
+# ==============================================================================
+# History & Command Help
+# ==============================================================================
+alias h='history'
+
+# which → command -v (shows where command comes from)
+alias which='command -v'
+
+# Better man pages with tldr fallback
+function man(){
+  if tldr --search "$*" &>/dev/null; then tldr "$*"; else /usr/bin/man "$@"; fi
+}
+
+# ==============================================================================
+# Trash/Recycle Bin
+# ==============================================================================
+alias trm='trash-put'
+alias trl='trash-list'
+
+# ==============================================================================
+# File Search & Grep
+# ==============================================================================
+alias rgrep='rg -IN -uuu'
+alias ff='fd'
+alias f='fd -HI'
+
+# ==============================================================================
+# System & Service Management
+# ==============================================================================
+# Journalctl integration
 alias journalctl='journalctl'
 if [[ "${WT_SESSION:-}" != "" ]]; then
     alias journalctl='journalctl --no-pager -xeu'
 fi
+
+# Journalctl convenience functions
 function jcu(){
     local unit
     unit="$1"
@@ -48,93 +115,54 @@ function jcu(){
     else
         journalctl -xfu "$unit"
     fi
-
 }
 alias jc='journalctl -xn'
 alias jcf='journalctl -xf'
-# End Journalctl related command aliases
 
-# Aliases for pager command + typo protection
-alias moer='more'
-alias moew='more'
-alias more='less'
-alias tial='tail'
-# End Aliases for pager command + typo protection
-
-# Alias for ls command + typo protection
-alias ls='ls --color'
-if command -v eza &>/dev/null; then
-    alias ls='eza -la --icons'
-fi
-alias ll='ls -la'
-alias kk='ll'
-alias ls-la='ls -la'
-# End Alias for ls command + typo protection
-
-# Alias for mv command + typo protection
-alias mv='mv -i'
-# End Alias for mv command + typo protection
-
-# Alias for ps command + typo protection
-alias ps='ps -ef'
-# End Alias for ps command + typo protection
-
-# Aliases for trash commands
-alias trm='trash-put'
-alias trl='trash-list'
-# End Aliases for trash commands
-
-# Command is better than which
-alias which='command -v'
-# End Command is better than which
-
-# Gawk if better, if available
+# ==============================================================================
+# Text Processing
+# ==============================================================================
+# Use gawk if available (better than mawk)
 if command -v gawk >/dev/null 2>&1; then
     alias awk='gawk'
 fi
-# End Gawk if better, if available
 
-# Print my path
-alias mypath='echo -e ${PATH//:/\\n}'
-# End Print my path
-
-# Alias for git/gh/gitlab-search commands + typo protection
+# ==============================================================================
+# Version Control - Git
+# ==============================================================================
+# Performance: disable pager for built-in git output
 alias git='git --no-pager'
-alias gits='git status' # Git Status
-alias gitcfg='git config --list --show-origin --show-scope' #Show config options
+alias gits='git status'
+alias gitcfg='git config --list --show-origin --show-scope'
+alias gdh='git dh'
 
-# End Alias for git/gh/gitlab-search commands + typo protection
-
-# Alias for grep-like commands + typo protection
-alias rgrep='rg -IN -uuu'
-# End Alias for grep-like commands + typo protection
-
-# Tmux should always be started as 'tmux -2'
+# ==============================================================================
+# Multiplexer - Tmux
+# ==============================================================================
+# Always use 256 colors
 alias tmux='tmux -2'
-# End Tmux should always be started as 'tmux -2'
 
-# Alias for docker commands + typo protection
+# ==============================================================================
+# Container Management - Docker
+# ==============================================================================
 alias dockerps='docker ps -a --format="table {{.ID}}\t{{.Names}}\t{{.Image}}\t{{.Command}}\t{{.Status}}"'
-# End Alias for docker commands + typo protection
 
-# Alias for npx-based commands + typo protection
-
-# File Formatting commands + typo protection
+# ==============================================================================
+# Build & Format Tools
+# ==============================================================================
 alias prettier='npx prettier'
-# End File Formatting commands + typo protection
 
-# End Alias for npx-based commands + typo protection
-
-# Restart shell
-alias zbrc='exec zsh'
-# End Restart shell
-
-# Better versions of classic utils
-function top(){if command -v htop &>/dev/null; then htop; else /usr/bin/top; fi}
-alias ff='fd'
-alias f='fd -HI'
+# ==============================================================================
+# Advanced File Search & Utils
+# ==============================================================================
+# df → duf (better disk usage visualization)
 alias df='duf'
-function man(){
-  if tldr --search "$*" &>/dev/null; then tldr "$*"; else /usr/bin/man "$@"; fi
-}
-# End User Aliases File
+
+# Display PATH entries one per line for readability
+alias mypath='echo -e ${PATH//:/\\n}'
+
+# ==============================================================================
+# Shell Management
+# ==============================================================================
+# Reload shell configuration
+alias zbrc='exec zsh'

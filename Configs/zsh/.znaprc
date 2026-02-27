@@ -1,5 +1,12 @@
 
-# Download znap
+# shellcheck shell=zsh
+# Znap plugin manager configuration
+# Manages plugin installation, loading, PATH/FPATH updates, and per-plugin config
+
+# ==============================================================================
+# Znap Bootstrap
+# ==============================================================================
+# Download znap plugin manager if not already present
 function _download_znap(){
   if [[ ! -d "$ZNAP_HOME" ]]; then
       zdebug ".znaprc: $ZNAP_HOME does not exist cloning the repo"
@@ -7,8 +14,20 @@ function _download_znap(){
   fi
 }
 
-# This function loads znap plugins from .zplugins
-# See ~/.zplugins
+# ==============================================================================
+# Plugin Loading
+# ==============================================================================
+# Load plugins from .zplugins file
+# Handles:
+#   - Per-plugin configuration files (~/.config/zplugin.d/plugin-name.zsh)
+#   - Cloning repositories
+#   - Adding plugin paths to PATH
+#   - Adding plugin completion paths to FPATH
+#   - Sourcing plugins
+#
+# File format: ~/.zplugins
+# CSV format: github-org/repo,path-addition,fpath-addition
+# - Empty lines and comments (starting with #) are ignored
 function _load_plugins(){
     local plugins_file repo repo_array plugin include_path completion_path
     plugins_file="${1:-$HOME/.zplugins}"
@@ -23,16 +42,18 @@ function _load_plugins(){
         zdebug ".znaprc: Loading plugin '$repo'"
         repo_array=(${(s:/:)repo})
         plugin="$repo_array[2]"
-        # Source plugin config file
+        # Source per-plugin configuration if it exists
         if [[ -f "$HOME/.config/zplugin.d/$plugin.zsh" ]]; then
             zdebug ".znaprc: Sourcing $HOME/.config/zplugin.d/$plugin.zsh"
             source "$HOME/.config/zplugin.d/$plugin.zsh"
         fi
         znap clone "$repo"
+        # Add plugin path entries to PATH
         if [[ "${include_path:-}" != "" ]]; then
             zdebug ".znaprc: Adding [$repo]/$include_path to the PATH"
             path=( ~[$repo]/$include_path $path )
         fi
+        # Add plugin completion path entries to FPATH
         if [[ "${completion_path:-}" != "" ]]; then
             zdebug ".znaprc: Adding [$repo]/$completion_path to the FPATH"
             fpath=( ~[$repo]/$completion_path $fpath )
@@ -42,10 +63,12 @@ function _load_plugins(){
             zdebug ".znaprc: Failed to source '$repo'"
         fi
     done < "$plugins_file"
+}
 
-  }
-
-# Load znap
+# ==============================================================================
+# Znap Initialization
+# ==============================================================================
+# Initialize the znap plugin manager
 function _load_znap(){
   if [[ -f "$ZNAP_HOME/znap.zsh" ]]; then
     zdebug ".znaprc: Sourcing $ZNAP_HOME/znap.zsh"
@@ -57,6 +80,9 @@ function _load_znap(){
   fi
 }
 
+# ==============================================================================
+# Znap Setup & Plugin Loading
+# ==============================================================================
 ZNAP_HOME="$HOME/.config/repos/znap"
 zdebug ".znaprc: ZNAP_HOME: $ZNAP_HOME"
 zstyle ':znap:*' "$ZNAP_HOME"

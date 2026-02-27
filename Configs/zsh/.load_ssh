@@ -1,32 +1,46 @@
-# function ssh_load(){
-#  eval "$(ssh-agent -s; SSH_ASKPASS=$SSH_ASKPASS)"
-#  ssh-add -K || true
-# }
-# ssh_load
+# shellcheck shell=zsh
+# SSH Agent management and initialization
+# Handles persistent SSH agent session across shell invocations
 
+# ==============================================================================
+# SSH Agent Configuration
+# ==============================================================================
+# Use clobber to safely redirect output
 setopt clobber
-ssh_load() {
-  local SSH_ENV="$HOME/.ssh-agent"
 
-  # Try to reuse saved agent env
+# SSH agent environment file location (persisted between sessions)
+SSH_ENV="$HOME/.ssh-agent"
+
+# ==============================================================================
+# SSH Agent Management Function
+# ==============================================================================
+# Initialize or reuse SSH agent session
+# - Attempts to reuse existing agent environment
+# - Falls back to creating new agent if needed
+# - Loads SSH keys with optional keychain support
+ssh_load() {
+  # Try to reuse saved agent env from previous session
   if [ -f "$SSH_ENV" ]; then
     # shellcheck disable=SC1090
     . "$SSH_ENV"
+    # Check if agent is still running and has identities
     if [ -n "${SSH_AUTH_SOCK:-}" ] && [ -S "$SSH_AUTH_SOCK" ] && ssh-add -l >|/dev/null 2>&1; then
       return 0
     fi
   fi
 
-  # Start a new agent
+  # Start a new SSH agent session
   eval "$(ssh-agent -s)" >/dev/null
 
-  # Save agent env (use printf to avoid heredoc indentation issues)
+  # Persist agent environment for future sessions
+  # Use printf to avoid heredoc indentation issues
   printf '%s\n' "export SSH_AUTH_SOCK=$SSH_AUTH_SOCK" "export SSH_AGENT_PID=$SSH_AGENT_PID" > "$SSH_ENV"
   chmod 600 "$SSH_ENV"
 
-  # If there are no identities, try -K then fallback to default ssh-add
+  # Load SSH keys into agent
+  # If there are no identities, try -K (with keychain support) then fallback to default
   if ! ssh-add -l >/dev/null 2>&1; then
-    # Disable SSH_ASKPASS for these calls so we get a terminal prompt (avoid GUI dialogs)
+    # Disable SSH_ASKPASS for these calls to get terminal prompt instead of GUI dialogs
     if SSH_ASKPASS= ssh-add -K >/dev/null 2>&1; then
       return 0
     else
@@ -34,4 +48,8 @@ ssh_load() {
     fi
   fi
 }
+
+# ==============================================================================
+# Initialize SSH Agent
+# ==============================================================================
 ssh_load

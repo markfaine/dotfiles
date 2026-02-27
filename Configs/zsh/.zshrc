@@ -1,31 +1,83 @@
 # shellcheck shell=zsh
 # User configuration sourced by interactive shells
-# ## See https://zsh.sourceforge.io/Doc/Release/Options.html
+# https://zsh.sourceforge.io/Doc/Release/Options.html
+#
+# Initialization Order:
+#   1. .zshenv - Loaded by all shells (environment)
+#   2. .zprofile - Loaded by login shells (login setup)
+#   3. .zshrc - Loaded by interactive shells
+#   4. .zlogin - Loaded by login shells (after .zshrc)
+#
+# This file:
+#   - Loads the znap plugin manager and plugins
+#   - Configures the prompt
+#   - Sets up tool environments
 
-# Load znap
-function _load_znaprc(){
-  zdebug ".zshrc: _load_znaprc called, _znaprc_loaded=$_znaprc_loaded"
-  if [[ -n  $_znaprc_loaded ]]; then 
-    zdebug ".zshrc: Skipping znaprc - already loaded"
-    return
-  fi
+# ==============================================================================
+# Plugin Manager: Znap Loading
+# ==============================================================================
+# Guard against multiple sourcing of .zshrc
+# (useful if user manually sources this file multiple times)
+if [[ -z "$_zshrc_loaded" ]]; then
+  export _zshrc_loaded=1
+
+  # Load znap plugin manager and configuration
   ZNAPRC="$HOME/.znaprc"
-  zdebug ".zshrc: Checking for $ZNAPRC"
+  zdebug ".zshrc: Loading znap plugin manager from $ZNAPRC"
+
   if [[ -f "$ZNAPRC" ]]; then
-    zdebug ".zshrc: Sourcing $ZNAPRC"
     # shellcheck source=/dev/null
-    source "$ZNAPRC"
-    _znaprc_loaded=1
-    zdebug ".zshrc: Sourced $ZNAPRC successfully"
+    if source "$ZNAPRC"; then
+      zdebug ".zshrc: Znap loaded successfully"
+    else
+      zdebug ".zshrc: ERROR - Failed to source $ZNAPRC"
+      echo "Warning: Failed to load znap plugin manager" >&2
+    fi
   else
-    zdebug ".zshrc: Failed to source $ZNAPRC - file not found"
+    zdebug ".zshrc: ERROR - $ZNAPRC not found"
+    echo "Warning: Znap configuration not found at $ZNAPRC" >&2
   fi
-}
-_load_znaprc
+else
+  zdebug ".zshrc: Skipping plugin loading - .zshrc already loaded"
+fi
 
-# Setup prompt
-znap prompt sindresorhus/pure
+# ==============================================================================
+# Prompt Configuration
+# ==============================================================================
+# Configure pure prompt theme from sindresorhus
+# Fallback to simple prompt if plugin manager failed
+if (( ${+commands[znap]} )) || typeset -f znap > /dev/null 2>&1; then
+  zdebug ".zshrc: Setting up pure prompt via znap"
+  znap prompt sindresorhus/pure || {
+    zdebug ".zshrc: Failed to load pure prompt, using simple prompt"
+    PS1='%~ %# '
+  }
+else
+  zdebug ".zshrc: Znap not available, using simple prompt"
+  PS1='%~ %# '
+fi
 
-# Export path to child processes
-#zdebug ".zshrc: Exporting PATH: $PATH"
-#export PATH
+# ==============================================================================
+# Python UV Environment
+# ==============================================================================
+# Load UV (fast Python package installer/environment manager) if available
+# UV provides fast Python package management and environment handling
+UV_ENV="$HOME/.local/opt/uv/env"
+if [[ -f "$UV_ENV" ]]; then
+  zdebug ".zshrc: Loading UV environment from $UV_ENV"
+  # shellcheck source=/dev/null
+  . "$UV_ENV"
+else
+  zdebug ".zshrc: UV environment file not found at $UV_ENV (optional)"
+fi
+
+# ==============================================================================
+# User Extension Hooks
+# ==============================================================================
+# Allow users to add custom initialization without modifying this file
+# Create ~/.zshrc.local for local customizations that won't be version controlled
+if [[ -f "$HOME/.zshrc.local" ]]; then
+  zdebug ".zshrc: Loading local overrides from ~/.zshrc.local"
+  # shellcheck source=/dev/null
+  . "$HOME/.zshrc.local"
+fi

@@ -26,7 +26,7 @@ return {
         -- LSP servers (match your core/lsp.lua)
         'lua-language-server',
         'bash-language-server',
-        "gitlab-ci-ls",
+        'gitlab-ci-ls',
         'yaml-language-server',
         'ansible-language-server',
         'marksman',
@@ -68,6 +68,7 @@ return {
     'jay-babu/mason-null-ls.nvim',
     event = { 'BufReadPre', 'BufNewFile' },
     dependencies = {
+      'nvim-lua/plenary.nvim',
       'williamboman/mason.nvim',
       'nvimtools/none-ls.nvim',
     },

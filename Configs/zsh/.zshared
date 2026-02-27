@@ -1,68 +1,143 @@
-# A collection of shared functions
 # shellcheck shell=zsh
+# Shared shell functions
+# Collection of utility functions used across interactive and non-interactive shells
+#
+# Guard against multiple sourcing
+if [[ -n "$_zshared_loaded" ]]; then
+  return
+fi
 
-# Send to trash-bin, if trash-put command exists ,else just rm
-# TODO: Make a $HOME/.Trash that is mounted from /mnt/d
-# Setup Trash directory
+# ==============================================================================
+# System Utilities
+# ==============================================================================
+# Check if mount point is mounted
+# Returns 0 if mounted, 1 if not
+# Fails gracefully if mount/grep commands unavailable
+function _is_mounted() {
+  local mount_point="$1"
+
+  # Fail fast if required commands are missing
+  if ! command -v mount &>/dev/null || ! command -v grep &>/dev/null; then
+    return 1
+  fi
+
+  # Strip trailing slash for consistency
+  mount_point="${mount_point%/}"
+  # Check if mount_point is present in the output of mount
+  mount | grep -q " on $mount_point "
+}
+
+# ==============================================================================
+# Trash/Recycle Bin Management
+# ==============================================================================
+# Send files to trash-bin (cross-platform), fallback to rm if trash-put unavailable
+# Supports mounted trash directories for WSL environments
+# TODO: Consider creating a $HOME/.Trash that is mounted from /mnt/d
+
+# Local trash directory
 export TRASH_DIR_LOCAL="$HOME/.Trash"
-TRASH_MOUNT="/mnt/d"
-export TRASH_DIR="$TRASH_MOUNT/.Trash"
+
+# Determine trash mount based on environment
+# For WSL: use /mnt/d; otherwise use local directory
+if [[ "${IS_WSL:-0}" == "1" ]]; then
+  TRASH_MOUNT="/mnt/d"
+  export TRASH_DIR="$TRASH_MOUNT/.Trash"
+  zdebug ".zshared: WSL detected, using mounted trash at $TRASH_MOUNT"
+else
+  export TRASH_DIR="$TRASH_DIR_LOCAL"
+  zdebug ".zshared: Using local trash at $TRASH_DIR_LOCAL"
+fi
+
+# Trash/delete function with smart fallback
 function trm() {
   if command -v trash-put &>/dev/null; then
     recycle_bin="$TRASH_DIR_LOCAL"
-    if _is_mounted "$TRASH_MOUNT"; then
-      zdebug ".zshared: $TRASH_MOUNT is mounted"
+    # Use mounted trash if available (WSL only)
+    if [[ "${IS_WSL:-0}" == "1" ]] && _is_mounted "$TRASH_MOUNT"; then
+      zdebug ".zshared: $TRASH_MOUNT is mounted, using it for trash"
       recycle_bin="$TRASH_DIR"
     fi
     trash-put --trash-dir "$recycle_bin" "$@"
   else
+    # Fallback to rm if trash-put is not available
+    zdebug ".zshared: trash-put not available, using /usr/bin/rm"
     /usr/bin/rm "$@"
   fi
 }
 
-# Customized docker ps
+# ==============================================================================
+# Docker Wrapper & Convenience Functions
+# ==============================================================================
+# Enhanced docker command with customized ps output
+# dops (better-docker-ps) provides better terminal-aware formatting
+# See: https://github.com/Mikescher/better-docker-ps
+# Falls back to regular docker ps if dops is not available
 docker() {
   case $1 in
     ps)
       shift
-      command dops "$@"
+      # Use dops if available for better formatting, fallback to docker ps
+      if command -v dops &>/dev/null; then
+        command dops "$@"
+      else
+        zdebug ".zshared: dops not available, using docker ps"
+        command docker ps "$@"
+      fi
       ;;
     *)
       command docker "$@";;
   esac
 }
 
-# Login to container
+# Interactive shell into container by service name
+# Usage: shell <container> [command]
+# Finds containers by service name (exact match or ending match)
+# Falls back to /bin/sh if no command specified
+# Example: shell web-server /bin/bash
 shell(){
   local ctnr cmd
   ctnr="$1"
   if [[ -z "$ctnr" ]]; then
     echo "Usage: shell <container> [command]" >&2
+    echo "  <container>  Service name (supports partial matches)" >&2
+    echo "  [command]    Shell to execute (default: /bin/sh)" >&2
     return 1
   fi
   shift
   cmd="${1:-/bin/sh}"
 
-  # Find container ID dynamically by looking for a service name that ends with the container name,
-  # or matches it exactly.
+  # Find container ID dynamically by service name
+  # Matches: exact service name or service names ending with "_<container>"
   local ctnr_ids
-  ctnr_ids=$(/usr/bin/docker ps --format '{{.ID}} {{.Label "com.docker.swarm.service.name"}}' | \
+  if ! command -v docker &>/dev/null; then
+    echo "Error: docker command not found" >&2
+    return 1
+  fi
+
+  ctnr_ids=$(docker ps --format '{{.ID}} {{.Label "com.docker.swarm.service.name"}}' 2>/dev/null | \
     awk -v ctnr="$ctnr" '$2 == ctnr || $2 ~ "_"(ctnr)"$" {print $1}')
 
   if [[ -z "$ctnr_ids" ]]; then
-    echo "No container found for '$ctnr'" >&2
+    echo "Error: No container found for '$ctnr'" >&2
     return 1
   fi
 
-  if [[ $(echo "$ctnr_ids" | wc -l) -gt 1 ]]; then
-    echo "Multiple containers match '$ctnr'. Please be more specific." >&2
-    echo "Matching services:" >&2
-    /usr/bin/docker ps --format '{{.Label "com.docker.swarm.service.name"}}' | \
-        awk -v ctnr="$ctnr" '$0 == ctnr || $0 ~ "_"(ctnr)"$"'
+  # Error if multiple containers match
+  local count
+  count=$(echo "$ctnr_ids" | wc -l)
+  if (( count > 1 )); then
+    echo "Error: Multiple containers match '$ctnr'. Please be more specific:" >&2
+    docker ps --format '{{.Label "com.docker.swarm.service.name"}}' 2>/dev/null | \
+        awk -v ctnr="$ctnr" '$0 == ctnr || $0 ~ "_"(ctnr)"$"' | sort | uniq
     return 1
   fi
 
+  # Execute command in container
   docker exec -it "$ctnr_ids" "$cmd"
 }
 
+# ==============================================================================
+# Module Flag
+# ==============================================================================
+# Mark this module as loaded
 export _zshared_loaded=1
