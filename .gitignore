@@ -7,3 +7,5 @@
 **/.token_seed*
 **/buildx
 **/.tmux/
+**/buildx/
+**/.token*

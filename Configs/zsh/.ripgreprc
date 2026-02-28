@@ -1,5 +1,10 @@
 # Ripgrep (rg) configuration file
 # Settings for the fast, recursive grep replacement
+#
+# NOTE: Theme-agnostic color configuration!
+# Colors use ANSI palette mapping (0-15) not hardcoded hex values.
+# This ensures rg output adapts to the active kitty theme.
+# See ~/.theme-colors for central color configuration.
 
 # ==============================================================================
 # Search Options
@@ -18,6 +23,22 @@
 
 # Disable line numbers by default (can override with -n flag)
 --no-line-number
+
+# ==============================================================================
+# Color Configuration (Theme-Agnostic)
+# ==============================================================================
+# Use terminal color palette (colors 0-15) instead of hardcoded hex values
+# Red text for matching content
+--colors=match:fg:red
+
+# Green text for line numbers (if enabled with -n)
+--colors=line:fg:green
+
+# Cyan text for file paths
+--colors=path:fg:cyan
+
+# White text for column numbers
+--colors=column:fg:white
 
 # ==============================================================================
 # Advanced Search

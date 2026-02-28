@@ -1,3 +1,14 @@
+# ==============================================================================
+# Git Configuration
+# ==============================================================================
+# Theme-agnostic colors using ANSI terminal indices (0-15)
+# Colors adapt automatically to current terminal theme
+# ==============================================================================
+
+# ==============================================================================
+# Aliases
+# ==============================================================================
+
 [alias]
   lg = log -10 --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
   slg = log --reverse -10 --pretty=format:"%h%x09%an%x09%ad%x09%s"
@@ -23,42 +34,84 @@
 	preserve-permissions-check = =
 	up = "!git remote update -p; git merge --ff-only @{u}"
   dh = "!git diff HEAD \"$1\" #"
+
+# ==============================================================================
+# Merge Tool
+# ==============================================================================
+
 [mergetool "nvim"]
   cmd = !nvim +DiffviewOpen +tabonly
   trustExitCode = true
+
+# ==============================================================================
+# Merge & Push Settings
+# ==============================================================================
+
 [merge]
 	ff = only
 	tool = nvim
+
 [push]
 	default = simple
+
 [pull]
 	rebase = true
 	ff = only
 	autostash = true
+
+# ==============================================================================
+# Core Settings
+# ==============================================================================
+
 [core]
 	filemode = true
 	eol = lf
 	whitespace = tab-in-indent
 	excludesFile = ~/.gitignore_global
 	editor = nvim
+
 [preservePermissions]
 	enableForCommit = true
+
 [merge "ours"]
 	driver = true
+
 [init]
 	defaultBranch = main
+
+# ==============================================================================
+# HTTP & Credentials
+# ==============================================================================
+
 [http]
 	sslVerify = true
+
 [credential "https://github.com"]
 	helper =
 	helper = !/usr/bin/gh auth git-credential
 [credential "https://gist.github.com"]
 	helper =
 	helper = !/usr/bin/gh auth git-credential
+
 [safe]
+
+# ==============================================================================
+# User Identity
+# ==============================================================================
+
 [user]
 	email = mark.faine@pm.me
 	name = Mark Faine
+
+# ==============================================================================
+# Color Configuration
+# ==============================================================================
+# All colors use ANSI terminal indices (0-15) for theme-agnostic configuration
+# Color format: <foreground> <background> [attributes]
+# ANSI colors: 0=black, 1=red, 2=green, 3=yellow, 4=blue, 5=magenta, 6=cyan,
+#              7=white, 8=bright-black, 9=bright-red, 10=bright-green, etc.
+# ==============================================================================
+
 [color "status"]
 	branch = 12 normal
 	added = 10 normal
@@ -108,17 +161,8 @@
 	whitespace = normal 9
 	oldMovedDimmed = 15 3 dim
 	oldDimmed = 15 1 dim
-  old = 15 1
-  # Muted Gray for headers
-  meta = 242
-  # Muted Red for deletions (no bright pink background)
-  old = "#f7768e"
-  # Muted Green for additions
-  new = "#9ece6a"
-  # Subtle Teal for hunk headers (@@ -1,4 +1,4 @@)
-  frag = "#2ac3de"
-  # Highlights whitespace errors in a deep red
-  whitespace = red reverse
+	old = 15 1
+
 [color "decorate"]
 	branch = 12 normal
 	tag = 5 normal
@@ -126,5 +170,10 @@
 	stash = 3 normal
 	grafted = 1 normal
 	HEAD = 7 4
+
+# ==============================================================================
+# Diff Settings
+# ==============================================================================
+
 [diff]
 	colorMoved = zebra

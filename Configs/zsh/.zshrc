@@ -14,31 +14,47 @@
 #   - Sets up tool environments
 
 # ==============================================================================
+# Shell Configuration Loading
+# ==============================================================================
+# Set the configuration directory if not already set
+ZCONFIG="${ZCONFIG:-$HOME/.config/dotfiles/Configs/zsh}"
+
+# Load shared functions
+if [[ -f "$ZCONFIG/.zshared" ]]; then
+  zdebug ".zshrc: Loading shared shell functions"
+  # shellcheck source=/dev/null
+  . "$ZCONFIG/.zshared"
+else
+  zdebug ".zshrc: Shared functions not found (optional)"
+fi
+
+# Load shell aliases
+if [[ -f "$ZCONFIG/.aliases" ]]; then
+  zdebug ".zshrc: Loading shell aliases"
+  # shellcheck source=/dev/null
+  . "$ZCONFIG/.aliases"
+else
+  zdebug ".zshrc: Aliases file not found (optional)"
+fi
+
+# ==============================================================================
 # Plugin Manager: Znap Loading
 # ==============================================================================
-# Guard against multiple sourcing of .zshrc
-# (useful if user manually sources this file multiple times)
-if [[ -z "$_zshrc_loaded" ]]; then
-  export _zshrc_loaded=1
+# Load znap plugin manager and configuration
+ZNAPRC="$HOME/.znaprc"
+zdebug ".zshrc: Loading znap plugin manager from $ZNAPRC"
 
-  # Load znap plugin manager and configuration
-  ZNAPRC="$HOME/.znaprc"
-  zdebug ".zshrc: Loading znap plugin manager from $ZNAPRC"
-
-  if [[ -f "$ZNAPRC" ]]; then
-    # shellcheck source=/dev/null
-    if source "$ZNAPRC"; then
-      zdebug ".zshrc: Znap loaded successfully"
-    else
-      zdebug ".zshrc: ERROR - Failed to source $ZNAPRC"
-      echo "Warning: Failed to load znap plugin manager" >&2
-    fi
+if [[ -f "$ZNAPRC" ]]; then
+  # shellcheck source=/dev/null
+  if source "$ZNAPRC"; then
+    zdebug ".zshrc: Znap loaded successfully"
   else
-    zdebug ".zshrc: ERROR - $ZNAPRC not found"
-    echo "Warning: Znap configuration not found at $ZNAPRC" >&2
+    zdebug ".zshrc: ERROR - Failed to source $ZNAPRC"
+    echo "Warning: Failed to load znap plugin manager" >&2
   fi
 else
-  zdebug ".zshrc: Skipping plugin loading - .zshrc already loaded"
+  zdebug ".zshrc: ERROR - $ZNAPRC not found"
+  echo "Warning: Znap configuration not found at $ZNAPRC" >&2
 fi
 
 # ==============================================================================
@@ -69,6 +85,19 @@ if [[ -f "$UV_ENV" ]]; then
   . "$UV_ENV"
 else
   zdebug ".zshrc: UV environment file not found at $UV_ENV (optional)"
+fi
+
+# ==============================================================================
+# Alias Completion Configuration
+# ==============================================================================
+# Load completion function mappings for shell aliases
+# This must run after compinit (loaded in .zshenv) to properly register completions
+if [[ -f "$ZCONFIG/completions/alias-completions.zsh" ]]; then
+  zdebug ".zshrc: Loading alias completion mappings"
+  # shellcheck source=/dev/null
+  . "$ZCONFIG/completions/alias-completions.zsh"
+else
+  zdebug ".zshrc: Alias completions file not found (optional)"
 fi
 
 # ==============================================================================

@@ -1,50 +1,307 @@
 # Dotfiles
 
-This repository contains a collection of personal dotfiles to create a consistent and productive development environment across both Ubuntu and Ubuntu on WSL2.
+A theme-agnostic, highly customized dotfiles configuration for a consistent and productive development environment across Ubuntu and WSL2.
 
 ## Overview
 
-These configurations are highly customized for a workflow centered around the following tools:
+These configurations provide a modern terminal environment with:
 
-*   **Shell:** Zsh with `zim` for plugin management
-*   **Terminal:** Kitty
-*   **Multiplexer:** Tmux
-*   **Editor:** Neovim (with a modern Lua-based configuration)
-*   **Version Control:** Git
+*   **Shell:** Zsh with custom configuration
+*   **Terminal:** Kitty with Tokyo Night theme
+*   **Multiplexer:** Tmux with comprehensive plugin system
+*   **Editor:** Neovim (Lua-based configuration)
+*   **Version Control:** Git with theme-aware colors
+*   **Tool Management:** mise for CLI tool versions
 *   **Secrets Management:** Doppler
 
-The setup is designed to be automated and reproducible, using Ansible for deployment and a structure compatible with the [Tuckr](https://github.com/RaphGL/Tuckr) dotfile manager.
+The setup uses **theme-agnostic color configuration** — all tools automatically adapt to your active terminal theme by using ANSI color indices instead of hardcoded values.
 
 ## Key Features
 
-*   **Consistent Environment:** Aims to provide a seamless experience whether working on a native Linux machine or within WSL2.
-*   **Modern Tooling:** Utilizes powerful and popular tools like Neovim, Kitty, and Zsh.
-*   **Modular Configuration:** The Neovim setup is built with a modular Lua configuration, making it easy to extend and maintain.
-*   **Automated Deployment:** Designed to be deployed via an Ansible role, ensuring a quick and easy setup on new machines.
-*   **Custom Scripts and Hooks:** Includes scripts for tasks like installing applications (`kitty`) and other setup steps.
+### Theme-Agnostic Color System
+*   **Any Theme, Automatic Adaptation:** Switch kitty themes without reconfiguring tools
+*   **ANSI Index Mapping:** All colors reference terminal palette (0-15) instead of hex values
+*   **Centralized Control:** Single `.theme-colors` file manages all tool colors
+*   **60+ CLI Tools:** bat, fzf, ripgrep, eza, jq, git, and more automatically adapt
 
-## Secrets Management with Doppler
-
-This project uses [Doppler](https://doppler.com/) for managing secrets and environment variables.
-
-*   The `Configs/zsh/.zshenv` file includes a `doppler-scope` function to easily switch between different Doppler configurations.
-*   The `Configs/zsh/.aliases` file contains an alias `gls` that uses `doppler run` to inject secrets into a script.
-*   The `Hooks/zsh/post.sh` script includes a commented-out command for downloading secrets, which can be enabled for automated setup.
+### Modern Tooling & Configuration
+*   **Consistent Formatting:** Clean section headers, no fold markers, readable structure
+*   **Modular Organization:** Each application in separate, well-documented configs
+*   **Automated Deployment:** Ansible-based deployment with Tuckr symlink management
+*   **WSL2 Optimized:** Seamless experience on native Linux and WSL2
+*   **Performance Tuned:** Optimized settings for fast shell startup and smooth operation
 
 ## Directory Structure
 
-The repository is organized into two main directories:
+The repository is organized for deployment with [Tuckr](https://github.com/RaphGL/Tuckr):
 
-*   `Configs/`: Contains the actual dotfiles, neatly organized by application.
-    *   `zsh/`: Zsh shell configuration, including plugins, aliases, and prompt settings.
-    *   `kitty/`: Kitty terminal emulator settings, covering themes, fonts, and keybindings.
-    *   `tmux/`: Tmux configuration for sessions, windows, and panes.
-    *   `nvim/`: A comprehensive, Lua-based Neovim configuration.
-    *   `git/`: Global Git settings, including aliases and credential helpers.
-*   `Hooks/`: Contains scripts that are executed during the deployment process to handle tasks like application installation and setup.
+```
+dotfiles/
+├── Configs/          # Application configurations (symlinked by Tuckr)
+│   ├── zsh/         # Shell config with theme-agnostic colors
+│   ├── kitty/       # Terminal config with Tokyo Night theme
+│   ├── tmux/        # Multiplexer config with session management
+│   ├── nvim/        # Neovim with Lua-based configuration
+│   ├── git/         # Git with ANSI color indices
+│   ├── mise/        # Tool version management
+│   └── docker/      # Docker configurations
+├── Hooks/           # Pre/post symlink scripts
+│   ├── kitty/       # Kitty installation hooks
+│   ├── nvim/        # Neovim setup hooks
+│   ├── mise/        # Tool installation hooks
+│   └── zsh/         # Shell initialization hooks
+└── README.md        # This file
+```
+
+## Color System
+
+All tools use **ANSI terminal color indices (0-15)** that automatically adapt to your active kitty theme:
+
+### How It Works
+
+1. **Kitty theme defines colors:** `current-theme.conf` sets what colors 0-15 actually display
+2. **Tools reference indices:** bat, fzf, git, etc. use "color 4" instead of "#7aa2f7"
+3. **Automatic adaptation:** Change theme → all tools instantly match new palette
+
+### Configured Tools
+
+| Tool        | Configuration      | Location        |
+| ----------- | ------------------ | --------------- |
+| **bat**     | `BAT_THEME=ansi`   | `.theme-colors` |
+| **fzf**     | ANSI color indices | `.theme-colors` |
+| **ripgrep** | Terminal palette   | `.ripgreprc`    |
+| **eza**     | EZA_COLORS         | `.theme-colors` |
+| **git**     | Color indices 0-15 | `.gitconfig`    |
+| **tmux**    | colour0-colour15   | `.tmux-colors`  |
+| **jq**      | ANSI format        | `.theme-colors` |
+
+### Switching Themes
+
+```bash
+# 1. Update theme
+cp new-theme.conf ~/.config/kitty/current-theme.conf
+
+# 2. Reload kitty (restart or reload config)
+
+# 3. Done! All tools automatically adapt
+```
+
+## Configuration Highlights
+
+### Zsh Shell
+*   **Fast startup:** Optimized loading with znap plugin manager
+*   **SSH agent:** Persistent across sessions, tmux-aware
+*   **Completions:** fpath-based system with tmuxinator support
+*   **Theme colors:** Centralized in `.theme-colors`
+*   **Location:** `Configs/zsh/`
+
+### Kitty Terminal
+*   **GPU-accelerated:** Hardware rendering for smooth scrolling
+*   **Tokyo Night theme:** Cool-toned, eye-friendly color scheme
+*   **Fira Code font:** 20+ OpenType features configured
+*   **Mouse support:** Extensive click/scroll mappings
+*   **Location:** `Configs/kitty/.config/kitty/`
+
+### Tmux Multiplexer
+*   **Plugin manager:** TPM with 15+ plugins
+*   **Session management:** tmux-resurrect with manual restore
+*   **Auto-save:** Every 15 minutes (auto-restore disabled)
+*   **Tmuxinator:** Compatible session configuration
+*   **Theme-aware:** Colors adapt to terminal palette
+*   **Location:** `Configs/tmux/`
+
+### Git Configuration
+*   **ANSI colors:** Theme-agnostic diff/status output
+*   **Nvim mergetool:** DiffviewOpen integration
+*   **GitHub CLI:** Credential helper configured
+*   **Smart aliases:** `lg`, `up`, `amend`, and more
+*   **Location:** `Configs/git/.gitconfig`
+
+### Tool Versions (mise)
+*   **60+ tools:** bat, fzf, ripgrep, eza, node, python, etc.
+*   **Version pinning:** Consistent tools across machines
+*   **Auto-activation:** Per-directory .tool-versions support
+*   **Location:** `Configs/mise/.config/mise/`
+
+## Formatting Conventions
+
+All configuration files follow consistent formatting standards:
+
+*   **Section headers:** Clean `====` style separators
+*   **No fold markers:** Removed `{{{ }}}` markers for cleaner diffs
+*   **Comments:** Descriptive, explain "why" not "what"
+*   **Indentation:** Tabs for shell/config, spaces for code
+*   **Structure:** Logical grouping with clear boundaries
 
 ## Deployment
 
-These dotfiles are intended to be deployed by the `user` role in the [net.markfaine](httpss://github.com/markfaine/net-markfaine) Ansible collection. The directory structure is specifically laid out to be compatible with [Tuckr](https://github.com/RaphGL/Tuckr), which manages the symlinking of the configuration files to their appropriate locations in the user's home directory.
+### Automated (Ansible)
 
-The `Hooks/` directory contains scripts that are run at different stages of the deployment to ensure that all dependencies are met and configurations are correctly applied.
+These dotfiles deploy via the `user` role in the [net.markfaine](https://github.com/markfaine/net-markfaine) collection:
+
+```bash
+# Run ansible playbook that includes the user role
+ansible-playbook site.yml
+```
+
+The directory structure is compatible with [Tuckr](https://github.com/RaphGL/Tuckr), which manages symlinking configurations to their appropriate locations. The `Hooks/` directory contains scripts that run at different stages to ensure dependencies are met.
+
+### Manual (Tuckr)
+
+```bash
+# 1. Clone repository
+git clone <repo-url> ~/.config/dotfiles
+cd ~/.config/dotfiles
+
+# 2. Install tuckr (if not installed)
+cargo install tuckr
+
+# 3. Symlink all configurations
+tuckr set -fy '*'
+
+# 4. Install dependencies (optional)
+./Hooks/*/pre.sh   # Run pre-hooks
+./Hooks/*/post.sh  # Run post-hooks
+```
+
+## Quick Start
+
+### First Time Setup
+
+1. **Deploy dotfiles** (see Deployment section above)
+2. **Reload shell:** `exec zsh` or restart terminal
+3. **Verify colors:** Tools should match your terminal theme
+4. **Install tmux plugins:** `<prefix>I` (prefix defaults to C-j)
+
+### Verify Installation
+
+```bash
+# Check environment
+echo $BAT_THEME        # Should be: ansi
+echo $COLORTERM        # Should be: truecolor
+
+# Test tools
+echo "print('test')" | bat -l python
+echo -e "opt1\nopt2" | fzf
+rg "pattern" ~/.config/dotfiles/
+eza -la --icons
+
+# Verify git colors
+git log --oneline --color=always | head
+```
+
+### Common Tasks
+
+**Switch themes:**
+```bash
+cd ~/.config/kitty
+cp themes/new-theme.conf current-theme.conf
+# Restart kitty - all tools adapt automatically
+```
+
+**Update tmux plugins:**
+```bash
+<prefix>U  # prefix is C-j by default
+```
+
+**Reload configurations:**
+```bash
+exec zsh                    # Reload shell
+<prefix>r                   # Reload tmux
+kitty @ load-config         # Reload kitty (from within kitty)
+```
+
+**Restore tmux session:**
+```bash
+<prefix>C-r  # Manual restore (auto-restore disabled)
+```
+
+## Troubleshooting
+
+### Colors Don't Match Theme
+
+**Issue:** Tool colors don't adapt to new theme
+
+**Check:**
+```bash
+echo $BAT_THEME           # Should be 'ansi', not a theme name
+echo $FZF_DEFAULT_OPTS    # Should have --color= with numbers
+echo $COLORTERM           # Should be 'truecolor'
+```
+
+**Fix:** Reload shell or source `.zshenv`
+```bash
+source ~/.zshenv
+```
+
+### Tmux Colors Wrong
+
+**Issue:** Tmux doesn't match terminal colors
+
+**Check:**
+```bash
+tmux show-options -g | grep terminal-overrides
+```
+
+**Fix:** Reload tmux config
+```bash
+<prefix>r  # Or manually: tmux source ~/.tmux.conf
+```
+
+### SSH Loading Causes Tmux Exit
+
+**Issue:** Tmux immediately exits on startup
+
+**Fix:** Already handled - `.load_ssh` detects TMUX and skips initialization
+```bash
+# Verify in .load_ssh:
+if [[ -n "${TMUX:-}" ]]; then return 0; fi
+```
+
+### Completions Not Working
+
+**Issue:** Tab completion missing for tmuxinator or other tools
+
+**Check:**
+```bash
+echo $fpath  # Should include home directory
+ls -la ~/    # Should see _tmuxinator file
+```
+
+**Fix:** Rebuild completions
+```bash
+rm ~/.zcompdump*
+exec zsh
+```
+
+### Session Restore Conflicts
+
+**Issue:** Tmuxinator sessions overridden by continuum
+
+**Solution:** Auto-restore is disabled. Use manual restore:
+```bash
+<prefix>C-r  # Manually restore last saved session only when needed
+```
+
+## Additional Documentation
+
+For detailed information on specific components:
+
+*   **Color system details:** See `COLOR_CONFLICT_RESOLUTION.md`
+*   **Tool reference:** See `TOOL_COLOR_REFERENCE.md`
+*   **Tmux colors:** See `Configs/tmux/TMUX_COLORS.md`
+*   **Implementation summary:** See `IMPLEMENTATION_SUMMARY.md`
+*   **Verification script:** Run `./verify-colors.sh`
+
+## Contributing
+
+When modifying configurations:
+
+1. **Maintain formatting:** Use `====` headers, no fold markers
+2. **Use ANSI colors:** Reference terminal indices (0-15), not hex values
+3. **Document changes:** Add comments explaining non-obvious choices
+4. **Test thoroughly:** Verify changes don't break theme adaptation
+
+## License
+
+Personal dotfiles - use at your own risk. Feel free to adapt for your own use.

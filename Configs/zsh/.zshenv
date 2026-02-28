@@ -2,6 +2,9 @@
 # Environment - loaded for all types of shell sessions
 # Source shared functions
 
+# Reset module tracking flags for this shell session
+unset _theme_colors_loaded _zshared_loaded
+
 # ==============================================================================
 # Editor & Pager Configuration
 # ==============================================================================
@@ -24,6 +27,16 @@ export SYSTEMD_PAGER="$PAGER"
 # Only set if ssh-askpass is available
 if command -v ssh-askpass &>/dev/null; then
   export SSH_ASKPASS="$(command -v ssh-askpass)"
+fi
+
+# ==============================================================================
+# Theme-Agnostic Color Configuration
+# ==============================================================================
+# Load theme color settings that work with any kitty theme
+# Uses terminal color indexes (0-15) instead of hardcoded hex colors
+if [[ -f "$HOME/.theme-colors" ]]; then
+  # shellcheck source=/dev/null
+  source "$HOME/.theme-colors"
 fi
 
 # ==============================================================================
@@ -137,6 +150,10 @@ _is_wsl
 # ==============================================================================
 # Load zsh completion module and configure globbing
 # Uses fast compinit cache to avoid slow initialization on every shell startup
+
+# Add home directory to fpath for custom completions (e.g., _tmuxinator)
+fpath=(~/ $fpath)
+
 function _load_complist(){
   zdebug ".zshenv: Loading zsh/complist"
 

@@ -1,4 +1,7 @@
-# # Completion for tmuxinator
+#compdef tmuxinator mux
+# Zsh completion for tmuxinator
+# Provides command and project name completion for tmuxinator session manager
+
 _tmuxinator() {
   local commands projects
   commands=(${(f)"$(tmuxinator commands zsh)"})
@@ -18,3 +21,5 @@ _tmuxinator() {
 
   return
 }
+
+_tmuxinator "$@"

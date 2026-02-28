@@ -1,11 +1,6 @@
 # shellcheck shell=zsh
 # Shared shell functions
 # Collection of utility functions used across interactive and non-interactive shells
-#
-# Guard against multiple sourcing
-if [[ -n "$_zshared_loaded" ]]; then
-  return
-fi
 
 # ==============================================================================
 # System Utilities
@@ -135,6 +130,26 @@ shell(){
   # Execute command in container
   docker exec -it "$ctnr_ids" "$cmd"
 }
+
+# ==============================================================================
+# Dotfiles Management
+# ==============================================================================
+# Function to relink dotfiles using tuckr
+function dotfiles-relink() {
+  echo "Relinking dotfiles with tuckr..."
+  tuckr set -fy '*'
+  local exit_code=$?
+  if [[ $exit_code -eq 0 ]]; then
+    echo "✓ Dotfiles relinked successfully"
+    echo "Reload your shell to apply changes: exec zsh"
+  else
+    echo "✗ Failed to relink dotfiles (exit code: $exit_code)"
+    return $exit_code
+  fi
+}
+
+# Alias for convenience
+alias dotfiles-update='dotfiles-relink'
 
 # ==============================================================================
 # Module Flag

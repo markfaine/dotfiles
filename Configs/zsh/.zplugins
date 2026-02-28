@@ -1,3 +1,4 @@
+# shellcheck shell=zsh
 # Znap plugin manifest
 # This file defines all zsh plugins to be loaded via znap
 #
