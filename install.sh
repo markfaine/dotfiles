@@ -201,8 +201,8 @@ deploy_dotfiles() {
     cd "$DOTFILES_DIR"
 
     # Run tuckr set with force and yes flags
-    info "Running: tuckr set -fy *"
-    tuckr set -fy * || {
+    info "Running: tuckr set -fy '*'"
+    tuckr set -fy '*' || {
         error "Tuckr deployment failed"
         exit 1
     }
