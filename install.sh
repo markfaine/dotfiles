@@ -185,8 +185,8 @@ install_tuckr() {
     fi
 }
 
-# Step 4: Set up mise configuration
-setup_misefiles() {
+# Step 4: Deploy dotfiles with tuckr
+deploy_dotfiles() {
     info "Deploying dotfiles with tuckr..."
 
     # Ensure tuckr is in PATH
@@ -210,7 +210,7 @@ setup_misefiles() {
     success "Dotfiles deployed successfully"
 }
 
-# Step 6: Post-installation setup
+# Step 5: Post-installation setup
 post_install() {
     info "Post-installation setup..."
 
@@ -255,7 +255,7 @@ main() {
     echo "║            Dotfiles Bootstrap Installer                    ║"
     echo "╚════════════════════════════════════════════════════════════╝"
     echo ""
-    
+
     check_prerequisites
     clone_dotfiles
     install_tuckr
