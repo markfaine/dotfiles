@@ -62,8 +62,21 @@ fi
 # ==============================================================================
 # Configure pure prompt theme from sindresorhus
 # Fallback to simple prompt if plugin manager failed
+# Note: Pure can have terminal formatting issues with commented text
+# PROMPT_EOL_MARK helps prevent line wrapping display issues
 if (( ${+commands[znap]} )) || typeset -f znap > /dev/null 2>&1; then
   zdebug ".zshrc: Setting up pure prompt via znap"
+
+  # Prevent invisible characters in line wrapping with comments
+  # This should be set before loading the theme
+  PROMPT_EOL_MARK=""
+
+  # Pure prompt configuration for better visibility
+  # Use git untracked dirty indicator
+  PURE_GIT_UNTRACKED_DIRTY=1
+  # Force minimal processing to reduce rendering issues
+  PURE_PROMPT_TCSETPGRP=1
+
   znap prompt sindresorhus/pure || {
     zdebug ".zshrc: Failed to load pure prompt, using simple prompt"
     PS1='%~ %# '
@@ -98,6 +111,17 @@ if [[ -f "$ZCONFIG/completions/alias-completions.zsh" ]]; then
   . "$ZCONFIG/completions/alias-completions.zsh"
 else
   zdebug ".zshrc: Alias completions file not found (optional)"
+fi
+
+# ==============================================================================
+# Syntax Highlighting Customization
+# ==============================================================================
+# Override zsh-syntax-highlighting plugin's default comment color
+# Default "ansigray" is too faint on dark backgrounds
+# Use bright gray for better contrast and visibility
+if [[ -n "${ZSH_HIGHLIGHT_STYLES+x}" ]]; then
+  ZSH_HIGHLIGHT_STYLES[comment]='fg=7'  # Bright white-ish gray instead of ansigray
+  zdebug ".zshrc: Set ZSH_HIGHLIGHT_STYLES[comment] to bright gray"
 fi
 
 # ==============================================================================
