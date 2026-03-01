@@ -207,12 +207,18 @@ deploy_dotfiles() {
         exit 1
     fi
 
-    # Run tuckr set with force and yes flags, explicitly specifying main directories
-    info "Running: tuckr set -fy Configs Hooks"
-    tuckr set -fy Configs Hooks || {
+    # Run tuckr add to discover and register dotfiles, then set to deploy
+    info "Adding dotfile manifests with tuckr..."
+    if ! tuckr add -y Configs Hooks 2>/dev/null; then
+        error "Tuckr add failed"
+        exit 1
+    fi
+
+    info "Deploying dotfiles with tuckr set..."
+    if ! tuckr set -fy Configs Hooks; then
         error "Tuckr deployment failed"
         exit 1
-    }
+    fi
 
     success "Dotfiles deployed successfully"
 }
