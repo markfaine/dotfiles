@@ -9,3 +9,5 @@
 **/.tmux/
 **/buildx/
 **/.token*
+**/install.sh
+**/font-install.sh

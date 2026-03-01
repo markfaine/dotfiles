@@ -200,9 +200,16 @@ deploy_dotfiles() {
     # Change to dotfiles directory
     cd "$DOTFILES_DIR"
 
-    # Run tuckr set with force and yes flags
-    info "Running: tuckr set -fy '*'"
-    tuckr set -fy '*' || {
+    # Verify dotfiles directory has content
+    if [ ! -d "Configs" ] && [ ! -d "Hooks" ]; then
+        error "Dotfiles directory appears empty or corrupted"
+        ls -la
+        exit 1
+    fi
+
+    # Run tuckr set with force and yes flags, explicitly specifying main directories
+    info "Running: tuckr set -fy Configs Hooks"
+    tuckr set -fy Configs Hooks || {
         error "Tuckr deployment failed"
         exit 1
     }

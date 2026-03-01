@@ -2,11 +2,19 @@
 
 set -euo pipefail
 
+# ==============================================================================
+# Neovim Post Hook
+# ==============================================================================
+
 echo "Checking for Neovim..."
 if ! command -v nvim >/dev/null 2>&1; then
     echo "Error: Neovim not found. Please install Neovim first." >&2
     exit 1
 fi
+
+# ==============================================================================
+# Plugin Sync (lazy.nvim)
+# ==============================================================================
 
 echo "Syncing Neovim plugins with Lazy..."
 if nvim --headless -u ~/.config/nvim/init.lua -c 'lua require("lazy").sync()' -c 'qa!'; then
