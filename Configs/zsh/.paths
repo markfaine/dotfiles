@@ -1,5 +1,25 @@
+# PATH configuration file
+# Comma-separated format: append_dir,prepend_dir
+# - First field (before comma): appended to PATH
+# - Second field (after comma): prepended to PATH
+# - Empty fields are ignored
+# - Lines starting with # are comments
+#
+# This file is processed by the _load_paths function in .zshenv
+
+# ==============================================================================
+# Neovim Language Servers (installed via Mason)
+# ==============================================================================
 "$HOME/.local/share/nvim/mason/bin",
 "$HOME/.local/share/nvim/mason/packages/ansible-language-server/node_modules/@ansible/ansible-language-server/bin",
+
+# ==============================================================================
+# NPM/Node Version Manager
+# ==============================================================================
 "/home/mfaine/.local/share/mise/installs/npm-vscode-langservers-extracted/latest/bin",
+
+# ==============================================================================
+# System Paths
+# ==============================================================================
 ,"/usr/local/bin"
 ,"$HOME/.local/bin"

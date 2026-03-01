@@ -69,6 +69,13 @@ vim.keymap.set('n', '<leader>tl', '<cmd>set list!<CR>', { desc = 'Toggle whitesp
 vim.keymap.set('n', '<leader>ta', function()
   -- Store initial state on first toggle
   if vim.g.distraction_free_state == nil then
+    -- Store ibl config if plugin is available
+    local ibl_config = {}
+    pcall(function()
+      local ibl = require 'ibl'
+      ibl_config = ibl.config
+    end)
+
     vim.g.distraction_free_state = {
       number = vim.wo.number,
       relativenumber = vim.wo.relativenumber,
@@ -85,8 +92,8 @@ vim.keymap.set('n', '<leader>ta', function()
       ruler = vim.o.ruler,
       cmdheight = vim.o.cmdheight,
       diagnostics_enabled = vim.diagnostic.is_enabled(),
-      -- Store diagnostic config
       diagnostic_config = vim.diagnostic.config(),
+      ibl_config = ibl_config,
     }
     vim.g.distraction_free_active = false
   end
@@ -108,10 +115,10 @@ vim.keymap.set('n', '<leader>ta', function()
     vim.o.ruler = false
     vim.o.cmdheight = 1   -- Minimal command height
 
-    -- Disable diagnostics
+    -- Disable diagnostics completely
     vim.diagnostic.enable(false)
 
-    -- Hide virtual text and signs
+    -- Hide all virtual text and signs
     vim.diagnostic.config {
       virtual_text = false,
       signs = false,
@@ -120,7 +127,7 @@ vim.keymap.set('n', '<leader>ta', function()
       severity_sort = false,
     }
 
-    -- Try to hide gitgutter/gitsigns if available
+    -- Hide gitgutter/gitsigns
     pcall(function()
       vim.cmd 'GitGutterDisable'
     end)
@@ -128,13 +135,52 @@ vim.keymap.set('n', '<leader>ta', function()
       vim.cmd 'Gitsigns toggle_signs'
     end)
 
-    -- Try to hide indent guides if available
+    -- Disable Snacks indent guides
+    pcall(function()
+      require('snacks').indent.disable()
+    end)
+
+    -- Disable nvim-ufo visual indicators (but don't change fold state)
+    pcall(function()
+      local ok, ufo = pcall(require, 'ufo')
+      if ok then
+        -- Disable ufo without closing folds
+        require('ufo.config.enable')._enable = false
+      end
+    end)
+
+    -- Hide indent guides - comprehensive approach
+    pcall(function()
+      vim.cmd 'IBLDisable'
+    end)
     pcall(function()
       vim.cmd 'IndentBlanklineDisable'
     end)
     pcall(function()
       local ibl = require 'ibl'
+      ibl.setup({ enabled = false })
       ibl.setup_buffer(0, { enabled = false })
+    end)
+
+    -- Disable Treesitter indent rendering
+    pcall(function()
+      local ts_indent_ok, ts_indent = pcall(require, 'nvim-treesitter.indent')
+      if ts_indent_ok then
+        vim.b.treesitter_indent_enabled = false
+      end
+    end)
+
+    -- Clear all extmarks (virtual text from any source)
+    local ns_ids = vim.api.nvim_get_namespaces()
+    for ns_name, ns_id in pairs(ns_ids) do
+      pcall(function()
+        vim.api.nvim_buf_clear_namespace(0, ns_id, 0, -1)
+      end)
+    end
+
+    -- Hide other virtual text sources
+    pcall(function()
+      vim.cmd 'LspVirtualTextToggle'
     end)
 
     vim.g.distraction_free_active = true
@@ -161,7 +207,7 @@ vim.keymap.set('n', '<leader>ta', function()
     vim.diagnostic.enable(state.diagnostics_enabled)
     vim.diagnostic.config(state.diagnostic_config)
 
-    -- Try to restore gitgutter/gitsigns if available
+    -- Restore gitgutter/gitsigns
     pcall(function()
       vim.cmd 'GitGutterEnable'
     end)
@@ -169,13 +215,44 @@ vim.keymap.set('n', '<leader>ta', function()
       vim.cmd 'Gitsigns toggle_signs'
     end)
 
-    -- Try to restore indent guides if available
+    -- Re-enable Snacks indent guides
+    pcall(function()
+      require('snacks').indent.enable()
+    end)
+
+    -- Re-enable nvim-ufo visual indicators (without changing fold state)
+    pcall(function()
+      local ok, ufo = pcall(require, 'ufo')
+      if ok then
+        require('ufo.config.enable')._enable = true
+      end
+    end)
+
+    -- Restore indent guides - comprehensive approach
+    pcall(function()
+      vim.cmd 'IBLEnable'
+    end)
     pcall(function()
       vim.cmd 'IndentBlanklineEnable'
     end)
     pcall(function()
       local ibl = require 'ibl'
+      if state.ibl_config and next(state.ibl_config) then
+        ibl.setup(state.ibl_config)
+      else
+        ibl.setup({ enabled = true })
+      end
       ibl.setup_buffer(0, { enabled = true })
+    end)
+
+    -- Re-enable Treesitter indent rendering
+    pcall(function()
+      vim.b.treesitter_indent_enabled = true
+    end)
+
+    -- Restore other virtual text sources
+    pcall(function()
+      vim.cmd 'LspVirtualTextToggle'
     end)
 
     vim.g.distraction_free_active = false
@@ -195,4 +272,62 @@ vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = 'Next diagnostic' }
 vim.keymap.set('n', '<leader>qq', '<cmd>qa<CR>', { desc = 'Quit all' })
 vim.keymap.set('n', '<leader>rr', '<cmd>source $MYVIMRC<CR>', { desc = 'Reload config' })
 vim.keymap.set('n', '<leader>ei', '<cmd>edit $MYVIMRC<CR>', { desc = 'Edit init.lua' })
+-- }}}1
+
+-- Clipboard {{{1
+-- Filter virtual text from clipboard on yank operations
+-- Ensures that indent guides, diagnostics, LSP hints, etc. are never copied
+vim.api.nvim_create_autocmd('TextYankPost', {
+  group = vim.api.nvim_create_augroup('ClipboardFilter', { clear = true }),
+  callback = function(ev)
+    -- Only process clipboard register operations
+    if vim.v.event.regname ~= '' and vim.v.event.regname ~= '+' and vim.v.event.regname ~= '*' then
+      return
+    end
+
+    -- Get the yank operator type and register
+    local reg_name = vim.v.event.regname or '+'
+    if reg_name == '' then
+      reg_name = '+'
+    end
+
+    -- Get the text that was yanked
+    local lines = vim.v.event.regcontents
+
+    if not lines or #lines == 0 then
+      return
+    end
+
+    -- Process lines to remove virtual text indicators
+    -- This handles: indent guides │, diagnostics, LSP hints, etc.
+    local cleaned_lines = {}
+    for _, line in ipairs(lines) do
+      -- Remove common virtual text characters used by indent plugins
+      -- │ (box drawing light vertical) - indent guides
+      -- ▁ ▂ ▃ ▄ ▅ ▆ ▇ █ (block elements) - various indicators
+      local cleaned = line
+        :gsub('│', '')   -- Indent guides
+        :gsub('▏', '')   -- Vertical bar
+        :gsub('▎', '')   -- Vertical bar
+        :gsub('▍', '')   -- Vertical bar
+        :gsub('▌', '')   -- Vertical bar
+        :gsub('▋', '')   -- Vertical bar
+        :gsub('▊', '')   -- Vertical bar
+        :gsub('▉', '')   -- Vertical bar
+        :gsub('█', '')   -- Full block
+        :gsub('┃', '')   -- Box drawing
+        :gsub('┆', '')   -- Box drawing
+        :gsub('┇', '')   -- Box drawing
+        :gsub('⎪', '')   -- Terminal box drawing
+        -- Trim trailing whitespace that might be left after removing guides
+        :gsub('%s+$', '')
+
+      table.insert(cleaned_lines, cleaned)
+    end
+
+    -- Set the cleaned content back to the register
+    vim.fn.setreg(reg_name, cleaned_lines, vim.v.event.regtype)
+  end,
+  desc = 'Remove virtual text from clipboard on yank'
+})
 -- }}}1

@@ -4,6 +4,8 @@
 **/*.key
 **/.vault
 **/home/.docker/buildx
-Configs/tmux/.tmux/
 **/.token_seed*
 **/buildx
+**/.tmux/
+**/buildx/
+**/.token*

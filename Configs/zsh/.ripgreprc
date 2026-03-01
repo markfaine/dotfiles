@@ -1,69 +1,83 @@
-# Ripgrep Configuration {{{
+# Ripgrep (rg) configuration file
+# Settings for the fast, recursive grep replacement
+#
+# NOTE: Theme-agnostic color configuration!
+# Colors use ANSI palette mapping (0-15) not hardcoded hex values.
+# This ensures rg output adapts to the active kitty theme.
+# See ~/.theme-colors for central color configuration.
 
-# Search case insensitively if the pattern is all lowercase {{{
+# ==============================================================================
+# Search Options
+# ==============================================================================
+# Smart case: search is case-insensitive unless pattern contains uppercase
 --smart-case
-# End Search case insensitively if the pattern is all lowercase }}}
 
-# Search in compressed files {{{
+# Include hidden files and directories in search
+--hidden
+
+# Show file path above matches (improves readability)
+--heading
+
+# Trim whitespace from matches
+--trim
+
+# Disable line numbers by default (can override with -n flag)
+--no-line-number
+
+# ==============================================================================
+# Color Configuration (Theme-Agnostic)
+# ==============================================================================
+# Use terminal color palette (colors 0-15) instead of hardcoded hex values
+# Red text for matching content
+--colors=match:fg:red
+
+# Green text for line numbers (if enabled with -n)
+--colors=line:fg:green
+
+# Cyan text for file paths
+--colors=path:fg:cyan
+
+# White text for column numbers
+--colors=column:fg:white
+
+# ==============================================================================
+# Advanced Search
+# ==============================================================================
+# Stay on one file system (don't cross file system boundaries)
+--one-file-system
+
+# Print preview for lines exceeding max column limit
+--max-columns-preview
+
+# ==============================================================================
+# Additional Options (Disabled)
+# ==============================================================================
+# Uncomment to enable:
+
+# Search in compressed files
 #--search-zip
-# End Search in compressed files }}}
 
-# Automatically select the best regex engine {{{
+# Automatically select the best regex engine
 #--engine auto
-# End Automatically select the best regex engine }}}
 
-# Follow symlinks {{{
+# Follow symlinks during search
 #--follow
-# End Follow symlinks }}}
 
-# Glob settings {{{
-
-# Ignore .git
+# Ignore .git directory
 #--glob !.git
 
-# Ignore *.bak
+# Ignore *.bak files
 #--glob !.bak
 
-# Ignore */backup/*
+# Ignore backup directories
 #--glob !*/backup/*
 
-# Globs are not case sensitive
+# Make glob patterns case-insensitive
 #--glob-case-insensitive
 
-# End Glob settings }}}
-
-# Include hidden files {{{
---hidden
-# End Include hidden files }}}
-
-# Ignore file {{{
+# Use .gitignore file
 #--ignore-file
 #.gitignore
-# End Ignore file }}}
 
-# Stay on one file system {{{
---one-file-system
-# End Stay on one file system }}}
-
-# Search all types by default {{{
+# Search all types by default
 #--type all
-# End Search all types by default }}}
-
-# Show file path above matches {{{
---heading
-# End Show file path above matches }}}
-
-# Don't show line numbers by default {{{
---no-line-number
-# End Don't show line numbers by default }}}
-
-# Enable Max columns preview {{{
-# Prints a preview for lines exceeding the configured max column limit.
---max-columns-preview
-# End Enable Max columns preview }}}
-
-# Trim whitespace from matches {{{
---trim
-# End Trim whitespace from matches }}}
-
-# End Ripgrep Configuration }}}

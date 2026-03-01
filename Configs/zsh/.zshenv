@@ -2,15 +2,119 @@
 # Environment - loaded for all types of shell sessions
 # Source shared functions
 
-# Debug
+# Reset module tracking flags for this shell session
+unset _theme_colors_loaded _zshared_loaded
+
+# ==============================================================================
+# Editor & Pager Configuration
+# ==============================================================================
+# Primary editor for environment
+export EDITOR="nvim"
+
+# Pager for various commands (bat provides syntax highlighting)
+export PAGER="bat"
+
+# Pager for git commands (use default PAGER)
+export GIT_PAGER="$PAGER"
+
+# Pager for man pages (use default PAGER)
+export MANPAGER="$PAGER"
+
+# Pager for systemd commands
+export SYSTEMD_PAGER="$PAGER"
+
+# SSH authentication prompt program (for passphrase input)
+# Only set if ssh-askpass is available
+if command -v ssh-askpass &>/dev/null; then
+  export SSH_ASKPASS="$(command -v ssh-askpass)"
+fi
+
+# ==============================================================================
+# Theme-Agnostic Color Configuration
+# ==============================================================================
+# Load theme color settings that work with any kitty theme
+# Uses terminal color indexes (0-15) instead of hardcoded hex colors
+if [[ -f "$HOME/.theme-colors" ]]; then
+  # shellcheck source=/dev/null
+  source "$HOME/.theme-colors"
+fi
+
+# ==============================================================================
+# File Operations
+# ==============================================================================
+# Allow history entries to overwrite existing files
+export HIST_ALLOW_CLOBBER="true"
+
+# ==============================================================================
+# Shell History Configuration
+# ==============================================================================
+# History file location
+export HISTFILE="$HOME/.zsh_history"
+
+# Number of history lines to keep in memory
+export HISTSIZE="5000"
+
+# Number of history lines to save to file
+export SAVEHIST="5000"
+
+# Append history incrementally to HISTFILE
+export APPEND_HISTORY="true"
+
+# Enable ! history expansion
+export BANG_HISTORY="true"
+
+# Skip duplicate commands when expanding history
+export HIST_IGNORE_ALL_DUPS="true"
+
+# Don't save commands that start with a space
+export HIST_IGNORE_SPACE="true"
+
+# Don't store function definitions in history
+export HIST_NO_FUNCTIONS="true"
+
+# Commands to ignore when recording history (wildcard patterns)
+export HISTORY_IGNORE="(ls*|ll*|pwd|exit|cd*|vi|vim)"
+
+# ==============================================================================
+# Terminal & Display
+# ==============================================================================
+# Disable automatic terminal title updates by shell
+export DISABLE_AUTO_TITLE="false"
+
+# Enable colored output for systemd commands
+export SYSTEMD_COLORS="true"
+
+# Flag for systemd pager (secure mode)
+export SYSTEMD_PAGERSECURE="true"
+
+# ==============================================================================
+# System Configuration
+# ==============================================================================
+# Timezone for time-related functions
+export TZ="America/Chicago"
+
+# ==============================================================================
+# Debug & Logging Configuration
+# ==============================================================================
+# Enable debug output (set to empty to disable)
 ZSH_DEBUG="${ZSH_DEBUG:-1}"
+
+# Enable execution tracing (set to empty to disable)
 ZSH_TRACE="${ZSH_TRACE:-}"
 
-# Clobber
+# ==============================================================================
+# Shell Options
+# ==============================================================================
+# Clobber option: allow overwriting files with >
 setopt clobber
 
-# Setup log file
+# ==============================================================================
+# Logging Setup
+# ==============================================================================
+# Log file for debug output
 export ZLOG_FILE="$HOME/.zshlog"
+
+# Initialize log file (truncate on each session)
 : >| "$HOME/.zshlog"
 
 function zdebug() {
@@ -25,6 +129,9 @@ function ztrace() {
   fi
 }
 
+# ==============================================================================
+# Environment Detection
+# ==============================================================================
 # Export a variable if this is WSL
 function _is_wsl(){
   if grep -q Microsoft /proc/version; then
@@ -34,34 +141,51 @@ function _is_wsl(){
 }
 _is_wsl
 
-# Check if mount point is mounted
-function _is_mounted() {
-  local mount_point="$1"
-  # Strip trailing slash for consistency
-  mount_point="${mount_point%/}"
-  # Check if mount_point is present in the output of mount
-  mount | grep -q " on $mount_point "
-}
-
+# ==============================================================================
 # ZSH Module configuration (built-in) {{{
 # See: https://zsh.sourceforge.io/Doc/Release/Zsh-Modules.html
+
+# ==============================================================================
+# ZSH Module: Completion
+# ==============================================================================
+# Load zsh completion module and configure globbing
+# Uses fast compinit cache to avoid slow initialization on every shell startup
+
+# Add home directory to fpath for custom completions (e.g., _tmuxinator)
+fpath=(~/ $fpath)
+
 function _load_complist(){
   zdebug ".zshenv: Loading zsh/complist"
-  zmodload zsh/complist
+
+  # Fail fast if module not available
+  zmodload zsh/complist || { zdebug ".zshenv: Failed to load zsh/complist"; return 1; }
+
+  # Use cached completions for speed (only regenerate if needed)
   autoload -U compinit
-  compinit
-  _comp_options+=(globdots)		# Include hidden files.
+  if [[ -z "$COMPDUMP" ]]; then
+    COMPDUMP="$HOME/.cache/zsh/zcompdump"
+    [[ ! -d "${COMPDUMP%/*}" ]] && mkdir -p "${COMPDUMP%/*}"
+  fi
+  compinit -d "$COMPDUMP" -C
+  _comp_options+=(globdots)    # Include hidden files.
 }
 _load_complist
 
-# ZSH Terminal Info module (dependency for zim) {{{
+# ==============================================================================
+# ZSH Module: Terminal Information
+# ==============================================================================
+# Load zsh terminal info module (dependency for zim)
 function _load_terminfo(){
   zdebug ".zshenv: Loading zsh/terminfo"
-  zmodload -F zsh/terminfo +p:terminfo
+  # Fail fast if module not available
+  zmodload -F zsh/terminfo +p:terminfo || { zdebug ".zshenv: Failed to load zsh/terminfo"; return 1; }
 }
 _load_terminfo
 
-# Keymaps
+# ==============================================================================
+# ZSH Configuration: Keybindings
+# ==============================================================================
+# Configure vim-style keybindings in completion menu
 function _load_keybinds(){
   ## Use vim keys in tab complete menu:
   bindkey -M menuselect 'h' vi-backward-char
@@ -75,22 +199,31 @@ function _load_keybinds(){
 }
 _load_keybinds
 
-# Cursor customization
+# ==============================================================================
+# Terminal Customization: Cursor
+# ==============================================================================
+# Configure beam cursor for visual feedback
 function _load_cursor(){
   echo -ne '\e[5 q' # Use beam shape cursor on startup.
   precmd() { echo -ne '\e[5 q' ;} # Use beam shape cursor for each new prompt.
 }
 _load_cursor
 
-# Setup ripgrep
-export RIPGREP_CONFIG_PATH="$HOME/.ripgreprc"
-function _load_ripgrep(){
-if [[ ! -f "$RIPGREP_CONFIG_PATH" ]]; then
-  printf "The ripgreprc is not present at %s\n" "$RIPGREP_CONFIG_PATH"
-  zdebug ".zshenv: No Ripgrep Config was found at $RIPGREP_CONFIG_PATH"
+# ==============================================================================
+# Third-Party Tool Configuration: Ripgrep
+# ==============================================================================
+# Setup ripgrep configuration file path (only set if file exists)
+if [[ -f "$HOME/.ripgreprc" ]]; then
+  export RIPGREP_CONFIG_PATH="$HOME/.ripgreprc"
+  zdebug ".zshenv: Ripgrep config loaded from $RIPGREP_CONFIG_PATH"
+else
+  zdebug ".zshenv: Ripgrep config not found at $HOME/.ripgreprc (optional)"
 fi
-}
 
+# ==============================================================================
+# File Sourcing: Aliases
+# ==============================================================================
+# Load user command aliases
 function _load_aliases(){
   ZALIASES="$HOME/.aliases"
   if [[ -e "$ZALIASES" ]]; then
@@ -103,8 +236,15 @@ function _load_aliases(){
 }
 _load_aliases
 
+# ==============================================================================
+# File Sourcing: Directory Colors
+# ==============================================================================
 # Load zcolors, requires znap zcolors plugin
 function _load_zcolors(){
+  if (( ! $+commands[znap] )) && ! typeset -f znap > /dev/null 2>&1; then
+    zdebug ".zshenv: Skipping zcolors - znap not available"
+    return
+  fi
   znap eval LS_COLORS 'dircolors -b LS_COLORS'
   zstyle \":completion:*:default\" list-colors \"${(s.:.)LS_COLORS}\"
   znap eval zcolors "zcolors ${(q)LS_COLORS}"
@@ -117,7 +257,10 @@ if [[ ! -f "$HOME/.zsh-dircolors.config" ]]; then
   _load_zcolors
 fi
 
-# Function to append paths to $PATH from a file
+# ==============================================================================
+# PATH Management
+# ==============================================================================
+# Append a directory to PATH (checks if directory exists)
 function _append_to_path() {
   local dir
   dir="$1"
@@ -126,7 +269,7 @@ function _append_to_path() {
   path=($path "$dir")
 }
 
-# Function to prepend paths to $PATH from a file
+# Prepend a directory to PATH (checks if directory exists)
 function _prepend_to_path() {
   local dir
   dir="$1"
@@ -135,6 +278,8 @@ function _prepend_to_path() {
   path=("$dir" $path)
 }
 
+# Read PATH entries from file (comma-separated format)
+# File format: append_dir,prepend_dir (empty fields are skipped, # lines are comments)
 function _add_to_path() {
     paths_file="${1:-$HOME/.paths}"
     while IFS=',' read -r append prepend; do
@@ -152,6 +297,7 @@ function _add_to_path() {
     done < <(tac "$paths_file")
 }
 
+# Load all PATH entries from .paths file
 function _load_paths(){
   ZPATHS="$HOME/.paths"
   if [[ -f "$ZPATHS" ]]; then
@@ -166,8 +312,10 @@ function _load_paths(){
 }
 _load_paths
 
-
-# Load shared functions
+# ==============================================================================
+# File Sourcing: Shared Functions
+# ==============================================================================
+# Load shared shell functions from .zshared file
 function _load_zhared(){
   zhared="$HOME/.zshared"
   if [[ -f "$zhared" ]]; then

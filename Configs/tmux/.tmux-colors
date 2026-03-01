@@ -1,0 +1,59 @@
+# ==============================================================================
+# Tmux Color Configuration
+# ==============================================================================
+# Theme-agnostic color configuration that adapts to current terminal palette
+# This file ensures tmux colors match the active kitty theme (Tokyo Night)
+#
+# Color Philosophy:
+#   - Use terminal palette indices (color0-color15) instead of hardcoded hex
+#   - Automatically adapts to any kitty theme change
+#   - Maintains consistency with shell, editor, and CLI tools
+#
+# Tokyo Night Reference Colors (from kitty theme):
+#   Background: #0d0e15 (color0)
+#   Foreground: #c0caf5 (color15)
+#   Blue:       #7aa2f7 (color4)
+#   Purple:     #bb9af7 (color5)
+#   Cyan:       #7dcfff (color6)
+#   Green:      #9ece6a (color2)
+#   Yellow:     #e0af68 (color3)
+#   Red:        #f7768e (color1)
+#   Orange:     #ff9e64 (color16)
+
+# ==============================================================================
+# Tmux Native Colors
+# ==============================================================================
+# These settings configure tmux's built-in color support
+# Note: The Tokyo Night tmux plugin handles most theming
+#       These settings ensure consistency for non-themed elements
+
+# Status bar colors
+set -g status-style "fg=colour15,bg=colour0"
+
+# Window status colors
+set -g window-status-style "fg=colour7,bg=colour0"
+set -g window-status-current-style "fg=colour4,bg=colour0,bold"
+set -g window-status-activity-style "fg=colour3,bg=colour0"
+
+# Pane border colors
+set -g pane-border-style "fg=colour8"
+set -g pane-active-border-style "fg=colour4"
+
+# Message colors (command prompt)
+set -g message-style "fg=colour15,bg=colour0,bold"
+set -g message-command-style "fg=colour15,bg=colour0,bold"
+
+# Copy mode colors
+set -g mode-style "fg=colour0,bg=colour4"
+
+# Clock mode colors
+set -g clock-mode-colour colour4
+
+# ==============================================================================
+# Plugin Color Overrides
+# ==============================================================================
+# The Tokyo Night plugin already provides comprehensive theming
+# Additional color overrides can be added here if needed
+
+# Note: If you change kitty themes, these colors will automatically
+# adapt since they reference terminal palette indices, not hex values

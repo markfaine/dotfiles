@@ -1,29 +1,49 @@
-# The function load_plugin in ~/.znaprc
-# will do the following for each uncommented, non-blank line
-# 1. Clone the plugin, if it doesn't exist
-# 1. add second command-separated arg to the path
-# 3. Add thrid comma-separated arg to the fpath
-# 4. Source the plugin
+# shellcheck shell=zsh
+# Znap plugin manifest
+# This file defines all zsh plugins to be loaded via znap
 #
-# Configuration for each plugin can be found
-# in ~/.config/zplugin.d/plugin-name
+# The _load_plugins function in ~/.znaprc processes each line:
+# 1. Clones the plugin repository (if not already present)
+# 2. Adds second comma-separated field to PATH (if provided)
+# 3. Adds third comma-separated field to FPATH for completions (if provided)
+# 4. Sources the plugin
+#
+# Per-plugin configuration can be placed in ~/.config/zplugin.d/plugin-name.zsh
+#
 # Format:
-# github-repo-path,path,fpath
+# github-repo-path,path-addition,fpath-addition
+#
+# Notes:
+# - Order mostly matters for completions (should go last)
+# - Empty lines and lines starting with # are ignored
+# - Both path arguments are optional (use empty field)
 
-# Order sort of matters here but mostly only that
-# completions should go last
-
+# ==============================================================================
+# Core Environment & Utilities
+# ==============================================================================
 zimfw/environment
 zimfw/utility,functions
 zimfw/prompt-pwd
+
+# ==============================================================================
+# Terminal & Display
+# ==============================================================================
 chrissicool/zsh-256color
 marlonrichert/zcolors
 zimfw/input
 zimfw/termtitle
 zimfw/run-help
+
+# ==============================================================================
+# Syntax & History
+# ==============================================================================
 zsh-users/zsh-autosuggestions
 zsh-users/zsh-history-substring-search
 zsh-users/zsh-syntax-highlighting
+
+# ==============================================================================
+# CLI Tools & Integrations
+# ==============================================================================
 MohamedElashri/eza-zsh
 zimfw/fzf
 joke/zim-github-cli
@@ -32,5 +52,9 @@ joke/zim-mise
 joke/zim-yq
 kiesman99/zim-zoxide
 thetic/extract
+
+# ==============================================================================
+# Completions (should be loaded last)
+# ==============================================================================
 zsh-users/zsh-completions,,src
 Freed-Wu/zsh-command-not-found

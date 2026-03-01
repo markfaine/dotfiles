@@ -1,15 +1,27 @@
-# Source helpers and clear session on logout (lock and remove tmpfs token)
+# shellcheck shell=zsh
+# Logout shell cleanup (runs once when exiting login session)
+# Cleans up session state and credentials
 
+# ==============================================================================
+# Execution Guard
+# ==============================================================================
 # Only run on interactive logout shells
 if [[ ! -o interactive ]]; then
-  return
+  return 0 2>/dev/null || exit 0
 fi
 
+# ==============================================================================
+# SSH Agent Cleanup
+# ==============================================================================
+# Remove SSH agent socket on logout
 if [ -n "${SSH_AUTH_SOCK:-}" ] && [ -S "$SSH_AUTH_SOCK" ]; then
   rm -f "$SSH_AUTH_SOCK"
 fi
 
-# Clear the in-memory token (locks bw, removes file, signals other shells)
+# ==============================================================================
+# Credential Cleanup
+# ==============================================================================
+# Clear Bitwarden session on logout
 zdebug "Clearing Bitwarden session on logout"
 unset BW_SESSION
 clear

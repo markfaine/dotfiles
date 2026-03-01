@@ -1,0 +1,130 @@
+# ==============================================================================
+# Theme-Agnostic Color Configuration
+# ==============================================================================
+# This file defines environment variables that work with ANY kitty theme
+# by using terminal color index references (0-15) instead of hex colors.
+#
+# How it works:
+# - Kitty theme defines what color0-15 are (set in current-theme.conf)
+# - Tools read these env vars and use terminal colors
+# - Same config works across all kitty themes automatically
+#
+# Color Index Reference (ANSI standard):
+#   0=Black    1=Red      2=Green    3=Yellow
+#   4=Blue     5=Magenta  6=Cyan     7=White
+#   8-15=Bright versions of 0-7
+
+# ==============================================================================
+# Tool: bat (Syntax Highlighter / Pager)
+# ==============================================================================
+# Use 'ansi' theme to leverage terminal colors instead of hardcoded theme
+# This respects the active terminal theme (kitty in this case)
+export BAT_THEME="ansi"
+
+# Alternative: Use less integration without bat's custom theme
+# export MANPAGER='less -R'
+# export PAGER='less -R'
+
+# ==============================================================================
+# Tool: ripgrep (rg)
+# ==============================================================================
+# Ripgrep detects terminal capabilities. These options enhance compatibility:
+# Note: .ripgreprc already exists - this env var supplements it
+export RIPGREP_CONFIG_PATH="$HOME/.config/ripgrep/config"
+
+# Force color output but let terminal handle the palette
+# (already set in .ripgreprc: --colors color:palette and --colors match:fg:red)
+
+# ==============================================================================
+# Tool: fzf (Fuzzy Finder)
+# ==============================================================================
+# Use ANSI color codes that map to terminal palette
+# Format: "color-name fg[/bg]"
+# fg/bg use ANSI color codes: 0-7 (normal), 8-15 (bright)
+export FZF_DEFAULT_OPTS="
+  --color=bg:-1,bg+:-1
+  --color=fg:7,fg+:15
+  --color=hl:4,hl+:12
+  --color=border:8
+  --color=prompt:6,pointer:5,marker:3
+  --color=spinner:2,header:4
+  --color=query:7
+  --color=info:8
+  --color=preview-bg:-1,preview-fg:7
+  --color=preview-border:8
+  --color=scrollbar:8
+"
+
+# ==============================================================================
+# Tool: eza (ls replacement)
+# ==============================================================================
+# eza respects the terminal's LS_COLORS/dircolors settings
+# We create a color-scheme that uses terminal colors
+# Set via environment (can also use --color-scale, --icons flags)
+export EZA_COLORS="da=38;5;8:di=38;5;4"
+
+# ==============================================================================
+# Tool: jq (JSON Processor)
+# ==============================================================================
+# Force color output using terminal-safe ANSI codes
+# Default jq colors often clash with themes
+export JQ_COLORS="0;90:0;37:0;37:0;37:0;32:1;37:1;37"
+
+# ==============================================================================
+# Tool: glow (Markdown Viewer)
+# ==============================================================================
+# Disable colors or use a compatible style
+# Style options: light, dark, notty (no colors)
+export GLOW_STYLE="dark"
+
+# ==============================================================================
+# Tool: delta (Diff Enhancer - if installed)
+# ==============================================================================
+# Similar to bat, uses theme-aware coloring
+export DELTA_FEATURES="+decorations"
+
+# ==============================================================================
+# Global Color Control
+# ==============================================================================
+# Many tools respect NO_COLOR standard (disable all colors)
+# Uncomment if you want to disable colors globally:
+# export NO_COLOR=1
+
+# Some tools use CLICOLOR/CLICOLOR_FORCE
+# CLICOLOR_FORCE=1 forces color even in non-TTY (useful for pipes)
+export CLICOLOR=1
+export CLICOLOR_FORCE=1
+
+# ==============================================================================
+# Terminal Capabilities
+# ==============================================================================
+# Ensure tools know we support 256 color terminal
+# (Already set in .zshenv via TERM but useful for tooling)
+export COLORTERM="truecolor"
+
+# ==============================================================================
+# Application-Specific Configurations
+# ==============================================================================
+# Disable color in less pager (bat handles syntax highlighting instead)
+export LESS="-R"
+export LESSOPEN="|bat %s"
+
+# Ruby colorization (if using Ruby tools)
+export IRB_USE_READLINE=true
+
+# Python - colored output
+# Some Python tools support PYTHONPATH to force colors
+export PYTHONUNBUFFERED=1
+
+# ==============================================================================
+# Notes for Custom Theme Adaptation
+# ==============================================================================
+# If switching to a different kitty theme:
+# 1. No changes needed to this file
+# 2. Update kitty/current-theme.conf with new colors
+# 3. All tools automatically adapt to new color0-15 definitions
+#
+# To verify colors are applied:
+#   fzf --help | grep -A 15 "COLOR SPECIFICATION"
+#   bat --list-themes
+#   grep "BAT_THEME\|FZF_DEFAULT_OPTS" ~/.theme-colors

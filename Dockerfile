@@ -26,7 +26,8 @@ USER mfaine
 WORKDIR /home/mfaine
 
 # Install Rust and Cargo as mfaine
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \
+    test -f /home/mfaine/.cargo/bin/cargo || exit 1
 
 # Set a clean PATH
 ENV PATH="/home/mfaine/.local/bin:/home/mfaine/.cargo/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
@@ -35,7 +36,7 @@ ENV PATH="/home/mfaine/.local/bin:/home/mfaine/.cargo/bin:/usr/local/sbin:/usr/l
 RUN /home/mfaine/.cargo/bin/cargo install tuckr
 
 # Install mise as mfaine
-RUN curl https://mise.run | sh
+RUN curl -fsSL https://mise.run | sh || exit 1
 
 # Install zim as mfaine
 RUN curl -fsSL https://raw.githubusercontent.com/zimfw/install/master/install.zsh | zsh
