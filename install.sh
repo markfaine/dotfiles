@@ -252,10 +252,10 @@ post_install() {
 main() {
     echo ""
     echo "╔════════════════════════════════════════════════════════════╗"
-    echo "║            Dotfiles Bootstrap Installer                   ║"
+    echo "║            Dotfiles Bootstrap Installer                    ║"
     echo "╚════════════════════════════════════════════════════════════╝"
     echo ""
-    5
+    
     check_prerequisites
     clone_dotfiles
     install_tuckr
