@@ -9,19 +9,3 @@
 if [[ ! -o interactive ]]; then
   return 0 2>/dev/null || exit 0
 fi
-
-# ==============================================================================
-# SSH Agent Cleanup
-# ==============================================================================
-# Remove SSH agent socket on logout
-if [ -n "${SSH_AUTH_SOCK:-}" ] && [ -S "$SSH_AUTH_SOCK" ]; then
-  rm -f "$SSH_AUTH_SOCK"
-fi
-
-# ==============================================================================
-# Credential Cleanup
-# ==============================================================================
-# Clear Bitwarden session on logout
-zdebug "Clearing Bitwarden session on logout"
-unset BW_SESSION
-clear

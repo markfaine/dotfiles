@@ -3,9 +3,11 @@
 set -euo pipefail
 
 # ==============================================================================
-# Mise Pre Hook
+# Mise Post Hook
 # ==============================================================================
-# Install mise if missing, without modifying shell rc files.
+# Ensure dependency ordering after dotfiles are deployed:
+#   1) bootstrap Node first
+#   2) install full mise toolchain (including npm:* tools)
 
 MISE_BIN="$HOME/.local/bin/mise"
 
@@ -15,7 +17,7 @@ USE_SPINNER=1
 
 usage() {
 	cat <<'EOF'
-Usage: pre.sh [--dry-run|-n] [--debug|-d] [--no-spinner] [--help|-h]
+Usage: post.sh [--dry-run|-n] [--debug|-d] [--no-spinner] [--help|-h]
 
 Options:
   -n, --dry-run    Show what would run, but do not execute commands
@@ -54,11 +56,6 @@ fi
 
 if (( DEBUG )); then
 	USE_SPINNER=0
-fi
-
-if ! command -v curl >/dev/null 2>&1 && ! command -v wget >/dev/null 2>&1; then
-	echo "Error: curl or wget is required to install mise." >&2
-	exit 1
 fi
 
 info() {
@@ -125,23 +122,15 @@ run_cmd() {
 	return 1
 }
 
-if [[ -x "$MISE_BIN" ]]; then
-	info "Mise already installed at $MISE_BIN"
+if [[ ! -x "$MISE_BIN" ]]; then
+	info "Mise not installed yet. Skipping Node bootstrap."
 	exit 0
 fi
 
-info "Installing mise..."
+info "Ensuring Node is available via mise..."
+run_cmd "Bootstrap Node via mise" "$MISE_BIN" exec -y --silent node@latest -- node -v
+info "Node bootstrap complete."
 
-if command -v curl >/dev/null 2>&1; then
-	run_cmd "Install mise via https://mise.run" bash -c 'curl https://mise.run | sh'
-else
-	run_cmd "Install mise via https://mise.run" bash -c 'wget -qO- https://mise.run | sh'
-fi
-
-if [[ -x "$MISE_BIN" ]]; then
-	info "Mise install complete: $MISE_BIN"
-else
-	echo "Error: mise installation did not produce $MISE_BIN" >&2
-	exit 1
-fi
-
+info "Installing configured mise toolchain..."
+run_cmd "Install all configured mise tools" "$MISE_BIN" install
+info "Mise toolchain install complete."

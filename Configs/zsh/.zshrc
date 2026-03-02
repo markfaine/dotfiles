@@ -1,4 +1,4 @@
-# shellcheck shell=zsh
+# shellcheck shell=zsh source=/dev/null
 # User configuration sourced by interactive shells
 # https://zsh.sourceforge.io/Doc/Release/Options.html
 #
@@ -38,12 +38,87 @@ else
 fi
 
 # ==============================================================================
+# SSH Identity Management
+# ==============================================================================
+# Load SSH identities into existing agent (assumes agent is already running via
+# systemd, gpg-agent, keychain, or system default)
+
+# Define key paths
+CONFIG_KEY=$(grep -m1 "IdentityFile" "$HOME/.ssh/config" 2>/dev/null | awk '{print $2}' | sed "s|^~|$HOME|")
+DEFAULT_KEY="$HOME/.ssh/id_rsa"
+SSH_ENV="$HOME/.ssh/agent.env"
+
+function start_agent {
+    /usr/bin/ssh-agent | sed 's/^echo/#echo/' > "${SSH_ENV}"
+    chmod 600 "$SSH_ENV"
+    zdebug ".zshrc: Sourcing $SSH_ENV"
+    . "$SSH_ENV" > /dev/null
+}
+
+# Identity loading function
+load_ssh_identities() {
+  # Only run if ssh-agent is available
+  if ! command -v ssh-add &>/dev/null; then
+    return 0
+  fi
+
+  # Check if agent is accessible
+  if ! ssh-add -l &>/dev/null && [[ $? -ne 1 ]]; then
+    # Exit code 2 = no agent running, 1 = agent running but no identities
+    zdebug ".zshrc: No SSH agent available, skipping identity load"
+    return 0
+  fi
+
+  # Case 1: Check for YubiKey (requires lsusb or system_profiler)
+  if command -v lsusb &>/dev/null && lsusb 2>/dev/null | grep -q "1050"; then
+    zdebug ".zshrc: YubiKey detected via lsusb, adding hardware keys"
+    ssh-add -K 2>/dev/null
+    return 0
+  elif command -v system_profiler &>/dev/null && system_profiler SPUSBDataType 2>/dev/null | grep -q "Yubico"; then
+    zdebug ".zshrc: YubiKey detected via system_profiler, adding hardware keys"
+    ssh-add -K 2>/dev/null
+    return 0
+  fi
+
+  # Case 2: Load file-based keys if not already in agent
+  local target_key=""
+  if [[ -f "$CONFIG_KEY" ]]; then
+    target_key="$CONFIG_KEY"
+  elif [[ -f "$DEFAULT_KEY" ]]; then
+    target_key="$DEFAULT_KEY"
+  fi
+
+  if [[ -n "$target_key" ]]; then
+    # Only add if the fingerprint isn't already in the agent
+    local fingerprint=$(ssh-keygen -lf "$target_key" 2>/dev/null | awk '{print $2}')
+    if [[ -n "$fingerprint" ]] && ! ssh-add -l 2>/dev/null | grep -q "$fingerprint"; then
+      zdebug ".zshrc: Loading SSH key: $target_key"
+      ssh-add "$target_key" 2>/dev/null
+    else
+      zdebug ".zshrc: SSH key already loaded or no valid key found"
+    fi
+  fi
+}
+
+# Start Agent
+if [ -f "${SSH_ENV}" ]; then
+    zdebug ".zshrc: Sourcing $SSH_ENV"
+    . "${SSH_ENV}" > /dev/null
+    ps -ef | grep ${SSH_AGENT_PID} | grep ssh-agent > /dev/null || start_agent
+else
+    zdebug ".zshrc: Starting ssh-agent"
+    start_agent
+fi
+
+# Load identities once per shell initialization
+load_ssh_identities
+
+# ==============================================================================
 # Plugin Manager: Znap Loading
 # ==============================================================================
 # Load znap plugin manager and configuration
 ZNAPRC="$HOME/.znaprc"
 zdebug ".zshrc: Loading znap plugin manager from $ZNAPRC"
-
 if [[ -f "$ZNAPRC" ]]; then
   # shellcheck source=/dev/null
   if source "$ZNAPRC"; then
@@ -91,6 +166,7 @@ fi
 # ==============================================================================
 # Load UV (fast Python package installer/environment manager) if available
 # UV provides fast Python package management and environment handling
+
 UV_ENV="$HOME/.local/opt/uv/env"
 if [[ -f "$UV_ENV" ]]; then
   zdebug ".zshrc: Loading UV environment from $UV_ENV"
@@ -100,9 +176,9 @@ else
   zdebug ".zshrc: UV environment file not found at $UV_ENV (optional)"
 fi
 
-# ==============================================================================
+#==============================================================================
 # Alias Completion Configuration
-# ==============================================================================
+#==============================================================================
 # Load completion function mappings for shell aliases
 # This must run after compinit (loaded in .zshenv) to properly register completions
 if [[ -f "$ZCONFIG/completions/alias-completions.zsh" ]]; then
@@ -113,9 +189,9 @@ else
   zdebug ".zshrc: Alias completions file not found (optional)"
 fi
 
-# ==============================================================================
+#==============================================================================
 # Syntax Highlighting Customization
-# ==============================================================================
+#==============================================================================
 # Override zsh-syntax-highlighting plugin's default comment color
 # Default "ansigray" is too faint on dark backgrounds
 # Use bright gray for better contrast and visibility
