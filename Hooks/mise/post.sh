@@ -133,4 +133,11 @@ info "Node bootstrap complete."
 
 info "Installing configured mise toolchain..."
 run_cmd "Install all configured mise tools" "$MISE_BIN" install
+
+info "Refreshing mise shims..."
+run_cmd "Rebuild mise shims" "$MISE_BIN" reshim
+
+info "Pruning stale mise tool installs..."
+run_cmd "Prune unused mise tool versions" "$MISE_BIN" prune --tools --yes
+
 info "Mise toolchain install complete."

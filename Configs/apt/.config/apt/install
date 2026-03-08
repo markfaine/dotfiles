@@ -53,5 +53,6 @@ trash-cli
 unzip
 wget
 yacc
+yubikey-manager
 zlib1g-dev
 zsh

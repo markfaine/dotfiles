@@ -182,6 +182,10 @@ function _load_terminfo(){
 }
 _load_terminfo
 
+# TODO: formalize this in the configuration and make sure it's not incompatible
+# with other options.
+bindkey -e
+
 # ==============================================================================
 # ZSH Configuration: Keybindings
 # ==============================================================================
@@ -199,6 +203,7 @@ function _load_keybinds(){
 }
 _load_keybinds
 
+# TODO: Remove or fix this, it interferes with SSH kex_exchange banner
 # ==============================================================================
 # Terminal Customization: Cursor
 # ==============================================================================
@@ -258,24 +263,57 @@ if [[ ! -f "$HOME/.zsh-dircolors.config" ]]; then
 fi
 
 # ==============================================================================
+# Python/UV: Environment Configuration
+# ==============================================================================
+# Set default virtual environment
+export UV_PROJECT_ENVIRONMENT="$HOME/.venv"
+
+# ==============================================================================
 # PATH Management
 # ==============================================================================
+# Normalize path entries from .paths (trim whitespace/quotes and expand $HOME/~)
+function _normalize_path_entry() {
+  local raw="$1"
+
+  # Trim leading and trailing whitespace
+  raw="${raw#"${raw%%[![:space:]]*}"}"
+  raw="${raw%"${raw##*[![:space:]]}"}"
+
+  # Strip optional surrounding quotes from CSV values
+  raw="${raw#\"}"
+  raw="${raw%\"}"
+  raw="${raw#\'}"
+  raw="${raw%\'}"
+
+  # Expand common home-directory forms used in config
+  raw="${raw//\$HOME/$HOME}"
+  if [[ "$raw" == "~"* ]]; then
+    raw="${raw/#\~/$HOME}"
+  fi
+
+  printf '%s' "$raw"
+}
+
 # Append a directory to PATH (checks if directory exists)
 function _append_to_path() {
-  local dir
+  local dir normalized realdir
   dir="$1"
-  realdir="$(readlink -f "$dir")"
+  normalized="$(_normalize_path_entry "$dir")"
+  [[ -n "$normalized" ]] || return
+  realdir="$(readlink -f "$normalized" 2>/dev/null || true)"
   [[ -d "$realdir" ]] || return
-  path=($path "$dir")
+  path=($path "$normalized")
 }
 
 # Prepend a directory to PATH (checks if directory exists)
 function _prepend_to_path() {
-  local dir
+  local dir normalized realdir
   dir="$1"
-  realdir="$(readlink -f "$dir")"
+  normalized="$(_normalize_path_entry "$dir")"
+  [[ -n "$normalized" ]] || return
+  realdir="$(readlink -f "$normalized" 2>/dev/null || true)"
   [[ -d "$realdir" ]] || return
-  path=("$dir" $path)
+  path=("$normalized" $path)
 }
 
 # Read PATH entries from file (comma-separated format)
@@ -329,3 +367,4 @@ function _load_zhared(){
 if [[ -z "$_zshared_loaded" ]]; then
   _load_zhared
 fi
+

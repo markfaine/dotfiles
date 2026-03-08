@@ -186,11 +186,11 @@ install_packages_from_file() {
 
 	#info "Install queue (${#packages[@]}): ${packages[*]}"
 
-	if ! run_apt "apt-get update" "${APT_PREFIX[@]}" apt-get update -qq; then
+	if ! run_apt "apt-get update" "${APT_PREFIX[@]}" apt-get update -qq -o Dpkg::Progress-Fancy=0; then
 		log_failure "apt-get update failed before install from $file"
 	fi
 
-	if ! run_apt "apt-get install (${#packages[@]} packages)" "${APT_PREFIX[@]}" apt-get install -y -qq "${packages[@]}"; then
+	if ! run_apt "apt-get install (${#packages[@]} packages)" "${APT_PREFIX[@]}" apt-get install -y -qq -o Dpkg::Progress-Fancy=0 --no-install-recommends "${packages[@]}"; then
 		log_failure "apt-get install failed for packages: ${packages[*]}"
 	fi
 }
@@ -218,7 +218,7 @@ remove_packages_from_file() {
 
 	info "Remove queue (${#packages[@]}): ${packages[*]}"
 
-	if ! run_apt "apt-get remove (${#packages[@]} packages)" "${APT_PREFIX[@]}" apt-get remove -y -qq "${packages[@]}"; then
+	if ! run_apt "apt-get remove (${#packages[@]} packages)" "${APT_PREFIX[@]}" apt-get remove -y -qq -o Dpkg::Progress-Fancy=0 "${packages[@]}"; then
 		log_failure "apt-get remove failed for packages: ${packages[*]}"
 	fi
 }

@@ -6,7 +6,7 @@
 **/home/.docker/buildx
 **/.token_seed*
 **/buildx
-**/.tmux/
+**/tmux/plugins
 **/buildx/
 **/.token*
 **/install.sh

@@ -164,6 +164,30 @@ tuckr set -fy '*'
 ./Hooks/*/post.sh  # Run post-hooks
 ```
 
+## Git Hook Guardrails
+
+This repo includes two layers to keep scripts executable:
+
+- Local git hook in `.githooks/pre-commit`:
+	- Auto-fixes executable bits for `Hooks/**/*.sh` and `Configs/**/bin/*.sh`
+	- Stages the permission change and asks you to re-run commit
+- Optional `pre-commit` framework config in `.pre-commit-config.yaml`:
+	- Validates executable scripts have shebangs
+	- Validates shebang scripts are executable
+
+Enable the local hook path:
+
+```bash
+git config core.hooksPath .githooks
+```
+
+Enable the `pre-commit` framework (recommended for team consistency):
+
+```bash
+pre-commit install
+pre-commit run --all-files
+```
+
 ## Quick Start
 
 ### First Time Setup

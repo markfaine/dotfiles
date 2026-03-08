@@ -161,21 +161,6 @@ else
   PS1='%~ %# '
 fi
 
-# ==============================================================================
-# Python UV Environment
-# ==============================================================================
-# Load UV (fast Python package installer/environment manager) if available
-# UV provides fast Python package management and environment handling
-
-UV_ENV="$HOME/.local/opt/uv/env"
-if [[ -f "$UV_ENV" ]]; then
-  zdebug ".zshrc: Loading UV environment from $UV_ENV"
-  # shellcheck source=/dev/null
-  . "$UV_ENV"
-else
-  zdebug ".zshrc: UV environment file not found at $UV_ENV (optional)"
-fi
-
 #==============================================================================
 # Alias Completion Configuration
 #==============================================================================
