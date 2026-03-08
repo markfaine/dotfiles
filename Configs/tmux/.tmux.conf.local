@@ -147,7 +147,7 @@ set -g @tmux_conf_uninstall_plugins_on_reload true
 # Tmux Plugin Manager (legacy)
 # set -g @plugin 'tmux-plugins/tpm'
 # Tmux tpack plugin manager
-set -g @plugin 'tmux-plugins/tpack'
+set -g @plugin 'tmuxpack/tpack'
 
 # Sensible default settings
 set -g @plugin 'tmux-plugins/tmux-sensible'
@@ -320,18 +320,14 @@ bind-key C-a display-message "Prefix is #{prefix}"
 bind-key C-b display-message "Prefix is #{prefix}"
 
 # ==============================================================================
-# TPM Installation
+# Tpack Installation
 # ==============================================================================
-# Auto-install TPM if not present
-# if "test ! -d ~/.tmux/plugins/tpm" \
-#   "run 'git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm && ~/.tmux/plugins/tpm/bin/install_plugins'"
-
-# Auto-install tpack if not present, use legacy tpm path
-if "test ! -d ~/.tmux/plugins/tpm" \
-   "run 'git clone https://github.com/tmuxpack/tpack ~/.tmux/plugins/tpm && ~/.tmux/plugins/tpm/bin/install_plugins'"
+# Auto-install tpack if not present
+if "test ! -d ~/.tmux/plugins/tpack" \
+   "run 'git clone https://github.com/tmuxpack/tpack ~/.tmux/plugins/tpack && ~/.tmux/plugins/tpack/bin/install_plugins'"
 
 
 # Initialize TPM (must be at end of file)
-run '~/.tmux/plugins/tpm/tpm'
+run '~/.tmux/plugins/tpack/tpm'
 
 # vim:syntax=tmux

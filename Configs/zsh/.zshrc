@@ -1,7 +1,6 @@
 # shellcheck shell=zsh source=/dev/null
 # User configuration sourced by interactive shells
 # https://zsh.sourceforge.io/Doc/Release/Options.html
-#
 # Initialization Order:
 #   1. .zshenv - Loaded by all shells (environment)
 #   2. .zprofile - Loaded by login shells (login setup)
