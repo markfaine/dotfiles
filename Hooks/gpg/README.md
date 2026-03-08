@@ -5,6 +5,7 @@ This script imports GPG public keys from `.asc` files into the local keyring.
 ## Overview
 
 The script:
+
 - Scans `~/.gnupg/` for `.asc` files (exported public keys)
 - Imports each key into the GPG keyring using `gpg --import`
 - Logs any failures to `~/.config/gpg/hook-errors.log`
@@ -25,6 +26,7 @@ gpg --export -a > ~/.gnupg/all-keys.asc
 ```
 
 Alternatively, if using symlinked configuration:
+
 ```bash
 # Link from dotfiles config
 ln -s ~/.config/dotfiles/Configs/gpg/.gnupg/keyid.asc ~/.gnupg/keyid.asc
@@ -39,26 +41,31 @@ ln -s ~/.config/dotfiles/Configs/gpg/.gnupg/keyid.asc ~/.gnupg/keyid.asc
 ## Usage
 
 ### Import keys (standard)
+
 ```bash
 ./Hooks/gpg/post.sh
 ```
 
 ### Preview what would be imported (dry-run)
+
 ```bash
 ./Hooks/gpg/post.sh --dry-run
 ```
 
 ### Verbose output (debug mode)
+
 ```bash
 ./Hooks/gpg/post.sh --debug
 ```
 
 ### Disable progress spinner
+
 ```bash
 ./Hooks/gpg/post.sh --no-spinner
 ```
 
 ### Help
+
 ```bash
 ./Hooks/gpg/post.sh --help
 ```
@@ -73,6 +80,7 @@ ln -s ~/.config/dotfiles/Configs/gpg/.gnupg/keyid.asc ~/.gnupg/keyid.asc
 ## Output
 
 ### Success
+
 ```
 ✓ Imported: mykey.asc
 
@@ -88,6 +96,7 @@ Failed:    0
 ### Errors
 
 If imports fail, they're logged to `~/.config/gpg/hook-errors.log`:
+
 ```
 2026-03-07 19:45:32: Failed to import: mykey.asc
 ```
@@ -95,6 +104,7 @@ If imports fail, they're logged to `~/.config/gpg/hook-errors.log`:
 ## Key File Naming
 
 Any `.asc` file in `~/.gnupg/` will be imported. Suggested naming:
+
 - `8F1234567890ABCD.asc` - By key ID
 - `user@example.com.asc` - By user ID
 - `primary-key.asc` - By purpose
@@ -108,11 +118,13 @@ Any `.asc` file in `~/.gnupg/` will be imported. Suggested naming:
 ## Integration
 
 Call as part of dotfiles deployment:
+
 ```bash
 bash ~/.config/dotfiles/Hooks/gpg/post.sh
 ```
 
 Or in a deploy script with options:
+
 ```bash
 bash ~/.config/dotfiles/Hooks/gpg/post.sh --dry-run --debug
 ```
@@ -120,18 +132,23 @@ bash ~/.config/dotfiles/Hooks/gpg/post.sh --dry-run --debug
 ## Troubleshooting
 
 ### "gpg: no default secret key" errors
+
 This is normal - the script imports public keys. If you need secret keys, import them separately:
+
 ```bash
 gpg --import ~/.gnupg/secret-key.asc
 ```
 
 ### Import fails
+
 Check `~/.config/gpg/hook-errors.log` for details:
+
 ```bash
 cat ~/.config/gpg/hook-errors.log
 ```
 
 ### Verify imported keys
+
 ```bash
 gpg --list-keys
 ```

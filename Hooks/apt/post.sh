@@ -235,6 +235,3 @@ install_packages_from_file "$INSTALL_LIST"
 remove_packages_from_file "$REMOVE_LIST"
 
 info "Apt post hook complete"
-
-
-

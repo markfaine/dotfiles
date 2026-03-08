@@ -27,6 +27,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   tar \
   zsh \
   sudo \
+  unzip \
   && update-ca-certificates \
   && rm -rf /var/lib/apt/lists/*
 

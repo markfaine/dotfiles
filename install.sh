@@ -319,6 +319,25 @@ install_tuckr() {
     fi
 }
 
+# Ensure common XDG directories exist before tuckr creates symlinks
+ensure_xdg_directories() {
+    debug_msg "Creating XDG base directories"
+
+    local xdg_dirs=(
+        "$HOME/.config"
+        "$HOME/.local/share"
+        "$HOME/.local/state"
+        "$HOME/.cache"
+    )
+
+    for dir in "${xdg_dirs[@]}"; do
+        if [ ! -d "$dir" ]; then
+            debug_msg "Creating: $dir"
+            mkdir -p "$dir"
+        fi
+    done
+}
+
 # Step 4: Deploy dotfiles with tuckr
 deploy_dotfiles() {
     info "Deploying dotfiles with tuckr..."
@@ -348,6 +367,9 @@ deploy_dotfiles() {
     fi
     debug_msg "Found Configs: $([ -d "Configs" ] && echo yes || echo no)"
     debug_msg "Found Hooks: $([ -d "Hooks" ] && echo yes || echo no)"
+
+    # Create XDG directories before symlink operations
+    ensure_xdg_directories
 
     # Ensure hook scripts are executable before running tuckr hooks.
     ensure_hook_scripts_executable "$DOTFILES_DIR"

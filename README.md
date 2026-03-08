@@ -6,30 +6,32 @@ A theme-agnostic, highly customized dotfiles configuration for a consistent and 
 
 These configurations provide a modern terminal environment with:
 
-*   **Shell:** Zsh with custom configuration
-*   **Terminal:** Kitty with Tokyo Night theme
-*   **Multiplexer:** Tmux with comprehensive plugin system
-*   **Editor:** Neovim (Lua-based configuration)
-*   **Version Control:** Git with theme-aware colors
-*   **Tool Management:** mise for CLI tool versions
-*   **Secrets Management:** Doppler
+- **Shell:** Zsh with custom configuration
+- **Terminal:** Kitty with Tokyo Night theme
+- **Multiplexer:** Tmux with comprehensive plugin system
+- **Editor:** Neovim (Lua-based configuration)
+- **Version Control:** Git with theme-aware colors
+- **Tool Management:** mise for CLI tool versions
+- **Secrets Management:** Doppler
 
 The setup uses **theme-agnostic color configuration** — all tools automatically adapt to your active terminal theme by using ANSI color indices instead of hardcoded values.
 
 ## Key Features
 
 ### Theme-Agnostic Color System
-*   **Any Theme, Automatic Adaptation:** Switch kitty themes without reconfiguring tools
-*   **ANSI Index Mapping:** All colors reference terminal palette (0-15) instead of hex values
-*   **Centralized Control:** Single `.theme-colors` file manages all tool colors
-*   **60+ CLI Tools:** bat, fzf, ripgrep, eza, jq, git, and more automatically adapt
+
+- **Any Theme, Automatic Adaptation:** Switch kitty themes without reconfiguring tools
+- **ANSI Index Mapping:** All colors reference terminal palette (0-15) instead of hex values
+- **Centralized Control:** Single `.theme-colors` file manages all tool colors
+- **60+ CLI Tools:** bat, fzf, ripgrep, eza, jq, git, and more automatically adapt
 
 ### Modern Tooling & Configuration
-*   **Consistent Formatting:** Clean section headers, no fold markers, readable structure
-*   **Modular Organization:** Each application in separate, well-documented configs
-*   **Automated Deployment:** Ansible-based deployment with Tuckr symlink management
-*   **WSL2 Optimized:** Seamless experience on native Linux and WSL2
-*   **Performance Tuned:** Optimized settings for fast shell startup and smooth operation
+
+- **Consistent Formatting:** Clean section headers, no fold markers, readable structure
+- **Modular Organization:** Each application in separate, well-documented configs
+- **Automated Deployment:** Ansible-based deployment with Tuckr symlink management
+- **WSL2 Optimized:** Seamless experience on native Linux and WSL2
+- **Performance Tuned:** Optimized settings for fast shell startup and smooth operation
 
 ## Directory Structure
 
@@ -60,8 +62,8 @@ All tools use **ANSI terminal color indices (0-15)** that automatically adapt to
 ### How It Works
 
 1. **Kitty theme defines colors:** `current-theme.conf` sets what colors 0-15 actually display
-2. **Tools reference indices:** bat, fzf, git, etc. use "color 4" instead of "#7aa2f7"
-3. **Automatic adaptation:** Change theme → all tools instantly match new palette
+1. **Tools reference indices:** bat, fzf, git, etc. use "color 4" instead of "#7aa2f7"
+1. **Automatic adaptation:** Change theme → all tools instantly match new palette
 
 ### Configured Tools
 
@@ -89,49 +91,54 @@ cp new-theme.conf ~/.config/kitty/current-theme.conf
 ## Configuration Highlights
 
 ### Zsh Shell
-*   **Fast startup:** Optimized loading with znap plugin manager
-*   **SSH agent:** Persistent across sessions, tmux-aware
-*   **Completions:** fpath-based system with tmuxinator support
-*   **Theme colors:** Centralized in `.theme-colors`
-*   **Location:** `Configs/zsh/`
+
+- **Fast startup:** Optimized loading with znap plugin manager
+- **SSH agent:** Persistent across sessions, tmux-aware
+- **Completions:** fpath-based system with tmuxinator support
+- **Theme colors:** Centralized in `.theme-colors`
+- **Location:** `Configs/zsh/`
 
 ### Kitty Terminal
-*   **GPU-accelerated:** Hardware rendering for smooth scrolling
-*   **Tokyo Night theme:** Cool-toned, eye-friendly color scheme
-*   **Fira Code font:** 20+ OpenType features configured
-*   **Mouse support:** Extensive click/scroll mappings
-*   **Location:** `Configs/kitty/.config/kitty/`
+
+- **GPU-accelerated:** Hardware rendering for smooth scrolling
+- **Tokyo Night theme:** Cool-toned, eye-friendly color scheme
+- **Fira Code font:** 20+ OpenType features configured
+- **Mouse support:** Extensive click/scroll mappings
+- **Location:** `Configs/kitty/.config/kitty/`
 
 ### Tmux Multiplexer
-*   **Plugin manager:** TPM with 15+ plugins
-*   **Session management:** tmux-resurrect with manual restore
-*   **Auto-save:** Every 15 minutes (auto-restore disabled)
-*   **Tmuxinator:** Compatible session configuration
-*   **Theme-aware:** Colors adapt to terminal palette
-*   **Location:** `Configs/tmux/`
+
+- **Plugin manager:** TPM with 15+ plugins
+- **Session management:** tmux-resurrect with manual restore
+- **Auto-save:** Every 15 minutes (auto-restore disabled)
+- **Tmuxinator:** Compatible session configuration
+- **Theme-aware:** Colors adapt to terminal palette
+- **Location:** `Configs/tmux/`
 
 ### Git Configuration
-*   **ANSI colors:** Theme-agnostic diff/status output
-*   **Nvim mergetool:** DiffviewOpen integration
-*   **GitHub CLI:** Credential helper configured
-*   **Smart aliases:** `lg`, `up`, `amend`, and more
-*   **Location:** `Configs/git/.gitconfig`
+
+- **ANSI colors:** Theme-agnostic diff/status output
+- **Nvim mergetool:** DiffviewOpen integration
+- **GitHub CLI:** Credential helper configured
+- **Smart aliases:** `lg`, `up`, `amend`, and more
+- **Location:** `Configs/git/.gitconfig`
 
 ### Tool Versions (mise)
-*   **60+ tools:** bat, fzf, ripgrep, eza, node, python, etc.
-*   **Version pinning:** Consistent tools across machines
-*   **Auto-activation:** Per-directory .tool-versions support
-*   **Location:** `Configs/mise/.config/mise/`
+
+- **60+ tools:** bat, fzf, ripgrep, eza, node, python, etc.
+- **Version pinning:** Consistent tools across machines
+- **Auto-activation:** Per-directory .tool-versions support
+- **Location:** `Configs/mise/.config/mise/`
 
 ## Formatting Conventions
 
 All configuration files follow consistent formatting standards:
 
-*   **Section headers:** Clean `====` style separators
-*   **No fold markers:** Removed `{{{ }}}` markers for cleaner diffs
-*   **Comments:** Descriptive, explain "why" not "what"
-*   **Indentation:** Tabs for shell/config, spaces for code
-*   **Structure:** Logical grouping with clear boundaries
+- **Section headers:** Clean `====` style separators
+- **No fold markers:** Removed `{{{ }}}` markers for cleaner diffs
+- **Comments:** Descriptive, explain "why" not "what"
+- **Indentation:** Tabs for shell/config, spaces for code
+- **Structure:** Logical grouping with clear boundaries
 
 ## Deployment
 
@@ -169,11 +176,11 @@ tuckr set -fy '*'
 This repo includes two layers to keep scripts executable:
 
 - Local git hook in `.githooks/pre-commit`:
-	- Auto-fixes executable bits for `Hooks/**/*.sh` and `Configs/**/bin/*.sh`
-	- Stages the permission change and asks you to re-run commit
+  - Auto-fixes executable bits for `Hooks/**/*.sh` and `Configs/**/bin/*.sh`
+  - Stages the permission change and asks you to re-run commit
 - Optional `pre-commit` framework config in `.pre-commit-config.yaml`:
-	- Validates executable scripts have shebangs
-	- Validates shebang scripts are executable
+  - Validates executable scripts have shebangs
+  - Validates shebang scripts are executable
 
 Enable the local hook path:
 
@@ -193,9 +200,9 @@ pre-commit run --all-files
 ### First Time Setup
 
 1. **Deploy dotfiles** (see Deployment section above)
-2. **Reload shell:** `exec zsh` or restart terminal
-3. **Verify colors:** Tools should match your terminal theme
-4. **Install tmux plugins:** `<prefix>I` (prefix defaults to C-j)
+1. **Reload shell:** `exec zsh` or restart terminal
+1. **Verify colors:** Tools should match your terminal theme
+1. **Install tmux plugins:** `<prefix>I` (prefix defaults to C-j)
 
 ### Verify Installation
 
@@ -217,6 +224,7 @@ git log --oneline --color=always | head
 ### Common Tasks
 
 **Switch themes:**
+
 ```bash
 cd ~/.config/kitty
 cp themes/new-theme.conf current-theme.conf
@@ -224,11 +232,13 @@ cp themes/new-theme.conf current-theme.conf
 ```
 
 **Update tmux plugins:**
+
 ```bash
 <prefix>U  # prefix is C-j by default
 ```
 
 **Reload configurations:**
+
 ```bash
 exec zsh                    # Reload shell
 <prefix>r                   # Reload tmux
@@ -236,6 +246,7 @@ kitty @ load-config         # Reload kitty (from within kitty)
 ```
 
 **Restore tmux session:**
+
 ```bash
 <prefix>C-r  # Manual restore (auto-restore disabled)
 ```
@@ -247,6 +258,7 @@ kitty @ load-config         # Reload kitty (from within kitty)
 **Issue:** Tool colors don't adapt to new theme
 
 **Check:**
+
 ```bash
 echo $BAT_THEME           # Should be 'ansi', not a theme name
 echo $FZF_DEFAULT_OPTS    # Should have --color= with numbers
@@ -254,6 +266,7 @@ echo $COLORTERM           # Should be 'truecolor'
 ```
 
 **Fix:** Reload shell or source `.zshenv`
+
 ```bash
 source ~/.zshenv
 ```
@@ -263,11 +276,13 @@ source ~/.zshenv
 **Issue:** Tmux doesn't match terminal colors
 
 **Check:**
+
 ```bash
 tmux show-options -g | grep terminal-overrides
 ```
 
 **Fix:** Reload tmux config
+
 ```bash
 <prefix>r  # Or manually: tmux source ~/.tmux.conf
 ```
@@ -277,6 +292,7 @@ tmux show-options -g | grep terminal-overrides
 **Issue:** Tmux immediately exits on startup
 
 **Fix:** Already handled - `.load_ssh` detects TMUX and skips initialization
+
 ```bash
 # Verify in .load_ssh:
 if [[ -n "${TMUX:-}" ]]; then return 0; fi
@@ -287,12 +303,14 @@ if [[ -n "${TMUX:-}" ]]; then return 0; fi
 **Issue:** Tab completion missing for tmuxinator or other tools
 
 **Check:**
+
 ```bash
 echo $fpath  # Should include home directory
 ls -la ~/    # Should see _tmuxinator file
 ```
 
 **Fix:** Rebuild completions
+
 ```bash
 rm ~/.zcompdump*
 exec zsh
@@ -303,6 +321,7 @@ exec zsh
 **Issue:** Tmuxinator sessions overridden by continuum
 
 **Solution:** Auto-restore is disabled. Use manual restore:
+
 ```bash
 <prefix>C-r  # Manually restore last saved session only when needed
 ```
@@ -311,20 +330,20 @@ exec zsh
 
 For detailed information on specific components:
 
-*   **Color system details:** See `COLOR_CONFLICT_RESOLUTION.md`
-*   **Tool reference:** See `TOOL_COLOR_REFERENCE.md`
-*   **Tmux colors:** See `Configs/tmux/TMUX_COLORS.md`
-*   **Implementation summary:** See `IMPLEMENTATION_SUMMARY.md`
-*   **Verification script:** Run `./verify-colors.sh`
+- **Color system details:** See `COLOR_CONFLICT_RESOLUTION.md`
+- **Tool reference:** See `TOOL_COLOR_REFERENCE.md`
+- **Tmux colors:** See `Configs/tmux/TMUX_COLORS.md`
+- **Implementation summary:** See `IMPLEMENTATION_SUMMARY.md`
+- **Verification script:** Run `./verify-colors.sh`
 
 ## Contributing
 
 When modifying configurations:
 
 1. **Maintain formatting:** Use `====` headers, no fold markers
-2. **Use ANSI colors:** Reference terminal indices (0-15), not hex values
-3. **Document changes:** Add comments explaining non-obvious choices
-4. **Test thoroughly:** Verify changes don't break theme adaptation
+1. **Use ANSI colors:** Reference terminal indices (0-15), not hex values
+1. **Document changes:** Add comments explaining non-obvious choices
+1. **Test thoroughly:** Verify changes don't break theme adaptation
 
 ## License
 

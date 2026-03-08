@@ -5,6 +5,7 @@ This script manages SSH public keys by downloading them from URLs and adding the
 ## Overview
 
 The script:
+
 - Reads SSH public key URLs from `~/.config/ssh/config`
 - Downloads each key from the provided URL
 - Adds keys to `~/.ssh/authorized_keys` with deduplication
@@ -33,26 +34,31 @@ https://example.com/path/to/public-key.pub
 ## Usage
 
 ### Add keys to authorized_keys (standard)
+
 ```bash
 ./Hooks/ssh/post.sh
 ```
 
 ### Preview what would be added (dry-run)
+
 ```bash
 ./Hooks/ssh/post.sh --dry-run
 ```
 
 ### Verbose output (debug mode)
+
 ```bash
 ./Hooks/ssh/post.sh --debug
 ```
 
 ### Disable progress spinner
+
 ```bash
 ./Hooks/ssh/post.sh --no-spinner
 ```
 
 ### Help
+
 ```bash
 ./Hooks/ssh/post.sh --help
 ```
@@ -67,6 +73,7 @@ https://example.com/path/to/public-key.pub
 ## Output
 
 ### Success
+
 ```
 ✓ Added key from: https://github.com/username.keys
 
@@ -81,6 +88,7 @@ Failed:        0
 ```
 
 ### Duplicate Key (Not Added)
+
 ```
 ≈ Key already exists: https://github.com/username.keys
 ```
@@ -88,23 +96,27 @@ Failed:        0
 ## Configuration Examples
 
 ### GitHub users
+
 ```bash
 # Get all keys for a GitHub user
 https://github.com/username.keys
 ```
 
 ### GitLab users
+
 ```bash
 # Get all keys for a GitLab user
 https://gitlab.com/username.keys
 ```
 
 ### Single public key file
+
 ```bash
 https://example.com/path/to/id_rsa.pub
 ```
 
 ### Multiple servers
+
 ```bash
 https://github.com/user1.keys
 https://github.com/user2.keys
@@ -114,6 +126,7 @@ https://example.com/corporate-key.pub
 ## Deduplication
 
 The script prevents duplicate keys by comparing key fingerprints. Even if:
+
 - The same URL is added multiple times
 - A key is added from different sources
 - Keys have different comments
@@ -123,6 +136,7 @@ Only unique key material is stored. The fingerprint comparison uses the key type
 ## authorized_keys Format
 
 After adding keys, `~/.ssh/authorized_keys` will look like:
+
 ```
 # Added from: https://github.com/username.keys
 ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQD...
@@ -136,6 +150,7 @@ Each key includes a comment showing its source URL for tracking.
 ## Error Handling
 
 Failures are logged to `~/.config/ssh/hook-errors.log`:
+
 ```
 2026-03-07 20:15:30: Failed to download: https://invalid-url.com/keys
 2026-03-07 20:15:31: Invalid SSH key format from https://bad-format.com/keys
@@ -159,11 +174,13 @@ Check this file for troubleshooting.
 ## Integration
 
 Call as part of dotfiles deployment:
+
 ```bash
 bash ~/.config/dotfiles/Hooks/ssh/post.sh
 ```
 
 Or with options:
+
 ```bash
 bash ~/.config/dotfiles/Hooks/ssh/post.sh --dry-run --debug
 ```
@@ -171,7 +188,9 @@ bash ~/.config/dotfiles/Hooks/ssh/post.sh --dry-run --debug
 ## Troubleshooting
 
 ### "curl not found"
+
 Install curl:
+
 ```bash
 # Ubuntu/Debian
 sudo apt install curl
@@ -181,18 +200,22 @@ brew install curl
 ```
 
 ### Keys not being added
+
 Check for errors:
+
 ```bash
 ./Hooks/ssh/post.sh --debug
 cat ~/.config/ssh/hook-errors.log
 ```
 
 ### Verify added keys
+
 ```bash
 cat ~/.ssh/authorized_keys
 ```
 
 ### Clear and re-add all keys
+
 ```bash
 # Backup first!
 cp ~/.ssh/authorized_keys ~/.ssh/authorized_keys.backup

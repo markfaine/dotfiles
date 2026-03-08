@@ -5,6 +5,7 @@ This script downloads and installs tools from a configuration file that aren't a
 ## Overview
 
 The script reads a list of URLs from `~/.config/utilities/config` and:
+
 - Downloads each tool/archive
 - Extracts archives if needed (tar.gz, tar.bz2, tar.xz, tar, zip)
 - Installs executables to `~/.local/bin`
@@ -25,21 +26,25 @@ https://example.com/archive.zip
 ## Usage
 
 ### Interactive install
+
 ```bash
 ~/.config/dotfiles/Hooks/utilties/post.sh
 ```
 
 ### Preview what would be installed (dry-run)
+
 ```bash
 ~/.config/dotfiles/Hooks/utilties/post.sh --dry-run
 ```
 
 ### Verbose output (debug mode)
+
 ```bash
 ~/.config/dotfiles/Hooks/utilties/post.sh --debug
 ```
 
 ### Disable spinner/progress animation
+
 ```bash
 ~/.config/dotfiles/Hooks/utilties/post.sh --no-spinner
 ```
@@ -57,6 +62,7 @@ https://example.com/archive.zip
 ## Current Configuration
 
 The example in `config` downloads:
+
 - `ansible-vault-pass-client` - a helper tool for Ansible vault operations
 
 ## Error Handling
@@ -73,11 +79,13 @@ All failures are logged to `~/.config/utilities/hook-errors.log` with timestamps
 ## Integration
 
 This script can be called as part of your dotfiles deployment process:
+
 ```bash
 bash ~/.config/dotfiles/Hooks/utilties/post.sh
 ```
 
 Or with options:
+
 ```bash
 bash ~/.config/dotfiles/Hooks/utilties/post.sh --dry-run --debug
 ```

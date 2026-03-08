@@ -367,4 +367,3 @@ function _load_zhared(){
 if [[ -z "$_zshared_loaded" ]]; then
   _load_zhared
 fi
-

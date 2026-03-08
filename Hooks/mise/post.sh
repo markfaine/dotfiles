@@ -137,6 +137,9 @@ run_cmd "Install all configured mise tools" "$MISE_BIN" install
 info "Refreshing mise shims..."
 run_cmd "Rebuild mise shims" "$MISE_BIN" reshim
 
+# Activate mise to add tools to PATH for remainder of install
+eval "$("$MISE_BIN" activate bash --shims)"
+
 info "Pruning stale mise tool installs..."
 run_cmd "Prune unused mise tool versions" "$MISE_BIN" prune --tools --yes
 
