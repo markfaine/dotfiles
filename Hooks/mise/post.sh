@@ -132,7 +132,7 @@ run_cmd "Bootstrap Node via mise" "$MISE_BIN" exec -y --silent node@latest -- no
 info "Node bootstrap complete."
 
 info "Installing configured mise toolchain..."
-run_cmd "Install all configured mise tools" "$MISE_BIN" install
+run_cmd "Install all configured mise tools" "$MISE_BIN" exec -y --silent node@latest -- "$MISE_BIN" install
 
 info "Refreshing mise shims..."
 run_cmd "Rebuild mise shims" "$MISE_BIN" reshim
