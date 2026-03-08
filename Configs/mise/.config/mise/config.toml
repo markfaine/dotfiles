@@ -65,6 +65,13 @@ yamllint = "latest"
 ripgrep = "latest"
 python = "3.13"
 "ubi:docker/docker-credential-helpers" = { version = "latest", matching = "pass", rename_exe = "docker-credential-pass" }
+marksman = "2026-02-08"
+fd = "latest"
+"pipx:pre-commit" = "4.5.1"
+"pipx:ansible-lint" = "26.3.0"
+"npm:vscode-langservers-extracted" = "4.10.0"
+"npm:@google/gemini-cli" = "0.29.5"
+"asdf:lua" = "5.5.0"
 
 [env]
 _.source = '.env'
