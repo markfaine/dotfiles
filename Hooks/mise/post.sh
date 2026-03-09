@@ -129,6 +129,7 @@ fi
 
 info "Ensuring Node is available via mise..."
 run_cmd "Bootstrap Node via mise" "$MISE_BIN" exec -y --silent node@latest -- node -v
+run_cmd "Bootstrap npm via mise" "$MISE_BIN" exec -y --silent npm@latest -- npm -v
 info "Node bootstrap complete."
 
 info "Installing configured mise toolchain..."

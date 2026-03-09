@@ -14,7 +14,6 @@ uv = "latest"
 pipx = "latest"
 perl = "latest"
 packer = "latest"
-semtag = "latest"
 terraform-validator = "latest"
 terraform = "latest"
 terraform-ls = "latest"
@@ -71,7 +70,6 @@ fd = "latest"
 "pipx:ansible-lint" = "26.3.0"
 "npm:vscode-langservers-extracted" = "4.10.0"
 "npm:@google/gemini-cli" = "0.29.5"
-"asdf:lua" = "5.5.0"
 
 [env]
 _.source = '.env'
