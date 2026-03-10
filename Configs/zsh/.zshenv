@@ -367,3 +367,24 @@ function _load_zhared(){
 if [[ -z "$_zshared_loaded" ]]; then
   _load_zhared
 fi
+
+# NVM
+NVM_DIR="$HOME/.config/nvm"
+export NVM_DIR
+# Install nvm
+export NVM_COMPLETION=true
+export NVM_LAZY_LOAD=true
+_node_availble=0
+znap source lukechilds/zsh-nvm
+if ! command -v npm &>/dev/null; then
+  if node install node &>/dev/null; then
+    _node_availble=1
+  fi
+fi
+
+# Mise
+if [[ _node_availble -eq 1 ]]; then
+  znap source joke/zim-mise
+else
+  zdebug "Could not activate mise, node is not available!"
+fi

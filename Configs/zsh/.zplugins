@@ -51,6 +51,7 @@ joke/zim-mise
 joke/zim-yq
 kiesman99/zim-zoxide
 thetic/extract
+lukechilds/zsh-nvm
 
 # ==============================================================================
 # Completions (should be loaded last)

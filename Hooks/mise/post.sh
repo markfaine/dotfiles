@@ -127,19 +127,11 @@ if [[ ! -x "$MISE_BIN" ]]; then
 	exit 0
 fi
 
-info "Ensuring Node is available via mise..."
-run_cmd "Bootstrap Node via mise" "$MISE_BIN" exec -y --silent node@latest -- node -v
-run_cmd "Bootstrap npm via mise" "$MISE_BIN" exec -y --silent npm@latest -- npm -v
-info "Node bootstrap complete."
-
-info "Installing configured mise toolchain..."
-run_cmd "Install all configured mise tools" "$MISE_BIN" exec -y --silent node@latest -- "$MISE_BIN" install
-
 info "Refreshing mise shims..."
 run_cmd "Rebuild mise shims" "$MISE_BIN" reshim
 
 # Activate mise to add tools to PATH for remainder of install
-eval "$("$MISE_BIN" activate bash --shims)"
+eval "$("$MISE_BIN" activate zsh --shims)"
 
 info "Pruning stale mise tool installs..."
 run_cmd "Prune unused mise tool versions" "$MISE_BIN" prune --tools --yes
