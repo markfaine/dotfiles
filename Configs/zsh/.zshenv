@@ -350,24 +350,6 @@ function _load_paths(){
 }
 _load_paths
 
-# ==============================================================================
-# File Sourcing: Shared Functions
-# ==============================================================================
-# Load shared shell functions from .zshared file
-function _load_zhared(){
-  zhared="$HOME/.zshared"
-  if [[ -f "$zhared" ]]; then
-    #shellcheck source=/dev/null
-    . "$zhared"
-    zdebug ".zshenv: Sourcing $zhared"
-  else
-    zdebug ".zshenv: Failed to source $zhared"
-  fi
-}
-if [[ -z "$_zshared_loaded" ]]; then
-  _load_zhared
-fi
-
 # NVM
 NVM_DIR="$HOME/.config/nvm"
 export NVM_DIR
@@ -387,4 +369,22 @@ if [[ _node_availble -eq 1 ]]; then
   znap source joke/zim-mise
 else
   zdebug "Could not activate mise, node is not available!"
+fi
+
+# ==============================================================================
+# File Sourcing: Shared Functions
+# ==============================================================================
+# Load shared shell functions from .zshared file
+function _load_zhared(){
+  zhared="$HOME/.zshared"
+  if [[ -f "$zhared" ]]; then
+    #shellcheck source=/dev/null
+    . "$zhared"
+    zdebug ".zshenv: Sourcing $zhared"
+  else
+    zdebug ".zshenv: Failed to source $zhared"
+  fi
+}
+if [[ -z "$_zshared_loaded" ]]; then
+  _load_zhared
 fi
