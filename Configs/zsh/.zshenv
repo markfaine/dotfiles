@@ -351,30 +351,6 @@ function _load_paths(){
 _load_paths
 
 # ==============================================================================
-# NVM: Load nvm znap plugin
-# ==============================================================================
-NVM_DIR="$HOME/.nvm"
-export NVM_DIR
-# Install nvm
-export NVM_COMPLETION=true
-export NVM_LAZY_LOAD=true
-znap clone lukechilds/zsh-nvm
-znap source lukechilds/zsh-nvm
-if [[ ! -d "$NVM_DIR" && ! command -v npm &>/dev/null; then
-  nvm install node &>/dev/null
-fi
-
-# ==============================================================================
-# Mise: Enable mise if npm is available
-# ==============================================================================
-if command -v npm &>/dev/null; then
-  znap clone joke/zim-mise
-  znap source joke/zim-mise
-else
-  zdebug "Could not activate mise, npm is not available!"
-fi
-
-# ==============================================================================
 # File Sourcing: Shared Functions
 # ==============================================================================
 # Load shared shell functions from .zshared file
