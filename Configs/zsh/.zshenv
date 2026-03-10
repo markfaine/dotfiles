@@ -350,25 +350,28 @@ function _load_paths(){
 }
 _load_paths
 
-# NVM
-NVM_DIR="$HOME/.config/nvm"
+# ==============================================================================
+# NVM: Load nvm znap plugin
+# ==============================================================================
+NVM_DIR="$HOME/.nvm"
 export NVM_DIR
 # Install nvm
 export NVM_COMPLETION=true
 export NVM_LAZY_LOAD=true
-_node_availble=0
+znap clone lukechilds/zsh-nvm
 znap source lukechilds/zsh-nvm
-if ! command -v npm &>/dev/null; then
-  if node install node &>/dev/null; then
-    _node_availble=1
-  fi
+if [[ ! -d "$NVM_DIR" && ! command -v npm &>/dev/null; then
+  nvm install node &>/dev/null
 fi
 
-# Mise
-if [[ _node_availble -eq 1 ]]; then
+# ==============================================================================
+# Mise: Enable mise if npm is available
+# ==============================================================================
+if command -v npm &>/dev/null; then
+  znap clone joke/zim-mise
   znap source joke/zim-mise
 else
-  zdebug "Could not activate mise, node is not available!"
+  zdebug "Could not activate mise, npm is not available!"
 fi
 
 # ==============================================================================
