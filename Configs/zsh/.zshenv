@@ -351,6 +351,16 @@ function _load_paths(){
 _load_paths
 
 # ==============================================================================
+# nvm: nvm plugin configuration
+# ==============================================================================
+# See: https://github.com/lukechilds/zsh-nvm
+# Auto use from .nvmrc
+export NVM_AUTO_USE=true
+
+# Enable completions
+export NVM_COMPLETION=true
+
+# ==============================================================================
 # File Sourcing: Shared Functions
 # ==============================================================================
 # Load shared shell functions from .zshared file

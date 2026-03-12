@@ -69,6 +69,7 @@ fd = "latest"
 "pipx:ansible-lint" = "26.3.0"
 "npm:vscode-langservers-extracted" = "4.10.0"
 "npm:@google/gemini-cli" = "0.29.5"
+node = "system"
 
 [env]
 _.source = '.env'
@@ -79,3 +80,4 @@ activate_aggressive = false
 idiomatic_version_file_enable_tools = ["python"]
 experimental = true
 lockfile = true
+disable_tools = ["node"]
