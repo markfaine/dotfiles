@@ -127,37 +127,33 @@ if [[ ! -x "$MISE_BIN" ]]; then
 	exit 0
 fi
 
-# Activate mise
-eval "$("$MISE_BIN" activate zsh )"
+# 1. Force the correct backend immediately
+run_cmd "Setting node backend to core" "$MISE_BIN" settings set preferred_backends node=core
 
-info "Disable experimental"
-run_cmd "Disabling experimental" "$MISE_BIN" settings set experimental false
+# 2. Clear corrupted cache
+run_cmd "Cleaning mise cache" rm -rf "$HOME/.cache/mise"
 
-info "Disable lockfile"
-run_cmd "Disabling lockfile" "$MISE_BIN" settings set lockfile false
+# 3. BOOTSTRAP NODE FIRST
+# This is the "secret sauce." Installing node standalone ensures
+# it's ready before mise tries to process the "npm:*" keys.
+run_cmd "Bootstrapping Node.js runtime" "$MISE_BIN" install node@latest
 
-# info "Remove the lockfile"
-# run_cmd "Removing uv.lock" rm -rf ~/uv.lock
+# 4. PRE-FLIGHT CHECK (Optional but helpful)
+if ! "$MISE_BIN" run node -- node -v >/dev/null 2>&1; then
+    info "✗ Node bootstrap failed (likely missing libatomic1). Check logs."
+    exit 1
+fi
 
-info "Pruning stale mise tool installs..."
-run_cmd "Prune unused mise tool versions" "$MISE_BIN" prune --tools --yes
+# 5. RUN FULL INSTALL
+# Now that Node is present, the npm:* tools will install smoothly.
+run_cmd "Installing remaining toolchain" "$MISE_BIN" install --yes
 
-info "Force the core backend for node"
-run_cmd "Setting preferred_backend to 'core' for node" "$MISE_BIN" settings set preferred_backends node=core
+# 6. POST-INSTALL MAINTENANCE
+run_cmd "Pruning stale tools" "$MISE_BIN" prune --tools --yes
+run_cmd "Rebuilding shims" "$MISE_BIN" reshim
 
-info "Clear the metadata cache"
-run_cmd "Removing ~/.cache/mise" rm -rf ~/.cache/mise
-
-info "Perform install of mise packages"
-run_cmd "Run mise install" "$MISE_BIN" install
-
-info "Refreshing mise shims..."
-run_cmd "Rebuild mise shims" "$MISE_BIN" reshim
-
-info "Enable experimental"
-run_cmd "Enabling experimental" "$MISE_BIN" settings set experimental true
-
-info "Enable lockfile"
+# 7. RESTORE SETTINGS
+run_cmd "Enabling experimental features" "$MISE_BIN" settings set experimental true
 run_cmd "Enabling lockfile" "$MISE_BIN" settings set lockfile true
 
 info "Mise toolchain install complete."
