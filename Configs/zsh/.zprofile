@@ -20,5 +20,5 @@
 # Add login-specific programs or environment setup here if needed
 # Examples:
 #   - Start SSH agent (for login sessions)
-#   - Initialize environment managers (mise, nvm, pyenv - already in .zshenv)
+#   - Initialize environment managers (mise, pyenv - already in .zshenv)
 #   - Load display-specific settings (DISPLAY for X11)

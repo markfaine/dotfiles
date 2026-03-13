@@ -1,75 +1,88 @@
 [tools]
-bat = "latest"
-bat-extras = "latest"
-fzf = "latest"
-gopass = "latest"
-lua-language-server = "latest"
-"aqua:neovim/neovim" = "latest"
+# Core Runtime (Define this first)
+node = "latest"
+
+# NPM Packages (List individually as top-level tools)
+"npm:yaml-language-server" = "latest"
+"npm:bash-language-server" = "latest"
+"npm:copilot" = "latest"
+"npm:gitlab-search" = "latest"
+"npm:vscode-langservers-extracted" = "4.10.0"
+"npm:@google/gemini-cli" = "0.29.5"
+
+# Other Runtimes
+python = "3.13"
 ruby = "latest"
-usage = "latest"
-yarn = "latest"
-make = "latest"
-markdownlint-cli2 = "latest"
-uv = "latest"
-pipx = "latest"
 perl = "latest"
-packer = "latest"
-terraform-validator = "latest"
+rust = "latest"
+
+# Infrastructure & CLI
 terraform = "latest"
 terraform-ls = "latest"
-rust = "latest"
-zoxide = "latest"
 terraform-lsp = "latest"
-semver = "latest"
-yq = "latest"
-tree-sitter = "latest"
-tmux = "latest"
-black = "latest"
-jq = "latest"
-"pipx:pydocstyle" = "latest"
-shfmt = "latest"
+terraform-validator = "latest"
 tflint = "latest"
-"pipx:yapf" = "latest"
+packer = "latest"
+make = "latest"
+gh = "latest"
+glab = "latest"
+gopass = "latest"
+"ubi:docker/docker-credential-helpers" = { version = "latest", matching = "pass", rename_exe = "docker-credential-pass" }
+
+# Development Tools
+"aqua:neovim/neovim" = "latest"
+lua-language-server = "latest"
+stylua = "latest"
+tree-sitter = "latest"
+shfmt = "latest"
+yamllint = "latest"
+yamlfmt = "latest"
+markdownlint-cli2 = "latest"
+marksman = "2026-02-08"
 editorconfig-checker = "latest"
-glow = "latest"
+usage = "latest"
+
+# Python Tools (via pipx)
+uv = "latest"
+pipx = "latest"
+"pipx:pydocstyle" = "latest"
+"pipx:yapf" = "latest"
 "pipx:mdformat" = "latest"
 "pipx:pyflakes" = "latest"
 "pipx:rstcheck" = "latest"
 "pipx:sphinx-lint" = "latest"
-yamlfmt = "latest"
 "pipx:flake8" = "latest"
-shellcheck = "latest"
-"ubi:alesbrelih/gitlab-ci-ls" = "latest"
-"ubi:uros-5/jinja-lsp" = "latest"
-gh = "latest"
-stylua = "latest"
-"npm:yaml-language-server" = "latest"
-"npm:bash-language-server" = "latest"
 "pipx:python-lsp-server" = "latest"
 "pipx:autopep8" = "latest"
 "pipx:pylint" = "latest"
-rg = "latest"
+"pipx:tldr" = "latest"
+"pipx:pre-commit" = "4.5.1"
+"pipx:ansible-lint" = "26.3.0"
+black = "latest"
+
+# Binaries (via ubi)
+"ubi:alesbrelih/gitlab-ci-ls" = "latest"
+"ubi:uros-5/jinja-lsp" = "latest"
 "ubi:ogham/exa" = "latest"
-glab = "latest"
-"npm:copilot" = "latest"
-"npm:gitlab-search" = "latest"
+"ubi:jesseduffield/lazygit" = "latest"
+
+# Terminal Utilities
+bat = "latest"
+bat-extras = "latest"
+fzf = "latest"
+zoxide = "latest"
+yq = "latest"
+jq = "latest"
+rg = "latest"
+ripgrep = "latest"
+fd = "latest"
 gdu = "latest"
 eza = "latest"
 duf = "latest"
-"pipx:tldr" = "latest"
-"ubi:jesseduffield/lazygit" = "latest"
+tmux = "latest"
+glow = "latest"
 lazydocker = "latest"
-yamllint = "latest"
-ripgrep = "latest"
-python = "3.13"
-"ubi:docker/docker-credential-helpers" = { version = "latest", matching = "pass", rename_exe = "docker-credential-pass" }
-marksman = "2026-02-08"
-fd = "latest"
-"pipx:pre-commit" = "4.5.1"
-"pipx:ansible-lint" = "26.3.0"
-"npm:vscode-langservers-extracted" = "4.10.0"
-"npm:@google/gemini-cli" = "0.29.5"
-node = "system"
+yarn = "latest"
 
 [env]
 _.source = '.env'
@@ -78,6 +91,5 @@ _.source = '.env'
 plugin_autoupdate_last_check_duration = '1 week'
 activate_aggressive = false
 idiomatic_version_file_enable_tools = ["python"]
-experimental = true
+experimental = false
 lockfile = true
-disable_tools = ["node"]

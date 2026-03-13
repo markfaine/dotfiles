@@ -127,13 +127,37 @@ if [[ ! -x "$MISE_BIN" ]]; then
 	exit 0
 fi
 
-info "Refreshing mise shims..."
-run_cmd "Rebuild mise shims" "$MISE_BIN" reshim
+# Activate mise
+eval "$("$MISE_BIN" activate zsh )"
 
-# Activate mise to add tools to PATH for remainder of install
-eval "$("$MISE_BIN" activate zsh --shims)"
+info "Disable experimental"
+run_cmd "Disabling experimental" "$MISE_BIN" settings set experimental false
+
+info "Disable lockfile"
+run_cmd "Disabling lockfile" "$MISE_BIN" settings set lockfile false
+
+# info "Remove the lockfile"
+# run_cmd "Removing uv.lock" rm -rf ~/uv.lock
 
 info "Pruning stale mise tool installs..."
 run_cmd "Prune unused mise tool versions" "$MISE_BIN" prune --tools --yes
+
+info "Force the core backend for node"
+run_cmd "Setting preferred_backend to 'core' for node" "$MISE_BIN" settings set preferred_backends node=core
+
+info "Clear the metadata cache"
+run_cmd "Removing ~/.cache/mise" rm -rf ~/.cache/mise
+
+info "Perform install of mise packages"
+run_cmd "Run mise install" "$MISE_BIN" install
+
+info "Refreshing mise shims..."
+run_cmd "Rebuild mise shims" "$MISE_BIN" reshim
+
+info "Enable experimental"
+run_cmd "Enabling experimental" "$MISE_BIN" settings set experimental true
+
+info "Enable lockfile"
+run_cmd "Enabling lockfile" "$MISE_BIN" settings set lockfile true
 
 info "Mise toolchain install complete."
