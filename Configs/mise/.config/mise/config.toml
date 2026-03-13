@@ -1,6 +1,6 @@
 [tools]
 # Core Runtime (Define this first)
-node = "latest"
+node = "v25.6.1"
 
 # NPM Packages (List individually as top-level tools)
 "npm:yaml-language-server" = "latest"
