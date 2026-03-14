@@ -31,6 +31,7 @@ libyaml-dev
 zlib1g-dev
 libfindbin-libs-perl
 make
+node
 ncurses-dev
 openssl
 openssh-client
