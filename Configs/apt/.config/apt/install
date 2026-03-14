@@ -54,6 +54,7 @@ trash-cli
 unzip
 vim-tiny
 wget
+xz
 yacc
 yubikey-manager
 zlib1g-dev

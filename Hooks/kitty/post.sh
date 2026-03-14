@@ -159,6 +159,10 @@ else
         echo "Error: curl is required to install Kitty." >&2
         exit 1
     fi
+    if ! command -v xz >/dev/null 2>&1; then
+        echo "Error: xz is required to install Kitty." >&2
+        exit 1
+    fi
 	if ! run_cmd "Download and run Kitty installer" bash -c 'curl -fsSL https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin'; then
         echo "Error: Failed to install Kitty." >&2
         exit 1
