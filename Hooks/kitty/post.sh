@@ -170,17 +170,18 @@ fi
 # Desktop Integration
 # ==============================================================================
 
-# Create symbolic links for kitty and kitten
-if [[ ! -x "$KITTY_BIN_DIR/kitty" || ! -x "$KITTY_BIN_DIR/kitten" ]]; then
-    info "Kitty binaries not found. Skipping desktop integration."
-    exit 0
-fi
-
 info "Setting up symbolic links for Kitty..."
 run_cmd "Create local bin directory" mkdir -p "$LOCAL_BIN_DIR"
-run_cmd "Link kitty binary" ln -sf "$KITTY_BIN_DIR/kitty" "$LOCAL_BIN_DIR/kitty"
-run_cmd "Link kitten binary" ln -sf "$KITTY_BIN_DIR/kitten" "$LOCAL_BIN_DIR/kitten"
-info "Symbolic links created."
+
+# Create symbolic links for kitty and kitten
+if [[ ! -x "$KITTY_BIN_DIR/kitty" ]]; then
+  run_cmd "Link kitty binary" ln -sf "$KITTY_BIN_DIR/kitty" "$LOCAL_BIN_DIR/kitty"
+fi
+
+# Create symbolic links for kitty and kitten
+if [[ ! -x "$KITTY_BIN_DIR/kitten" ]]; then
+  run_cmd "Link kitten binary" ln -sf "$KITTY_BIN_DIR/kitten" "$LOCAL_BIN_DIR/kitten"
+fi
 
 info "Copying desktop files..."
 run_cmd "Create local applications directory" mkdir -p "$LOCAL_APPS_DIR"

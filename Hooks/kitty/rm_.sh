@@ -12,6 +12,7 @@ set -euo pipefail
 KITTY_APP_DIR="$HOME/.local/kitty.app"
 LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}"
 LOG_FILE="$LOG_DIR/kitty-clean-hook.log"
+LOCAL_BIN_DIR="$HOME/.local/bin"
 
 DRY_RUN=0
 DEBUG=0
