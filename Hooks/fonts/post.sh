@@ -297,6 +297,9 @@ if (( DEBUG )); then
 	info "Debug mode enabled"
 fi
 
+# Create parent directories
+mkdir -p "$(dirname "$INSTALL_LIST")"
+
 install_fonts_from_file
 refresh_font_cache
 

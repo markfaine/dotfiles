@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
-# This hook runs tasks after the config files have been linked
+# This hook ensures the required directory structure for creating symlinks
 
 set -euo pipefail
 
 # ==============================================================================
-# Kitty Post Hook
+# Kitty Pre Hook
 # ==============================================================================
 
 KITTY_APP_DIR="$HOME/.local/kitty.app"
@@ -140,70 +140,14 @@ run_cmd() {
 }
 
 # ==============================================================================
-# Install Kitty
+# Create directories
 # ==============================================================================
-info "Checking if Kitty is already installed..."
-if [[ -d "$KITTY_APP_DIR" ]]; then
-    info "Kitty is already installed. Skipping installation."
-else
-    info "Installing Kitty..."
-
-    # Create parent directories
-    mkdir -p "$KITTY_BIN_DIR"
-    mkdir -p "$KITTY_SHARE_APPS_DIR"
-    mkdir -p "$(dirname "$KITTY_ICON_PATH")"
-    mkdir -p "$LOCAL_BIN_DIR"
-    mkdir -p "$LOCAL_APPS_DIR"
-
-    if ! command -v curl >/dev/null 2>&1; then
-        echo "Error: curl is required to install Kitty." >&2
-        exit 1
-    fi
-	if ! run_cmd "Download and run Kitty installer" bash -c 'curl -fsSL https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin'; then
-        echo "Error: Failed to install Kitty." >&2
-        exit 1
-    fi
-    info "Kitty installed successfully."
-fi
-
-# ==============================================================================
-# Desktop Integration
-# ==============================================================================
-
-# Create symbolic links for kitty and kitten
-if [[ ! -x "$KITTY_BIN_DIR/kitty" || ! -x "$KITTY_BIN_DIR/kitten" ]]; then
-    info "Kitty binaries not found. Skipping desktop integration."
-    exit 0
-fi
-
-info "Setting up symbolic links for Kitty..."
-run_cmd "Create local bin directory" mkdir -p "$LOCAL_BIN_DIR"
-run_cmd "Link kitty binary" ln -sf "$KITTY_BIN_DIR/kitty" "$LOCAL_BIN_DIR/kitty"
-run_cmd "Link kitten binary" ln -sf "$KITTY_BIN_DIR/kitten" "$LOCAL_BIN_DIR/kitten"
-info "Symbolic links created."
-
-info "Copying desktop files..."
-run_cmd "Create local applications directory" mkdir -p "$LOCAL_APPS_DIR"
-run_cmd "Copy kitty.desktop" cp "$KITTY_SHARE_APPS_DIR/kitty.desktop" "$LOCAL_APPS_DIR/"
-
-if [[ -f "$KITTY_SHARE_APPS_DIR/kitty-open.desktop" ]]; then
-    run_cmd "Copy kitty-open.desktop" cp "$KITTY_SHARE_APPS_DIR/kitty-open.desktop" "$LOCAL_APPS_DIR/"
-fi
-
-info "Updating desktop file paths..."
-run_cmd "Patch desktop icon path" sed -i "s|Icon=kitty|Icon=$KITTY_ICON_PATH|g" "$LOCAL_APPS_DIR"/kitty*.desktop
-run_cmd "Patch desktop exec path" sed -i "s|Exec=kitty|Exec=$KITTY_BIN_DIR/kitty|g" "$LOCAL_APPS_DIR"/kitty*.desktop
-info "Desktop files updated."
-
-info "Setting up xdg-terminal-exec..."
-run_cmd "Create ~/.config" mkdir -p "$HOME/.config"
-if (( DRY_RUN )); then
-    info "[dry-run] Write $HOME/.config/xdg-terminals.list"
-    info "          kitty.desktop"
-else
-    echo 'kitty.desktop' >"$HOME/.config/xdg-terminals.list"
-    info "✓ Wrote $HOME/.config/xdg-terminals.list"
-fi
-info "xdg-terminal-exec configured."
-
-info "Kitty setup complete."
+info "Create kitty directories"
+kitty_config_dir="${XDG_CONFIG_HOME:-$HOME/.config}/kitty"
+kitty_icon_dir="$(dirname "$KITTY_ICON_PATH")"
+run_cmd "Create $kitty_config_dir directory" mkdir -p "$kitty_config_dir"
+run_cmd "Create $KITTY_BIN_DIR directory" mkdir -p "$KITTY_BIN_DIR"
+run_cmd "Create $KITTY_SHARE_APPS_DIR directory" mkdir -p "$KITTY_SHARE_APPS_DIR"
+run_cmd "Create $LOCAL_BIN_DIR directory" mkdir -p "$LOCAL_BIN_DIR"
+run_cmd "Create $LOCAL_APPS_DIR directory" mkdir -p "$LOCAL_APPS_DIR"
+run_cmd "Create $kitty_icon_dir" mkdir -p "$kitty_icon_dir"

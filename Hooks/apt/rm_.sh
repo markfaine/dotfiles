@@ -3,13 +3,14 @@
 set -euo pipefail
 
 # ==============================================================================
-# Mise Pre Hook
+# Apt Clean Hook
 # ==============================================================================
-# Install mise if missing, without modifying shell rc files.
+# Runs during `tuckr unset` for apt group.
+# Intentionally non-destructive: does not remove packages automatically.
 
-MISE_BIN="$HOME/.local/bin/mise"
+APT_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/apt"
 LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}"
-LOG_FILE="$LOG_DIR/mise-pre-hook.log"
+LOG_FILE="$LOG_DIR/apt-hook.log"
 
 DRY_RUN=0
 DEBUG=0
@@ -17,10 +18,10 @@ USE_SPINNER=1
 
 usage() {
 	cat <<'EOF'
-Usage: pre.sh [--dry-run|-n] [--debug|-d] [--no-spinner] [--help|-h]
+Usage: rm_.sh [--dry-run|-n] [--debug|-d] [--no-spinner] [--help|-h]
 
 Options:
-  -n, --dry-run    Show what would run, but do not execute commands
+  -n, --dry-run    Show what would run, but do not execute changes
   -d, --debug      Verbose output; show commands and command output
       --no-spinner Disable spinner/progress animation
   -h, --help       Show this help
@@ -58,17 +59,22 @@ if (( DEBUG )); then
 	USE_SPINNER=0
 fi
 
-if ! command -v curl >/dev/null 2>&1 && ! command -v wget >/dev/null 2>&1; then
-	echo "Error: curl or wget is required to install mise." >&2
-	exit 1
-fi
+mkdir -p "$LOG_DIR"
+
+log_msg() {
+	local level="$1"
+	shift
+	printf '[%s] [%s] %s\n' "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" "$level" "$*" >> "$LOG_FILE"
+}
 
 info() {
+	log_msg INFO "$*"
 	printf '%s\n' "$*"
 }
 
 debug() {
 	if (( DEBUG )); then
+		log_msg DEBUG "$*"
 		printf '[debug] %s\n' "$*"
 	fi
 }
@@ -95,8 +101,6 @@ run_cmd() {
 		local idx=0
 		local pid
 		local status=0
-		local local_bin_dir
-    local mise_config_dir
 
 		printf '→ %s ' "$label"
 		"$@" >/dev/null 2>&1 &
@@ -115,6 +119,7 @@ run_cmd() {
 			printf '\r✓ %s\n' "$label"
 		else
 			printf '\r✗ %s\n' "$label"
+			log_msg ERROR "$label failed: $*"
 		fi
 
 		return $status
@@ -126,31 +131,20 @@ run_cmd() {
 		return 0
 	fi
 	printf '✗ %s\n' "$label"
+	log_msg ERROR "$label failed: $*"
 	return 1
 }
 
-if [[ -x "$MISE_BIN" ]]; then
-	info "Mise already installed at $MISE_BIN"
-	exit 0
+info "Running apt clean hook"
+if (( DRY_RUN )); then
+	info "Dry-run mode enabled"
+fi
+if (( DEBUG )); then
+	info "Debug mode enabled"
 fi
 
-info "Installing mise..."
+# Keep package removal non-destructive. This cleanup only removes apt group
+# config files created/symlinked by this dotfiles group.
+run_cmd "Remove apt config directory" rm -rf "$APT_CONFIG_DIR"
 
-info "Create parent directories"
-local_bin_dir="$(dirname "$MISE_BIN")"
-mise_config_dir="${XDG_CONFIG_HOME:-$HOME/.config}/mise"
-run_cmd "Create $local_bin_dir directory" mkdir -p "$local_bin_dir"
-run_cmd "Create $mise_config_dir directory" mkdir -p "$mise_config_dir"
-
-if command -v curl >/dev/null 2>&1; then
-	run_cmd "Install mise via https://mise.run" bash -c 'curl https://mise.run | sh'
-else
-	run_cmd "Install mise via https://mise.run" bash -c 'wget -qO- https://mise.run | sh'
-fi
-
-if [[ -x "$MISE_BIN" ]]; then
-	info "Mise install complete: $MISE_BIN"
-else
-	echo "Error: mise installation did not produce $MISE_BIN" >&2
-	exit 1
-fi
+info "Apt clean hook complete"
