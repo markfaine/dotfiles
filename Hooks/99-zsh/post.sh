@@ -1,0 +1,110 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+# ==============================================================================
+# Zsh Post Hook
+# ==============================================================================
+# Validates deployed zsh dotfiles can be sourced without startup errors.
+
+DRY_RUN=0
+DEBUG=0
+
+usage() {
+	cat <<'EOF'
+Usage: post.sh [--dry-run|-n] [--debug|-d] [--help|-h]
+
+Validate zsh startup files after deployment.
+
+Checks performed:
+  1) Ensure required files exist (~/.zshenv, ~/.zprofile, ~/.zshrc)
+  2) Syntax-check each file with zsh -n
+  3) Start a login+interactive zsh shell to verify runtime sourcing
+
+Options:
+  -n, --dry-run    Print what would run
+  -d, --debug      Enable verbose output
+  -h, --help       Show this help
+EOF
+}
+
+for arg in "$@"; do
+	case "$arg" in
+		-n|--dry-run)
+			DRY_RUN=1
+			;;
+		-d|--debug)
+			DEBUG=1
+			;;
+		-h|--help)
+			usage
+			exit 0
+			;;
+		*)
+			echo "Unknown argument: $arg" >&2
+			usage >&2
+			exit 2
+			;;
+	esac
+done
+
+info() {
+	printf '%s\n' "$*"
+}
+
+debug() {
+	if (( DEBUG )); then
+		printf '[debug] %s\n' "$*"
+	fi
+}
+
+run_cmd() {
+	local description="$1"
+	shift
+
+	if (( DRY_RUN )); then
+		info "[dry-run] $description"
+		info "          $*"
+		return 0
+	fi
+
+	if (( DEBUG )); then
+		info "[run] $description"
+		debug "cmd: $*"
+		"$@"
+		return $?
+	fi
+
+	info "$description"
+	"$@" >/dev/null 2>&1
+}
+
+info "Running zsh post hook"
+if (( DRY_RUN )); then
+	info "Dry-run mode enabled"
+fi
+if (( DEBUG )); then
+	info "Debug mode enabled"
+fi
+
+if ! command -v zsh >/dev/null 2>&1; then
+	info "zsh not found; skipping zsh startup validation"
+	exit 0
+fi
+
+required_files=("$HOME/.zshenv" "$HOME/.zprofile" "$HOME/.zshrc")
+for file in "${required_files[@]}"; do
+	if [[ ! -f "$file" ]]; then
+		echo "Error: required zsh startup file missing: $file" >&2
+		exit 1
+	fi
+done
+
+run_cmd "Syntax check ~/.zshenv" zsh -n "$HOME/.zshenv"
+run_cmd "Syntax check ~/.zprofile" zsh -n "$HOME/.zprofile"
+run_cmd "Syntax check ~/.zshrc" zsh -n "$HOME/.zshrc"
+
+# Start a login+interactive shell to match normal user startup behavior.
+run_cmd "Validate login interactive zsh startup" zsh -lic 'exit 0'
+
+info "Zsh post hook complete"

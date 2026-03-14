@@ -378,7 +378,8 @@ deploy_dotfiles() {
     local groups=()
     debug_msg "Discovering groups in Configs directory"
     if [ -d "Configs" ]; then
-        for group in Configs/*/; do
+        mapfile -t groups < <(printf '%s\n' Configs/*/ | sort -V)
+        for group in "${groups[@]}"; do
             if [ -d "$group" ]; then
                 local group_name=$(basename "$group")
                 groups+=("$group_name")
@@ -389,7 +390,8 @@ deploy_dotfiles() {
 
     debug_msg "Discovering groups in Hooks directory"
     if [ -d "Hooks" ]; then
-        for group in Hooks/*/; do
+        mapfile -t groups < <(printf '%s\n' Hooks/*/ | sort -V)
+        for group in "${groups[@]}"; do
             if [ -d "$group" ]; then
                 local group_name=$(basename "$group")
                 # Only add if not already in list (avoid duplicates)
