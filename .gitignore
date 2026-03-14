@@ -3,11 +3,9 @@
 **/*.bak
 **/*.key
 **/.vault
-**/home/.docker/buildx
-**/.token_seed*
 **/buildx
 **/tmux/plugins
-**/buildx/
+**/tpack/plugins
 **/.token*
 **/install.sh
 **/font-install.sh
