@@ -204,7 +204,6 @@ check_prerequisites() {
     local missing=()
 
     debug_msg "Ensuring scripts are executable"
-    find "$DOTFILES_DIR" -type f \( -name '*.sh' -o -name '*.py' \) -exec chmod 750 "{}" \;
 
     debug_msg "Checking for git..."
     # Essential tools
@@ -247,7 +246,7 @@ clone_dotfiles() {
 
     if [ -d "$DOTFILES_DIR" ]; then
         warn "Dotfiles directory already exists at $DOTFILES_DIR"
-        debug_msg "Directory contents: $(ls -la "$DOTFILES_DIR" 2>/dev/null | wc -l) items"
+        debug_msg "Directory contents: $(find "$DOTFILES_DIR" -mindepth 1 -maxdetph 1 2>/dev/null | wc -l) items"
 
         read -p "Do you want to update it? (y/N) " -n 1 -r
         echo
@@ -331,6 +330,7 @@ ensure_xdg_directories() {
         "$HOME/.local/share"
         "$HOME/.local/state"
         "$HOME/.cache"
+        "$LOCAL_BIN"
     )
 
     for dir in "${xdg_dirs[@]}"; do
@@ -357,20 +357,6 @@ deploy_dotfiles() {
     fi
     debug_msg "tuckr found: $(which tuckr)"
 
-    # Change to dotfiles directory
-    debug_msg "Changing to directory: $DOTFILES_DIR"
-    cd "$DOTFILES_DIR"
-
-    # Verify dotfiles directory has content
-    debug_msg "Verifying Configs and Hooks directories"
-    if [ ! -d "Configs" ] && [ ! -d "Hooks" ]; then
-        error "Dotfiles directory appears empty or corrupted"
-        ls -la
-        exit 1
-    fi
-    debug_msg "Found Configs: $([ -d "Configs" ] && echo yes || echo no)"
-    debug_msg "Found Hooks: $([ -d "Hooks" ] && echo yes || echo no)"
-
     # Create XDG directories before symlink operations
     ensure_xdg_directories
 
@@ -378,45 +364,41 @@ deploy_dotfiles() {
     ensure_hook_scripts_executable "$DOTFILES_DIR"
 
     # Discover all dotfile groups by basename and sort in natural version order.
-    # This supports ordered prefixes like 10-apt, 20-fonts, ... and avoids
+    # This supports ordered prefixes like apt, fonts, ... and avoids
     # mixing full paths with group names.
-    local groups=()
-    local discovered_groups=()
 
-    debug_msg "Discovering groups in Configs directory"
-    if [ -d "Configs" ]; then
-        while IFS= read -r group_name; do
-            discovered_groups+=("$group_name")
-        done < <(find Configs -mindepth 1 -maxdepth 1 -type d -printf '%f\n')
-    fi
+    info "Deploying dotfiles with tuckr set..."
 
-    debug_msg "Discovering groups in Hooks directory"
-    if [ -d "Hooks" ]; then
-        while IFS= read -r group_name; do
-            discovered_groups+=("$group_name")
-        done < <(find Hooks -mindepth 1 -maxdepth 1 -type d -printf '%f\n')
-    fi
-
-    if [ ${#discovered_groups[@]} -gt 0 ]; then
-        mapfile -t groups < <(printf '%s\n' "${discovered_groups[@]}" | sort -Vu)
-    fi
-
-    for group_name in "${groups[@]}"; do
-        debug_msg "Found group: $group_name"
-    done
-
-    if [ ${#groups[@]} -eq 0 ]; then
-        error "No dotfile groups found in Configs or Hooks directories"
+    debug_msg "Running: tuckr set for non-dependent configs"
+    if ! tuckr set -fy \* -e mise,pass,nvim,wsl,zsh  ; then
+        error "Tuckr non-dependent config deployment failed"
         exit 1
     fi
 
-    info "Found ${#groups[@]} dotfile groups: ${groups[*]}"
+    debug_msg "Running: tuckr set mise"
+    if ! tuckr set -fy mise; then
+        error "Tuckr mise config deployment failed"
+        exit 1
+    fi
 
+    debug_msg "Running: tuckr set pass"
+    if ! tuckr set -fy pass; then
+        warn "Tuckr pass config deployment failed"
+    fi
 
-    info "Deploying dotfiles with tuckr set..."
-    debug_msg "Running: tuckr set -fy ${groups[*]}"
-    if ! tuckr set -fy "${groups[@]}"; then
-        error "Tuckr deployment failed"
+    debug_msg "Running: tuckr set nvim"
+    if ! tuckr set -fy nvim; then
+        warn "Tuckr nvim config deployment failed"
+    fi
+
+    debug_msg "Running: tuckr set wsl"
+    if ! tuckr set -fy wsl; then
+        warn "Tuckr wsl config deployment failed"
+    fi
+
+    debug_msg "Running: tuckr set zsh"
+    if ! tuckr set -fy zsh; then
+        error "Tuckr zsh config deployment failed"
         exit 1
     fi
 
