@@ -6,7 +6,7 @@ set -euo pipefail
 # Fonts Post Hook
 # ==============================================================================
 
-INSTALL_LIST="$TUCKR_USER_CONFIG/fonts/install"
+INSTALL_LIST="${XDG_CONFIG_HOME:-$HOME/.config}/fonts/install"
 LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}"
 LOG_FILE="$LOG_DIR/fonts-hook.log"
 FONTS_DIR_LINUX="${}/fonts"

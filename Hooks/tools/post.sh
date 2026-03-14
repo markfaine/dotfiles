@@ -6,10 +6,10 @@ set -euo pipefail
 # ==============================================================================
 # Tools Post Hook
 # ==============================================================================
-# Downloads and installs tools from "$TUCKR_USER_CONFIG/tools/sources
+# Downloads and installs tools from "${XDG_CONFIG_HOME:-$HOME/.config}/tools/sources
 # that are not available via mise. Supports raw text scripts, binary files, and archives.
 
-TOOLS_CONFIG="$TUCKR_USER_CONFIG/tools/sources"
+TOOLS_CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/tools/sources"
 INSTALL_DIR="$HOME/.local/bin"
 LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}"
 LOG_FILE="$LOG_DIR/tools-hook.log"

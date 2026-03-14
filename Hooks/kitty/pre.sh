@@ -14,7 +14,7 @@ KITTY_BIN_DIR="$KITTY_APP_DIR/bin"
 KITTY_SHARE_APPS_DIR="$KITTY_APP_DIR/share/applications"
 KITTY_ICON_PATH="$KITTY_APP_DIR/share/icons/hicolor/256x256/apps/kitty.png"
 LOCAL_BIN_DIR="$HOME/.local/bin"
-LOCAL_APPS_DIR="$TUCKR_USER_DATA/applications"
+LOCAL_APPS_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/applications"
 # TODO: Log to the below
 # LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}"
 # LOG_FILE="$LOG_DIR/kitty-hook.log"

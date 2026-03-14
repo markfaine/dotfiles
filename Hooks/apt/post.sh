@@ -6,8 +6,8 @@ set -euo pipefail
 # Apt Post Hook
 # ==============================================================================
 
-INSTALL_LIST="$TUCKR_USER_CONFIG/apt/install"
-REMOVE_LIST="$TUCKR_USER_CONFIG/apt/remove"
+INSTALL_LIST="${XDG_CONFIG_HOME:-$HOME/.config}/apt/install"
+REMOVE_LIST="${XDG_CONFIG_HOME:-$HOME/.config}/apt/remove"
 LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}"
 LOG_FILE="$LOG_DIR/apt-hook.log"
 
