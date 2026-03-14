@@ -133,18 +133,17 @@ run_cmd "Setting node backend to core" "$MISE_BIN" settings set preferred_backen
 # 2. Clear corrupted cache
 run_cmd "Cleaning mise cache" rm -rf "$HOME/.cache/mise"
 
-# # 3. BOOTSTRAP NODE FIRST
-# # This is the "secret sauce." Installing node standalone ensures
-# # it's ready before mise tries to process the "npm:*" keys.
-# run_cmd "Bootstrapping Node.js runtime" "$MISE_BIN" install node@v25.6.1
+# 3. BOOTSTRAP NODE FIRST
+# This is the "secret sauce." Installing node standalone ensures
+# it's ready before mise tries to process the "npm:*" keys.
+run_cmd "Bootstrapping Node.js runtime" "$MISE_BIN" install node@v25.6.1
 
-# sudo ln -s /usr/lib/x86_64-linux-gnu/libatomic.so.1 /usr/lib/libatomic.so.1
-# # 4. PRE-FLIGHT CHECK (Optional but helpful)
-# if ! "$MISE_BIN" run node -- node -v >/dev/null 2>&1; then
-#     info "✗ Node bootstrap failed (likely missing libatomic1). Check logs."
-#    #exit 1
-# fi
-
+sudo ln -s /usr/lib/x86_64-linux-gnu/libatomic.so.1 /usr/lib/libatomic.so.1
+# 4. PRE-FLIGHT CHECK (Optional but helpful)
+if ! "$MISE_BIN" run node -- node -v >/dev/null 2>&1; then
+    info "✗ Node bootstrap failed (likely missing libatomic1). Check logs."
+    exit 1
+fi
 
 # 5. RUN FULL INSTALL
 # Now that Node is present, the npm:* tools will install smoothly.
