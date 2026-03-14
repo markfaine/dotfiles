@@ -1,8 +1,8 @@
 [tools]
-# Core Runtime (Define this first)
-# node = "v25.6.1"
+# Core Runtime
+node = "latest"
 
-# NPM Packages (List individually as top-level tools)
+# NPM Packages
 "npm:yaml-language-server" = "latest"
 "npm:bash-language-server" = "latest"
 "npm:copilot" = "latest"
@@ -88,8 +88,11 @@ yarn = "latest"
 _.source = '.env'
 
 [settings]
+always_keep_download = false
+always_keep_install = false
+preferred_backends node = core
 plugin_autoupdate_last_check_duration = '1 week'
 activate_aggressive = false
-idiomatic_version_file_enable_tools = ["python"]
+idiomatic_version_file_enable_tools = []
 experimental = false
-lockfile = true
+lockfile = false

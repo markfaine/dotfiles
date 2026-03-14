@@ -8,8 +8,8 @@ set -euo pipefail
 
 INSTALL_LIST="$HOME/.config/apt/install"
 REMOVE_LIST="$HOME/.config/apt/remove"
-APT_LOG_DIR="$HOME/.config/apt"
-APT_LOG_FILE="$APT_LOG_DIR/hook-errors.log"
+APT_LOG_DIR="$HOME/.local/var/log"
+APT_LOG_FILE="$APT_LOG_DIR/apt-hook-errors.log"
 
 DRY_RUN=0
 DEBUG=0

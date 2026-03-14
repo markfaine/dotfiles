@@ -203,6 +203,9 @@ check_prerequisites() {
 
     local missing=()
 
+    debug_msg "Ensuring scripts are executable"
+    find "$DOTFILES_DIR" -type f \( -name '*.sh' -o -name '*.py' \) -exec chmod 750 "{}" \;
+
     debug_msg "Checking for git..."
     # Essential tools
     if ! command_exists git; then

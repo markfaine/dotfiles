@@ -6,3 +6,4 @@
 # cat <<'EOF' | sudo tee /etc/wsl.conf
 
 # EOF
+exit 0

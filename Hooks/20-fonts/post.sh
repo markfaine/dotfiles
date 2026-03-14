@@ -6,10 +6,10 @@ set -euo pipefail
 # Fonts Post Hook
 # ==============================================================================
 
-INSTALL_LIST="$HOME/.fonts"
+INSTALL_LIST="$HOME/.fontlist"
 FONTS_DIR_LINUX="$HOME/.local/share/fonts"
 FONTS_DIR_MACOS="$HOME/Library/Fonts"
-LOG_DIR="$HOME/.local/var/log/fonts"
+LOG_DIR="$HOME/.local/var/log"
 LOG_FILE="$LOG_DIR/fonts-hook-errors.log"
 
 DRY_RUN=0
@@ -20,9 +20,9 @@ usage() {
     cat <<'EOF'
 Usage: post.sh [--dry-run|-n] [--debug|-d] [--no-spinner] [--help|-h]
 
-Install fonts listed in ~/.fonts.
+Install fonts listed in ~/.fontlist.
 
-Each non-comment line in ~/.fonts must be a downloadable font archive URL.
+Each non-comment line in ~/.fontlist must be a downloadable font archive URL.
 
 Options:
   -n, --dry-run    Show what would run, but do not execute changes
