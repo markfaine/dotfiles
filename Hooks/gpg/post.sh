@@ -9,8 +9,8 @@ set -euo pipefail
 # Imports GPG public keys from ~/.gnupg/*.asc into the local keyring
 
 GNUPG_DIR="$HOME/.gnupg"
-LOG_DIR="$HOME/.local/var/log"
-LOG_FILE="$LOG_DIR/gpg-hook-errors.log"
+LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}"
+LOG_FILE="$LOG_DIR/gnupg-hook.log"
 
 DRY_RUN=0
 DEBUG=0

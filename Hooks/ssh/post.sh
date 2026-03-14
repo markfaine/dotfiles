@@ -9,11 +9,11 @@ set -euo pipefail
 # Downloads SSH public keys from URLs and adds them to ~/.ssh/authorized_keys
 # Prevents duplicate keys while allowing unique keys to be appended
 
-SSH_CONFIG="$HOME/.config/ssh/keys"
+SSH_CONFIG="$TUCKR_USER_CONFIG/ssh/authorized_keys"
 SSH_DIR="$HOME/.ssh"
 AUTHORIZED_KEYS="$SSH_DIR/authorized_keys"
-LOG_DIR="$HOME/.local/var/log"
-LOG_FILE="$LOG_DIR/ssh-hook-errors.log"
+LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}"
+LOG_FILE="$LOG_DIR/ssh-hook.log"
 
 DRY_RUN=0
 DEBUG=0

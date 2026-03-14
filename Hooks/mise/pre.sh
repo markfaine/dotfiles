@@ -8,6 +8,8 @@ set -euo pipefail
 # Install mise if missing, without modifying shell rc files.
 
 MISE_BIN="$HOME/.local/bin/mise"
+LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}"
+LOG_FILE="$LOG_DIR/mise-pre-hook.log"
 
 DRY_RUN=0
 DEBUG=0

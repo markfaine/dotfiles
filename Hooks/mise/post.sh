@@ -10,6 +10,8 @@ set -euo pipefail
 #   2) install full mise toolchain (including npm:* tools)
 
 MISE_BIN="$HOME/.local/bin/mise"
+LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}"
+LOG_FILE="$LOG_DIR/mise-post-hook.log"
 
 DRY_RUN=0
 DEBUG=0
@@ -133,17 +135,14 @@ run_cmd "Setting node backend to core" "$MISE_BIN" settings set preferred_backen
 # 2. Clear corrupted cache
 run_cmd "Cleaning mise cache" rm -rf "$HOME/.cache/mise"
 
-# 1. Disable the npm backend
-run_cmd "Setting node backend to core" "$MISE_BIN" prepare set disable=['npm']
-
 # 3. BOOTSTRAP NODE FIRST
 # This is the "secret sauce." Installing node standalone ensures
 # it's ready before mise tries to process the "npm:*" keys.
-run_cmd "Bootstrapping Node.js runtime" "$MISE_BIN" install node@latest
+run_cmd "Bootstrapping Node.js runtime" "$MISE_BIN" use node@latest
 
 # 4. PRE-FLIGHT CHECK (Optional but helpful)
 if ! "$MISE_BIN" run node -- node -v >/dev/null 2>&1; then
-    info "✗ Node bootstrap failed (likely missing libatomic1). Check logs."
+    info "✗ Node bootstrap failed. Check logs."
     exit 1
 fi
 

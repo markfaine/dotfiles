@@ -6,11 +6,11 @@ set -euo pipefail
 # Fonts Post Hook
 # ==============================================================================
 
-INSTALL_LIST="$HOME/.fontlist"
-FONTS_DIR_LINUX="$HOME/.local/share/fonts"
+INSTALL_LIST="$TUCKR_USER_CONFIG/fonts/install"
+LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}"
+LOG_FILE="$LOG_DIR/fonts-hook.log"
+FONTS_DIR_LINUX="${}/fonts"
 FONTS_DIR_MACOS="$HOME/Library/Fonts"
-LOG_DIR="$HOME/.local/var/log"
-LOG_FILE="$LOG_DIR/fonts-hook-errors.log"
 
 DRY_RUN=0
 DEBUG=0
@@ -233,7 +233,7 @@ download_font() {
 	fi
 
     temp_dir=$(mktemp -d)
-    trap "rm -rf '$temp_dir'" RETURN
+    trap 'rm -rf "$temp_dir"' RETURN
 
     if command -v curl >/dev/null 2>&1; then
 		if ! run_cmd "Download $label" curl -fsSL "$url" -o "$temp_dir/$filename"; then

@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
 set -euo pipefail
+LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}"
+LOG_FILE="$LOG_DIR/nvim-hook.log"
 
 DRY_RUN=0
 DEBUG=0

@@ -6,13 +6,13 @@ set -euo pipefail
 # ==============================================================================
 # Tools Post Hook
 # ==============================================================================
-# Downloads and installs tools from ~/.config/tools/.config/tools/config
-# that are not available via mise. Supports both binary files and archives.
+# Downloads and installs tools from "$TUCKR_USER_CONFIG/tools/sources
+# that are not available via mise. Supports raw text scripts, binary files, and archives.
 
-TOOLS_CONFIG="$HOME/.tools"
+TOOLS_CONFIG="$TUCKR_USER_CONFIG/tools/sources"
 INSTALL_DIR="$HOME/.local/bin"
-LOG_DIR="$HOME/.local/var/log"
-LOG_FILE="$LOG_DIR/tools-hook-errors.log"
+LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}"
+LOG_FILE="$LOG_DIR/tools-hook.log"
 
 DRY_RUN=0
 DEBUG=0
@@ -236,7 +236,7 @@ install_utility() {
 	archive_type=$(is_archive "$filename")
 
 	temp_file=$(mktemp)
-	trap "rm -f $temp_file" RETURN
+	trap 'rm -f "$temp_file"' RETURN
 
 	debug_msg "Downloading: $url"
 

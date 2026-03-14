@@ -6,12 +6,18 @@ set -euo pipefail
 # Kitty Pre Hook
 # ==============================================================================
 
+
+
+
 KITTY_APP_DIR="$HOME/.local/kitty.app"
 KITTY_BIN_DIR="$KITTY_APP_DIR/bin"
 KITTY_SHARE_APPS_DIR="$KITTY_APP_DIR/share/applications"
 KITTY_ICON_PATH="$KITTY_APP_DIR/share/icons/hicolor/256x256/apps/kitty.png"
 LOCAL_BIN_DIR="$HOME/.local/bin"
-LOCAL_APPS_DIR="$HOME/.local/share/applications"
+LOCAL_APPS_DIR="$TUCKR_USER_DATA/applications"
+# TODO: Log to the below
+# LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}"
+# LOG_FILE="$LOG_DIR/kitty-hook.log"
 
 DRY_RUN=0
 DEBUG=0

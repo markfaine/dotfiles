@@ -6,10 +6,10 @@ set -euo pipefail
 # Apt Post Hook
 # ==============================================================================
 
-INSTALL_LIST="$HOME/.config/apt/install"
-REMOVE_LIST="$HOME/.config/apt/remove"
-APT_LOG_DIR="$HOME/.local/var/log"
-APT_LOG_FILE="$APT_LOG_DIR/apt-hook-errors.log"
+INSTALL_LIST="$TUCKR_USER_CONFIG/apt/install"
+REMOVE_LIST="$TUCKR_USER_CONFIG/apt/remove"
+LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}"
+LOG_FILE="$LOG_DIR/apt-hook.log"
 
 DRY_RUN=0
 DEBUG=0
@@ -70,8 +70,8 @@ debug() {
 
 log_failure() {
 	local message="$1"
-	mkdir -p "$APT_LOG_DIR"
-	printf '[%s] %s\n' "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" "$message" >> "$APT_LOG_FILE"
+	mkdir -p "$LOG_DIR"
+	printf '[%s] %s\n' "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" "$message" >> "$LOG_FILE"
 	if (( DEBUG )); then
 		printf '[error] %s\n' "$message" >&2
 	fi
