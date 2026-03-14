@@ -143,7 +143,7 @@ run_cmd() {
 # Install Kitty
 # ==============================================================================
 info "Checking if Kitty is already installed..."
-if [[ -d "$KITTY_APP_DIR" ]]; then
+if [[ -x "$KITTY_APP_DIR/bin/kitty" ]]; then
     info "Kitty is already installed. Skipping installation."
 else
     info "Installing Kitty..."
