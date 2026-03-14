@@ -144,4 +144,3 @@ else
 	echo "Error: mise installation did not produce $MISE_BIN" >&2
 	exit 1
 fi
-

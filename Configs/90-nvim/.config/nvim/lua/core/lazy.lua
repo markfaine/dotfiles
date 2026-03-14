@@ -95,4 +95,3 @@ end
 
 lazy.setup(config)
 -- }}}1
-

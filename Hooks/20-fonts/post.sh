@@ -300,4 +300,3 @@ install_fonts_from_file
 refresh_font_cache
 
 info "Fonts post hook complete"
-

@@ -7,4 +7,3 @@
 # If not found
 # pass insert docker-credential-helpers/docker-pass-initialized-check
 # "pass is initialized"
-

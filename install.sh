@@ -374,34 +374,33 @@ deploy_dotfiles() {
     # Ensure hook scripts are executable before running tuckr hooks.
     ensure_hook_scripts_executable "$DOTFILES_DIR"
 
-    # Discover all dotfile groups (subdirectories in Configs and Hooks)
+    # Discover all dotfile groups by basename and sort in natural version order.
+    # This supports ordered prefixes like 10-apt, 20-fonts, ... and avoids
+    # mixing full paths with group names.
     local groups=()
+    local discovered_groups=()
+
     debug_msg "Discovering groups in Configs directory"
     if [ -d "Configs" ]; then
-        mapfile -t groups < <(printf '%s\n' Configs/*/ | sort -V)
-        for group in "${groups[@]}"; do
-            if [ -d "$group" ]; then
-                local group_name=$(basename "$group")
-                groups+=("$group_name")
-                debug_msg "Found group: $group_name"
-            fi
-        done
+        while IFS= read -r group_name; do
+            discovered_groups+=("$group_name")
+        done < <(find Configs -mindepth 1 -maxdepth 1 -type d -printf '%f\n')
     fi
 
     debug_msg "Discovering groups in Hooks directory"
     if [ -d "Hooks" ]; then
-        mapfile -t groups < <(printf '%s\n' Hooks/*/ | sort -V)
-        for group in "${groups[@]}"; do
-            if [ -d "$group" ]; then
-                local group_name=$(basename "$group")
-                # Only add if not already in list (avoid duplicates)
-                if [[ ! " ${groups[@]} " =~ " ${group_name} " ]]; then
-                    groups+=("$group_name")
-                    debug_msg "Found group: $group_name"
-                fi
-            fi
-        done
+        while IFS= read -r group_name; do
+            discovered_groups+=("$group_name")
+        done < <(find Hooks -mindepth 1 -maxdepth 1 -type d -printf '%f\n')
     fi
+
+    if [ ${#discovered_groups[@]} -gt 0 ]; then
+        mapfile -t groups < <(printf '%s\n' "${discovered_groups[@]}" | sort -Vu)
+    fi
+
+    for group_name in "${groups[@]}"; do
+        debug_msg "Found group: $group_name"
+    done
 
     if [ ${#groups[@]} -eq 0 ]; then
         error "No dotfile groups found in Configs or Hooks directories"
@@ -410,29 +409,6 @@ deploy_dotfiles() {
 
     info "Found ${#groups[@]} dotfile groups: ${groups[*]}"
 
-    # Run tuckr add to discover and register dotfiles
-    info "Adding dotfile groups with tuckr..."
-    debug_msg "Running: tuckr add -y ${groups[*]}"
-
-    # Temporarily disable exit on error to capture tuckr output
-    local add_result=0
-    set +e
-    if [ "${DEBUG:-0}" = "1" ]; then
-        tuckr add -y "${groups[@]}"
-        add_result=$?
-    else
-        tuckr add -y "${groups[@]}" 2>/dev/null
-        add_result=$?
-    fi
-    set -e
-
-    if [ $add_result -ne 0 ]; then
-        error "Tuckr add failed (exit code: $add_result)"
-        if [ "${DEBUG:-0}" != "1" ]; then
-            info "Re-run with DEBUG=1 to see detailed error output"
-        fi
-        exit 1
-    fi
 
     info "Deploying dotfiles with tuckr set..."
     debug_msg "Running: tuckr set -fy ${groups[*]}"
