@@ -10,7 +10,7 @@ set -euo pipefail
 
 APT_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/apt"
 LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}"
-LOG_FILE="$LOG_DIR/apt-hook.log"
+LOG_FILE="$LOG_DIR/apt-unset-hook.log"
 
 DRY_RUN=0
 DEBUG=0

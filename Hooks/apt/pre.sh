@@ -8,10 +8,8 @@ set -euo pipefail
 # Prepare apt config files used by the apt post hook.
 
 APT_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/apt"
-INSTALL_LIST="$APT_CONFIG_DIR/install"
-REMOVE_LIST="$APT_CONFIG_DIR/remove"
 LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}"
-LOG_FILE="$LOG_DIR/apt-hook.log"
+LOG_FILE="$LOG_DIR/apt-pre-hook.log"
 
 DRY_RUN=0
 DEBUG=0
@@ -145,7 +143,4 @@ if (( DEBUG )); then
 fi
 
 run_cmd "Create apt config directory" mkdir -p "$APT_CONFIG_DIR"
-run_cmd "Ensure install list exists" touch "$INSTALL_LIST"
-run_cmd "Ensure remove list exists" touch "$REMOVE_LIST"
-
 info "Apt pre hook complete"
