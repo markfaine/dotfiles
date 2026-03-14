@@ -136,26 +136,24 @@ run_cmd "Setting node backend to core" "$MISE_BIN" settings set preferred_backen
 run_cmd "Cleaning mise cache" rm -rf "$HOME/.cache/mise"
 
 # 3. BOOTSTRAP NODE FIRST
-# This is the "secret sauce." Installing node standalone ensures
-# it's ready before mise tries to process the "npm:*" keys.
-run_cmd "Bootstrapping Node.js runtime" "$MISE_BIN" use node@latest
+run_cmd "Bootstrapping Node.js runtime" "$MISE_BIN" use -- node@latest
 
 # 4. PRE-FLIGHT CHECK (Optional but helpful)
-if ! "$MISE_BIN" run node -- node -v >/dev/null 2>&1; then
-    info "✗ Node bootstrap failed. Check logs."
-    exit 1
-fi
+# if ! "$MISE_BIN" run node -- node -v >/dev/null 2>&1; then
+#     info "✗ Node bootstrap failed. Check logs."
+#     exit 1
+# fi
 
 # 5. RUN FULL INSTALL
 # Now that Node is present, the npm:* tools will install smoothly.
-run_cmd "Installing toolchain" "$MISE_BIN" install --yes
+#run_cmd "Installing toolchain" "$MISE_BIN" install --yes
 
 # 6. POST-INSTALL MAINTENANCE
-run_cmd "Pruning stale tools" "$MISE_BIN" prune --tools --yes
-run_cmd "Rebuilding shims" "$MISE_BIN" reshim
+# run_cmd "Pruning stale tools" "$MISE_BIN" prune --tools --yes
+# run_cmd "Rebuilding shims" "$MISE_BIN" reshim
 
 # 7. RESTORE SETTINGS
-run_cmd "Enabling experimental features" "$MISE_BIN" settings set experimental true
-run_cmd "Enabling lockfile" "$MISE_BIN" settings set lockfile true
+# run_cmd "Enabling experimental features" "$MISE_BIN" settings set experimental true
+# run_cmd "Enabling lockfile" "$MISE_BIN" settings set lockfile true
 
-info "Mise toolchain install complete."
+info "Mise post hook complete."

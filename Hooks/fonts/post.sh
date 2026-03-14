@@ -9,7 +9,7 @@ set -euo pipefail
 INSTALL_LIST="${XDG_CONFIG_HOME:-$HOME/.config}/fonts/install"
 LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}"
 LOG_FILE="$LOG_DIR/fonts-hook.log"
-FONTS_DIR_LINUX="${}/fonts"
+FONTS_DIR_LINUX="${XDG_DATA_HOME:-$HOME/.local/share}/fonts"
 FONTS_DIR_MACOS="$HOME/Library/Fonts"
 
 DRY_RUN=0
@@ -233,7 +233,8 @@ download_font() {
 	fi
 
     temp_dir=$(mktemp -d)
-    trap 'rm -rf "$temp_dir"' RETURN
+    # shellcheck disable=SC2064
+    trap "rm -rf $temp_dir" RETURN
 
     if command -v curl >/dev/null 2>&1; then
 		if ! run_cmd "Download $label" curl -fsSL "$url" -o "$temp_dir/$filename"; then

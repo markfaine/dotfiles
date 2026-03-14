@@ -236,7 +236,8 @@ install_utility() {
 	archive_type=$(is_archive "$filename")
 
 	temp_file=$(mktemp)
-	trap 'rm -f "$temp_file"' RETURN
+	# shellcheck disable=SC2064
+	trap "rm -f $temp_file" RETURN
 
 	debug_msg "Downloading: $url"
 

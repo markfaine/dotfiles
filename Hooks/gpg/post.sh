@@ -8,7 +8,8 @@ set -euo pipefail
 # ==============================================================================
 # Imports GPG public keys from ~/.gnupg/*.asc into the local keyring
 
-GNUPG_DIR="$HOME/.gnupg"
+GPGDIR="${GNUPGHOME:-$HOME/.gnupg}"
+IMPORT_DIR="$HOME/.config/gnupg/keys"
 LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}"
 LOG_FILE="$LOG_DIR/gnupg-hook.log"
 
@@ -24,7 +25,7 @@ usage() {
 	cat <<'EOF'
 Usage: post.sh [--dry-run|-n] [--debug|-d] [--no-spinner] [--help|-h]
 
-Imports GPG public keys (.asc files) from ~/.gnupg into the local keyring.
+Imports GPG public keys (.asc files) from $IMPORT_DIR into the local keyring.
 
 Options:
   -n, --dry-run    Show what would be imported, but don't execute
@@ -137,22 +138,22 @@ if command -v gpg2 &>/dev/null; then
 fi
 
 debug_msg "Using GPG command: $GPG_CMD"
-
 # Check if ~/.gnupg exists
-if [[ ! -d "$GNUPG_DIR" ]]; then
-	echo "Error: $GNUPG_DIR not found" >&2
+"$GPG_CMD" --list-keys &>/dev/null
+if [[ ! -d "$GPGDIR" ]]; then
+	echo "Error: $GPGDIR not found" >&2
 	exit 1
 fi
 
 # Find all .asc files in ~/.gnupg
-mapfile -t asc_files < <(find "$GNUPG_DIR" -maxdepth 1 -name "*.asc" -type f 2>/dev/null | sort)
+mapfile -t asc_files < <(find "$IMPORT_DIR" -maxdepth 1 -name "*.asc" -type f 2>/dev/null | sort)
 
 total=${#asc_files[@]}
 imported=0
 failed=0
 
 if (( total == 0 )); then
-	echo "No .asc key files found in $GNUPG_DIR"
+	echo "No .asc key files found in $IMPORT_DIR"
 	exit 0
 fi
 
