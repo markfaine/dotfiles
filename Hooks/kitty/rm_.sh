@@ -10,8 +10,6 @@ set -euo pipefail
 # ==============================================================================
 
 KITTY_APP_DIR="$HOME/.local/kitty.app"
-KITTY_BIN_DIR="$KITTY_APP_DIR/bin"
-KITTY_BIN_DIR_LINK="$KITTY_BIN_DIR/kitty"
 LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}"
 LOG_FILE="$LOG_DIR/kitty-clean-hook.log"
 
@@ -138,11 +136,12 @@ run_cmd() {
 }
 
 # ==============================================================================
-# Remove directories
+# Remove directories and symlinks
 # ==============================================================================
-info "Remove kitty directories"
+info "Remove kitty directories and symlinks"
 kitty_config_dir="${XDG_CONFIG_HOME:-$HOME/.config}/kitty"
 run_cmd "Remove $kitty_config_dir directory" rm -rf "$kitty_config_dir"
 run_cmd "Remove $KITTY_APP_DIR directory" rm -rf "$KITTY_APP_DIR"
 run_cmd "Remove $LOG_FILE" rm -f "$LOG_FILE"
-run_cmd "Remove $KITTY_BIN_DIR_LINK" rm -f "$KITTY_BIN_DIR_LINK"
+run_cmd "Remove kitty binary symlink" rm -f "$LOCAL_BIN_DIR/kitty"
+run_cmd "Remove kitten binary symlink" rm -f "$LOCAL_BIN_DIR/kitten"

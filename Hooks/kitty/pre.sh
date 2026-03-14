@@ -143,11 +143,13 @@ run_cmd() {
 # Create directories
 # ==============================================================================
 info "Create kitty directories"
-kitty_config_dir="${XDG_CONFIG_HOME:-$HOME/.config}/kitty"
-kitty_icon_dir="$(dirname "$KITTY_ICON_PATH")"
-run_cmd "Create $kitty_config_dir directory" mkdir -p "$kitty_config_dir"
-run_cmd "Create $KITTY_BIN_DIR directory" mkdir -p "$KITTY_BIN_DIR"
-run_cmd "Create $KITTY_SHARE_APPS_DIR directory" mkdir -p "$KITTY_SHARE_APPS_DIR"
-run_cmd "Create $LOCAL_BIN_DIR directory" mkdir -p "$LOCAL_BIN_DIR"
+
 run_cmd "Create $LOCAL_APPS_DIR directory" mkdir -p "$LOCAL_APPS_DIR"
-run_cmd "Create $kitty_icon_dir" mkdir -p "$kitty_icon_dir"
+kitty_config_dir="${XDG_CONFIG_HOME:-$HOME/.config}/kitty"
+run_cmd "Create $kitty_config_dir directory" mkdir -p "$kitty_config_dir"
+
+# kitty_icon_dir="$(dirname "$KITTY_ICON_PATH")"
+# run_cmd "Create $KITTY_BIN_DIR directory" mkdir -p "$KITTY_BIN_DIR"
+# run_cmd "Create $KITTY_SHARE_APPS_DIR directory" mkdir -p "$KITTY_SHARE_APPS_DIR"
+# run_cmd "Create $LOCAL_BIN_DIR directory" mkdir -p "$LOCAL_BIN_DIR"
+# run_cmd "Create $kitty_icon_dir" mkdir -p "$kitty_icon_dir"
