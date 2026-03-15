@@ -149,8 +149,13 @@ info "Installing mise..."
 info "Create parent directories"
 local_bin_dir="$(dirname "$MISE_BIN")"
 mise_config_dir="${XDG_CONFIG_HOME:-${ZDOTDIR:-$HOME}/.config}/mise"
+zplugin_dir="${XDG_CONFIG_HOME:-${ZDOTDIR:-$HOME}/.config}/zplugin.d"
+site_functions="${XDG_DATA_HOME:-${ZDOTDIR:-$HOME}/.local/share}/zsh/site-functions"
+
 run_cmd "Create $local_bin_dir directory" mkdir -p "$local_bin_dir"
 run_cmd "Create $mise_config_dir directory" mkdir -p "$mise_config_dir"
+run_cmd "Create $zplugin_dir directory" mkdir -p "$zplugin_dir"
+run_cmd "Create $site_functions directory" mkdir -p "$site_functions"
 
 if command -v curl >/dev/null 2>&1; then
 	run_cmd "Install mise via https://mise.run" bash -c 'curl https://mise.run | sh'
