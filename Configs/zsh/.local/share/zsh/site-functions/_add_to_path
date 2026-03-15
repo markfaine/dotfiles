@@ -4,7 +4,7 @@
 # ==============================================================================
 # Read PATH entries from file (comma-separated format)
 # File format: append_dir,prepend_dir (empty fields are skipped, # lines are comments)
-paths_file="${1:-$HOME/.paths}"
+paths_file="${1:-${ZDOTDIR:-$HOME}/.paths}"
 while IFS=',' read -r append prepend; do
     line="${append}${prepend}"
     [[ -z $line ]] && continue

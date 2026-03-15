@@ -1,6 +1,9 @@
 # ==============================================================================
 # Recrete dotfile symlinks
 # ==============================================================================
+if (( ! $+commands[tuckr] )); then
+  return 0
+fi
 # Function to relink dotfiles using tuckr
 echo "Relinking dotfiles with tuckr..."
 tuckr add -fy '*'

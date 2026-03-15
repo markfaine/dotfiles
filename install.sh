@@ -26,9 +26,9 @@ fi
 # ==============================================================================
 DOTFILES_REPO="${DOTFILES_REPO:-https://github.com/markfaine/dotfiles.git}"
 DOTFILES_BRANCH="${DOTFILES_BRANCH:-}"  # Empty means use repo default branch
-DOTFILES_DIR="${HOME}/.config/dotfiles"
+DOTFILES_DIR="${ZDOTDIR:-$HOME}/.config/dotfiles"
 TUCKR_VERSION="${TUCKR_VERSION:-latest}"
-LOCAL_BIN="${HOME}/.local/bin"
+LOCAL_BIN="${ZDOTDIR:-$HOME}/.local/bin"
 
 # Colors for output
 RED='\033[0;31m'
@@ -67,6 +67,42 @@ debug_msg() {
 # Check if command exists
 command_exists() {
     command -v "$1" >/dev/null 2>&1
+}
+
+usage() {
+    cat <<'EOF'
+Usage: install.sh [OPTIONS]
+
+Bootstrap dotfiles.
+
+Options:
+  -b, --branch BRANCH   Clone and deploy a specific dotfiles branch
+  -h, --help            Show this help
+EOF
+}
+
+parse_args() {
+    while [ "$#" -gt 0 ]; do
+        case "$1" in
+            -b|--branch)
+                if [ -z "${2:-}" ]; then
+                    error "--branch requires a branch name"
+                    exit 2
+                fi
+                DOTFILES_BRANCH="$2"
+                shift 2
+                ;;
+            -h|--help)
+                usage
+                exit 0
+                ;;
+            *)
+                error "Unknown option: $1"
+                usage >&2
+                exit 2
+                ;;
+        esac
+    done
 }
 
 # Ensure hook scripts are executable so tuckr can run them.
@@ -326,10 +362,10 @@ ensure_xdg_directories() {
     debug_msg "Creating XDG base directories"
 
     local xdg_dirs=(
-        "$HOME/.config"
-        "$HOME/.local/share"
-        "$HOME/.local/state"
-        "$HOME/.cache"
+        "${XDG_CONFIG_HOME:-$HOME/.config}"
+        "${XDG_DATA_HOME:-$HOME/.local/share}"
+        "${XDG_STATE_HOME:-$HOME/.local/state}"
+        "${XDG_CACHE_HOME:-$HOME/.cache}"
         "$LOCAL_BIN"
     )
 
@@ -432,7 +468,7 @@ post_install() {
             echo "    chsh -s \$(which zsh)"
             echo ""
         else
-            warn "Zsh not installed. Install it for the best experience."
+            warn "Zsh not installed. "
         fi
     else
         debug_msg "Already using zsh"
@@ -452,6 +488,8 @@ post_install() {
 # ==============================================================================
 
 main() {
+    parse_args "$@"
+
     echo ""
     echo "╔════════════════════════════════════════════════════════════╗"
     echo "║            Dotfiles Bootstrap Installer                    ║"
@@ -471,7 +509,9 @@ main() {
     clone_dotfiles
     configure_git_hooks "$DOTFILES_DIR"
     install_tuckr
-    deploy_dotfiles
+    ensure_xdg_directories
+    ensure_hook_scripts_executable "$DOTFILES_DIR"
+    #deploy_dotfiles
     post_install
 
     echo ""

@@ -8,7 +8,7 @@ function _is_mounted() {
   local mount_point="$1"
 
   # Fail fast if required commands are missing
-  if ! command -v mount &>/dev/null || ! command -v grep &>/dev/null; then
+  if (( ! $+commands[mount] || ! $+commands[grep] )); then
     return 1
   fi
 

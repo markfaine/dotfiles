@@ -9,7 +9,7 @@ set -euo pipefail
 
 DRY_RUN=0
 DEBUG=0
-LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}"
+LOG_DIR="${XDG_STATE_HOME:-${ZDOTDIR:-$HOME}/.local/state}"
 LOG_FILE="$LOG_DIR/zsh-hook.log"
 
 usage() {
@@ -19,7 +19,7 @@ Usage: post.sh [--dry-run|-n] [--debug|-d] [--help|-h]
 Validate zsh startup files after deployment.
 
 Checks performed:
-  1) Ensure required files exist (~/.zshenv, ~/.zprofile, ~/.zshrc)
+  1) Ensure required files exist
   2) Syntax-check each file with zsh -n
   3) Start a login+interactive zsh shell to verify runtime sourcing
 
@@ -104,7 +104,7 @@ if ! command -v zsh >/dev/null 2>&1; then
 	exit 0
 fi
 
-required_files=("$HOME/.zshenv" "$HOME/.zprofile" "$HOME/.zshrc")
+required_files=("${ZDOTDIR:-$HOME}/.zshrc" "${ZDOTDIR:-$HOME}/.zplugins" "${ZDOTDIR:-$HOME}/.zlogout" "${ZDOTDIR:-$HOME}/.paths")
 for file in "${required_files[@]}"; do
 	if [[ ! -f "$file" ]]; then
 		log_msg ERROR "required zsh startup file missing: $file"
@@ -113,12 +113,15 @@ for file in "${required_files[@]}"; do
 	fi
 done
 
-run_cmd "Syntax check ~/.zshenv" zsh -n "$HOME/.zshenv"
-run_cmd "Syntax check ~/.zprofile" zsh -n "$HOME/.zprofile"
-run_cmd "Syntax check ~/.zshrc" zsh -n "$HOME/.zshrc"
+run_cmd "Syntax check ~/.paths" zsh -n "${ZDOTDIR:-$HOME}/.paths"
+run_cmd "Syntax check ~/.zplugins" zsh -n "${ZDOTDIR:-$HOME}/.zplugins"
+run_cmd "Syntax check ~/.zlogout" zsh -n "${ZDOTDIR:-$HOME}/.zlogout"
+run_cmd "Syntax check ~/.zshrc" zsh -n "${ZDOTDIR:-$HOME}/.zshrc"
+
+run_cmd "Remove compiled zsh cache files" find "${ZDOTDIR:-$HOME}" -type f -name '*.zwc' -delete
+run_cmd "Delete completion cache" rm -f "${ZSH_COMPDUMP:-${ZDOTDIR:-$HOME}/.zcompdump}"
 
 # Start a login+interactive shell to match normal user startup behavior.
 run_cmd "Validate login interactive zsh startup" zsh -lic 'exit 0'
 
 info "Zsh post hook complete"
-

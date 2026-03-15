@@ -17,4 +17,3 @@ zstyle ':zim:termtitle:preexec' format '${${(Az)1}[1]}'
 
 # Before each prompt, show compact current directory name.
 zstyle ':zim:termtitle:precmd' format '%1~'
-

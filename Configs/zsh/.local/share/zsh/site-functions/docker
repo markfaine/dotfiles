@@ -12,7 +12,7 @@ case $1 in
     if command -v dops &>/dev/null; then
       command dops "$@"
     else
-      zdebug ".zshared: dops not available, using docker ps"
+      zdebug "docker: dops not available, using docker ps"
       command docker ps "$@"
     fi
     ;;

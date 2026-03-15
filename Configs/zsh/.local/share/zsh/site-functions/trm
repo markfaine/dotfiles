@@ -2,9 +2,12 @@
 # ==============================================================================
 # Trash/Recycle Bin Management
 # ==============================================================================
+if (( ! $+commands[trash-put] )); then
+  return 0
+fi
 # Delete to the trash
 # Trash/delete function with smart fallback
-if command -v trash-put &>/dev/null; then
+if (( $+commands[trash-put] )); then
   recycle_bin="$TRASH_DIR_LOCAL"
   # Use mounted trash if available (WSL only)
   if [[ "${IS_WSL:-0}" == "1" ]] && _is_mounted "$TRASH_MOUNT"; then

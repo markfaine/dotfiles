@@ -8,9 +8,9 @@ set -euo pipefail
 # ==============================================================================
 # Imports GPG public keys from ~/.gnupg/*.asc into the local keyring
 
-GPGDIR="${GNUPGHOME:-$HOME/.gnupg}"
-IMPORT_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/gnupg/keys"
-LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}"
+GPGDIR="${GNUPGHOME:-${ZDOTDIR:-$HOME}/.gnupg}"
+IMPORT_DIR="${XDG_CONFIG_HOME:-${ZDOTDIR:-$HOME}/.config}/gnupg/keys"
+LOG_DIR="${XDG_STATE_HOME:-${ZDOTDIR:-$HOME}/.local/state}"
 LOG_FILE="$LOG_DIR/gnupg-hook.log"
 
 DRY_RUN=0

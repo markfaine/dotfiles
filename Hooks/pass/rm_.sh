@@ -6,8 +6,8 @@ set -euo pipefail
 # Pass Clean Hook
 # ==============================================================================
 
-PASS_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/pass"
-LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}"
+PASS_CONFIG_DIR="${XDG_CONFIG_HOME:-${ZDOTDIR:-$HOME}/.config}/pass"
+LOG_DIR="${XDG_STATE_HOME:-${ZDOTDIR:-$HOME}/.local/state}"
 LOG_FILE="$LOG_DIR/pass-hook.log"
 
 DRY_RUN=0

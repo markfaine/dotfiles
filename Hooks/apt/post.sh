@@ -243,4 +243,10 @@ fi
 install_packages_from_file "$INSTALL_LIST"
 remove_packages_from_file "$REMOVE_LIST"
 
+info "Remove compiled zsh cache files"
+find "${ZDOTDIR:-$HOME}" -type f -name '*.zwc' -delete
+
+info "Delete completion cache"
+rm -f "${ZSH_COMPDUMP:-$HOME/.zcompdump}"
+
 info "Apt post hook complete"

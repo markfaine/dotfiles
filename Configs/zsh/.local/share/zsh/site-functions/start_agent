@@ -2,8 +2,7 @@
 # SSH start agent
 # ==============================================================================
 # Start agent, save configuration and then source it.
-/usr/bin/ssh-agent | sed 's/^echo/#echo/' > "${SSH_ENV}"
+/usr/bin/ssh-agent | sed 's/^echo/#echo/' >| "${SSH_ENV}"
 chmod 600 "$SSH_ENV"
 zdebug "_start_agent: Sourcing $SSH_ENV"
 . "$SSH_ENV" > /dev/null
-

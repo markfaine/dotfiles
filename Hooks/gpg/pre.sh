@@ -7,10 +7,10 @@ set -euo pipefail
 # GPG Pre Hook
 # ==============================================================================
 
-GPG_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/gnupg"
+GPG_CONFIG_DIR="${XDG_CONFIG_HOME:-${ZDOTDIR:-$HOME}/.config}/gnupg"
 IMPORT_DIR="$GPG_CONFIG_DIR/keys"
-GPGDIR="${GNUPGHOME:-$HOME/.gnupg}"
-LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}"
+GPGDIR="${GNUPGHOME:-${ZDOTDIR:-$HOME}/.gnupg}"
+LOG_DIR="${XDG_STATE_HOME:-${ZDOTDIR:-$HOME}/.local/state}"
 LOG_FILE="$LOG_DIR/gnupg-hook.log"
 
 DRY_RUN=0

@@ -7,10 +7,10 @@ set -euo pipefail
 # ==============================================================================
 # Ensure dependency ordering after dotfiles are deployed:
 #   1) bootstrap Node first
-#   2) install full mise toolchain (including npm:* tools)
+#   2) other misc. tasks to ensure a clean environment
 
-MISE_BIN="$HOME/.local/bin/mise"
-LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}"
+MISE_BIN="${ZDOTDIR:-$HOME}/.local/bin/mise"
+LOG_DIR="${XDG_STATE_HOME:-${ZDOTDIR:-$HOME}/.local/state}"
 LOG_FILE="$LOG_DIR/mise-post-hook.log"
 
 DRY_RUN=0
@@ -145,10 +145,13 @@ fi
 run_cmd "Bootstrap Node via mise" "$MISE_BIN" exec -y --silent node@latest -- node -v
 
 # Install configured toolchain under node-enabled context.
-run_cmd "Install all configured mise tools" "$MISE_BIN" exec -y --silent node@latest -- "$MISE_BIN" install
+#run_cmd "Install all configured mise tools" "$MISE_BIN" exec -y --silent node@latest -- "$MISE_BIN" install
 
 # Refresh command shims and prune stale installs.
 run_cmd "Rebuild mise shims" "$MISE_BIN" reshim
 run_cmd "Prune unused mise tool versions" "$MISE_BIN" prune --tools --yes
+
+run_cmd "Remove compiled zsh cache files" find "${ZDOTDIR:-$HOME}" -type f -name '*.zwc' -delete
+run_cmd "Delete completion cache" rm -f "${ZSH_COMPDUMP:${ZDOTDIR:-$HOME}/.zcompdump}"
 
 info "Mise post hook complete."

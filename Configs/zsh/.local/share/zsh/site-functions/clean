@@ -2,6 +2,9 @@
 # Run tuckr unset
 # ==============================================================================
 # Function to unlink dotfiles using tuckr
+if (( ! $+commands[tuckr] )); then
+  return 0
+fi
 echo "Removing links and runing rm_ hooks with tuckr..."
 tuckr unset -fy '*'
 local exit_code=$?

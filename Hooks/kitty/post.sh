@@ -8,13 +8,13 @@ set -euo pipefail
 # Kitty Post Hook
 # ==============================================================================
 
-KITTY_APP_DIR="$HOME/.local/kitty.app"
+KITTY_APP_DIR="${ZDOTDIR:-$HOME}/.local/kitty.app"
 KITTY_BIN_DIR="$KITTY_APP_DIR/bin"
 KITTY_SHARE_APPS_DIR="$KITTY_APP_DIR/share/applications"
 KITTY_ICON_PATH="$KITTY_APP_DIR/share/icons/hicolor/256x256/apps/kitty.png"
-LOCAL_BIN_DIR="$HOME/.local/bin"
-LOCAL_APPS_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/applications"
-LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}"
+LOCAL_BIN_DIR="${ZDOTDIR:-$HOME}/.local/bin"
+LOCAL_APPS_DIR="${XDG_DATA_HOME:-${ZDOTDIR:-$HOME}/.local/share}/applications"
+LOG_DIR="${XDG_STATE_HOME:-${ZDOTDIR:-$HOME}/.local/state}"
 LOG_FILE="$LOG_DIR/kitty-hook.log"
 
 DRY_RUN=0
@@ -206,7 +206,7 @@ run_cmd "Patch desktop exec path" sed -i "s|Exec=kitty|Exec=$KITTY_BIN_DIR/kitty
 info "Desktop files updated."
 
 info "Setting up xdg-terminal-exec..."
-XDG_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}"
+XDG_CONFIG_DIR="${XDG_CONFIG_HOME:-${ZDOTDIR:-$HOME}/.config}"
 run_cmd "Create $XDG_CONFIG_DIR" mkdir -p "$XDG_CONFIG_DIR"
 if (( DRY_RUN )); then
     info "[dry-run] Write $XDG_CONFIG_DIR/xdg-terminals.list"
@@ -216,5 +216,8 @@ else
     info "✓ Wrote $XDG_CONFIG_DIR/xdg-terminals.list"
 fi
 info "xdg-terminal-exec configured."
+
+run_cmd "Remove compiled zsh cache files" find "${ZDOTDIR:-$HOME}" -type f -name '*.zwc' -delete
+run_cmd "Delete completion cache" rm -f "${ZSH_COMPDUMP:${ZDOTDIR:-$HOME}/.zcompdump}"
 
 info "Kitty setup complete."

@@ -29,7 +29,7 @@ compdef _vim vi
 # File Management Completions
 # ==============================================================================
 # ls aliases get completions from _ls
-if command -v eza &>/dev/null; then
+if (( $+commands[eza] )); then
     # If using eza, use eza's completion
     compdef _eza ls
 else
@@ -57,6 +57,6 @@ compdef _man man
 # Utility Completions
 # ==============================================================================
 # tmuxinator if available
-if command -v tmuxinator &>/dev/null; then
+if (( $+commands[tmuxinator] )); then
     compdef _tmuxinator tmuxinator
 fi

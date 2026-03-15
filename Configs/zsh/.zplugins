@@ -2,7 +2,7 @@
 # Znap plugin manifest
 # This file defines all zsh plugins to be loaded via znap
 #
-# The _load_plugins function in ~/.znaprc processes each line:
+# The _load_plugins function processes each line:
 # 1. Clones the plugin repository (if not already present)
 # 2. Adds second comma-separated field to PATH (if provided)
 # 3. Adds third comma-separated field to FPATH for completions (if provided)
@@ -23,9 +23,7 @@
 # ==============================================================================
 zimfw/environment
 zimfw/utility,functions
-zimfw/prompt-pwd
-sindresorhus/pure
-
+sindresorhus/pure,,.
 # ==============================================================================
 # Terminal & Display
 # ==============================================================================
@@ -36,22 +34,19 @@ zimfw/termtitle
 zimfw/run-help
 
 # ==============================================================================
-# Syntax & History
-# ==============================================================================
-zsh-users/zsh-autosuggestions
-zsh-users/zsh-history-substring-search
-zsh-users/zsh-syntax-highlighting
-
-# ==============================================================================
 # CLI Tools & Integrations
 # ==============================================================================
-MohamedElashri/eza-zsh,,,eza
-zimfw/fzf,,,fzf
+Aloxaf/fzf-tab
 thetic/extract,,,extract
 laggardkernel/zsh-thefuck,,,tf
+
+# ==============================================================================
+# Syntax & History
+# ==============================================================================
+zsh-users/zsh-history-substring-search
+zsh-users/zsh-syntax-highlighting
 
 # ==============================================================================
 # Completions (should be loaded last)
 # ==============================================================================
 zsh-users/zsh-completions,,src
-Freed-Wu/zsh-command-not-found

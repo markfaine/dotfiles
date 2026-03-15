@@ -9,4 +9,3 @@ normalized="$(_normalize_path_entry "$dir")"
 realdir="$(readlink -f "$normalized" 2>/dev/null || true)"
 [[ -d "$realdir" ]] || return
 path=($path "$normalized")
-

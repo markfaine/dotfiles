@@ -7,8 +7,8 @@ set -euo pipefail
 # Tools Clean Hook
 # ==============================================================================
 
-TOOLS_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/tools"
-LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}"
+TOOLS_CONFIG_DIR="${XDG_CONFIG_HOME:-${ZDOTDIR:-$HOME}/.config}/tools"
+LOG_DIR="${XDG_STATE_HOME:-${ZDOTDIR:-$HOME}/.local/state}"
 LOG_FILE="$LOG_DIR/tools-hook.log"
 
 DRY_RUN=0
@@ -143,5 +143,7 @@ if (( DEBUG )); then
 fi
 
 run_cmd "Remove tools config directory" rm -rf "$TOOLS_CONFIG_DIR"
+run_cmd "Remove compiled zsh cache files" find "${ZDOTDIR:-$HOME}" -type f -name '*.zwc' -delete
+run_cmd "Delete completion cache" rm -f "${ZSH_COMPDUMP:-${ZDOTDIR:-$HOME}/.zcompdump}"
 
 info "Tools clean hook complete"

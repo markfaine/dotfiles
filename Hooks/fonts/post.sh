@@ -10,7 +10,7 @@ INSTALL_LIST="${XDG_CONFIG_HOME:-$HOME/.config}/fonts/install"
 LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}"
 LOG_FILE="$LOG_DIR/fonts-hook.log"
 FONTS_DIR_LINUX="${XDG_DATA_HOME:-$HOME/.local/share}/fonts"
-FONTS_DIR_MACOS="$HOME/Library/Fonts"
+FONTS_DIR_MACOS="${ZDOTDIR:-$HOME}/Library/Fonts"
 
 DRY_RUN=0
 DEBUG=0
@@ -312,4 +312,3 @@ install_fonts_from_file
 refresh_font_cache
 
 info "Fonts post hook complete"
-

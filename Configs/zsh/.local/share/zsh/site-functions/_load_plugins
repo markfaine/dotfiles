@@ -13,17 +13,42 @@
 # File format: ~/.zplugins
 # CSV format: github-org/repo,path-addition,fpath-addition
 # - Empty lines and comments (starting with #) are ignored
-local plugins_file="${1:-$HOME/.zplugins}"
-local zconfig_home="${XDG_CONFIG_HOME:-$HOME/.config}"
+local plugins_file="${1:-${ZDOTDIR:-$HOME}/.zplugins}"
+local zconfig_home="${XDG_CONFIG_HOME:-${ZDOTDIR:-$HOME}/.config}"
 [[ -f "$plugins_file" ]] || return 1
 
-# 1. Clone all in parallel first
-local repos=($(grep -v '^#' "$plugins_file" | cut -d, -f1))
-znap clone $repos
+# 1. Clone all repositories first (skip comments/blank/malformed rows).
+local repo_line repo_clone
+local repos=()
+while IFS= read -r repo_line || [[ -n "$repo_line" ]]; do
+    # Trim leading/trailing whitespace.
+    repo_line="${repo_line#${repo_line%%[![:space:]]*}}"
+    repo_line="${repo_line%${repo_line##*[![:space:]]}}"
+
+    [[ -z "$repo_line" || "$repo_line" == \#* ]] && continue
+    repo_clone="${repo_line%%,*}"
+    repo_clone="${repo_clone#${repo_clone%%[![:space:]]*}}"
+    repo_clone="${repo_clone%${repo_clone##*[![:space:]]}}"
+
+    [[ -z "$repo_clone" ]] && continue
+    repos+=("$repo_clone")
+done < "$plugins_file"
+
+(( ${#repos[@]} > 0 )) && znap clone "${repos[@]}"
 
 # 2. Loop to source or lazy-load
 local repo inc fpc triggers plugin
 while IFS=',' read -r repo inc fpc triggers; do
+    # Trim whitespace around CSV fields.
+    repo="${repo#${repo%%[![:space:]]*}}"
+    repo="${repo%${repo##*[![:space:]]}}"
+    inc="${inc#${inc%%[![:space:]]*}}"
+    inc="${inc%${inc##*[![:space:]]}}"
+    fpc="${fpc#${fpc%%[![:space:]]*}}"
+    fpc="${fpc%${fpc##*[![:space:]]}}"
+    triggers="${triggers#${triggers%%[![:space:]]*}}"
+    triggers="${triggers%${triggers##*[![:space:]]}}"
+
     [[ -z "$repo" || "$repo" == \#* ]] && continue
     plugin="${repo#*/}"
 
@@ -39,6 +64,8 @@ while IFS=',' read -r repo inc fpc triggers; do
         # 'triggers' can be a space-separated list of commands
         znap function ${(s: :)triggers} "znap source $repo"
     else
-        znap source "$repo"
+        if ! znap source "$repo"; then
+            printf 'warning: failed to source plugin %s\n' "$repo" >&2
+        fi
     fi
 done < "$plugins_file"

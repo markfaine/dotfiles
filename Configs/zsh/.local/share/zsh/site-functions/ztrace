@@ -4,4 +4,3 @@
 if [[ -n $ZSH_TRACE ]]; then
   set -x
 fi
-

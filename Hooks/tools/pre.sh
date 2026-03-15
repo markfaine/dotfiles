@@ -7,9 +7,9 @@ set -euo pipefail
 # Tools Pre Hook
 # ==============================================================================
 
-TOOLS_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/tools"
+TOOLS_CONFIG_DIR="${XDG_CONFIG_HOME:-${ZDOTDIR:-$HOME}/.config}/tools"
 TOOLS_CONFIG="$TOOLS_CONFIG_DIR/sources"
-LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}"
+LOG_DIR="${XDG_STATE_HOME:-${ZDOTDIR:-$HOME}/.local/state}"
 LOG_FILE="$LOG_DIR/tools-hook.log"
 
 DRY_RUN=0

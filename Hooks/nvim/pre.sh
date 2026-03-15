@@ -6,8 +6,9 @@ set -euo pipefail
 # Neovim Pre Hook
 # ==============================================================================
 
-NVIM_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/nvim"
-LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}"
+NVIM_CONFIG_DIR="${XDG_CONFIG_HOME:-${ZDOTDIR:-$HOME}/.config}/nvim"
+XDG_CONFIG_DIR="${XDG_CONFIG_HOME:-${ZDOTDIR:-$HOME}/.config}"
+LOG_DIR="${XDG_STATE_HOME:-${ZDOTDIR:-$HOME}/.local/state}"
 LOG_FILE="$LOG_DIR/nvim-hook.log"
 
 DRY_RUN=0
@@ -141,6 +142,7 @@ if (( DEBUG )); then
     info "Debug mode enabled"
 fi
 
-run_cmd "Create Neovim config directory" mkdir -p "$NVIM_CONFIG_DIR"
+run_cmd "Create XDG config directory" mkdir -p "$XDG_CONFIG_DIR"
+run_cmd "Remove existing Neovim config path" rm -rf "$NVIM_CONFIG_DIR"
 
 info "Neovim pre hook complete."

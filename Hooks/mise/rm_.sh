@@ -6,8 +6,8 @@ set -euo pipefail
 # Mise Clean Hook
 # ==============================================================================
 
-MISE_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/mise"
-LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}"
+MISE_CONFIG_DIR="${XDG_CONFIG_HOME:-${ZDOTDIR:-$HOME}/.config}/mise"
+LOG_DIR="${XDG_STATE_HOME:-${ZDOTDIR:-$HOME}/.local/state}"
 LOG_FILE="$LOG_DIR/mise-clean-hook.log"
 
 DRY_RUN=0
@@ -142,5 +142,8 @@ if (( DEBUG )); then
 fi
 
 run_cmd "Remove mise config directory" rm -rf "$MISE_CONFIG_DIR"
+
+run_cmd "Remove compiled zsh cache files" find "${ZDOTDIR:-$HOME}" -type f -name '*.zwc' -delete
+run_cmd "Delete completion cache" rm -f "${ZSH_COMPDUMP:-${ZDOTDIR:-$HOME}/.zcompdump}"
 
 info "Mise clean hook complete"

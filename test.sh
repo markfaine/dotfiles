@@ -16,6 +16,7 @@ DRY_RUN=0
 DEBUG=0
 NO_CLEANUP=0
 KEEP_CONTAINER=0
+RUN_ZSH_BENCH=0
 USERNAME="${USER}"
 USER_ID="$(id -u)"
 GROUP_ID="$(id -g)"
@@ -36,6 +37,7 @@ Options:
   -d, --debug         Verbose output; show all commands
       --no-cleanup    Skip docker system prune before building
       --keep          Keep container running after test (for inspection)
+	  --zsh-bench     Clone romkatv/zsh-bench and run benchmark in container
   -b, --branch BRANCH Specify git branch to clone (default: repo default)
   -h, --help          Show this help message
 
@@ -48,6 +50,7 @@ Examples:
   ./test.sh --debug               # Test with verbose output
   ./test.sh --keep testuser       # Test and keep container running
   ./test.sh --branch development  # Test with development branch
+	./test.sh --zsh-bench           # Run zsh benchmark after install
 EOF
 }
 
@@ -72,6 +75,10 @@ parse_args() {
 				;;
 			--keep)
 				KEEP_CONTAINER=1
+				shift
+				;;
+			--zsh-bench)
+				RUN_ZSH_BENCH=1
 				shift
 				;;
 			-b|--branch)
@@ -257,6 +264,28 @@ run_tests() {
 
 	if "${exec_cmd[@]}"; then
 		success "Installation test completed successfully"
+
+		if (( RUN_ZSH_BENCH )); then
+			info "Running zsh-bench in container..."
+			local bench_cmd=(
+				docker exec -it "$CONTAINER_NAME" bash -lc
+				'mkdir -p "$HOME/.cache" &&
+				 if [[ -d "$HOME/.cache/zsh-bench/.git" ]]; then
+				   git -C "$HOME/.cache/zsh-bench" pull --ff-only;
+				 else
+				   git clone --depth 1 https://github.com/romkatv/zsh-bench.git "$HOME/.cache/zsh-bench";
+				 fi &&
+				 cd "$HOME/.cache/zsh-bench" && ./zsh-bench'
+			)
+
+			if (( DRY_RUN )); then
+				echo "[DRY-RUN] Would run: ${bench_cmd[*]}"
+			else
+				debug_msg "Executing: ${bench_cmd[*]}"
+				"${bench_cmd[@]}"
+			fi
+		fi
+
 		return 0
 	else
 		error "Installation test failed"
@@ -309,6 +338,9 @@ main() {
 	fi
 	if (( KEEP_CONTAINER )); then
 		echo "Keep:      YES"
+	fi
+	if (( RUN_ZSH_BENCH )); then
+		echo "Zsh bench: YES"
 	fi
 	echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 	echo ""

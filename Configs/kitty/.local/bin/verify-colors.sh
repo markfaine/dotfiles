@@ -113,7 +113,7 @@ echo -e "${BLUE}[4/4] CONFIGURATION FILES${NC}"
 echo "-----------------------------------"
 
 echo -n "Checking ~/.theme-colors... "
-if [ -f "$HOME/.theme-colors" ]; then
+if [ -f "${ZDOTDIR:-$HOME}/.theme-colors" ]; then
     echo -e "${GREEN}✓${NC} File exists"
     PASSED=$((PASSED + 1))
 else
@@ -122,9 +122,9 @@ else
 fi
 
 echo -n "Checking ~/.ripgreprc... "
-if [ -f "$HOME/.ripgreprc" ]; then
+if [ -f "${ZDOTDIR:-$HOME}/.ripgreprc" ]; then
     echo -e "${GREEN}✓${NC} File exists"
-    if grep -q "palette:yes" "$HOME/.ripgreprc" 2>/dev/null; then
+    if grep -q "palette:yes" "${ZDOTDIR:-$HOME}/.ripgreprc" 2>/dev/null; then
         echo "  Contains palette configuration ${GREEN}✓${NC}"
     fi
     PASSED=$((PASSED + 1))
@@ -134,7 +134,7 @@ else
 fi
 
 echo -n "Checking ~/.dircolors... "
-if [ -f "$HOME/.dircolors" ]; then
+if [ -f "${ZDOTDIR:-$HOME}/.dircolors" ]; then
     echo -e "${GREEN}✓${NC} File exists"
     PASSED=$((PASSED + 1))
 else
@@ -142,8 +142,8 @@ else
     WARNINGS=$((WARNINGS + 1))
 fi
 
-echo -n "Checking ~/.zshenv loads theme-colors... "
-if grep -q "source.*\.theme-colors" "$HOME/.zshenv" 2>/dev/null; then
+echo -n "Checking ~/.zshrc loads theme-colors... "
+if grep -q "source.*\.theme-colors" "${ZDOTDIR:-$HOME}/.zshrc" 2>/dev/null; then
     echo -e "${GREEN}✓${NC}"
     PASSED=$((PASSED + 1))
 else

@@ -6,8 +6,8 @@
 # Supports mounted trash directories for WSL environments
 # Determine trash mount based on environment
 # For WSL: use /mnt/d; otherwise use local directory
-export TRASH_DIR_LOCAL="$HOME/.Trash"
-if [[ "${IS_WSL:-0}" == "1" ]]; then
+export TRASH_DIR_LOCAL="${ZDOTDIR:-$HOME}/.Trash"
+if _is_wsl; then
   TRASH_MOUNT="/mnt/d"
   export TRASH_DIR="$TRASH_MOUNT/.Trash"
   zdebug "_setup_trash: WSL detected, using mounted trash at $TRASH_MOUNT"

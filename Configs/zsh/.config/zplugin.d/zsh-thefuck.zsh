@@ -7,5 +7,5 @@ zstyle ":prezto:module:thefuck" bindkey "no"
 # Customized keybinding
 # bindkey "\e\e" fuck-command-line
 
-# If $HOME/.zshrc changes regenerate cache
-zstyle ":prezto:runcom" zpreztorc "$HOME/.zshrc"
+# If .zshrc changes regenerate cache
+zstyle ":prezto:runcom" zpreztorc "${ZDOTDIR:-$HOME}/.zshrc"

@@ -7,8 +7,8 @@ set -euo pipefail
 # GPG Clean Hook
 # ==============================================================================
 
-GPG_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/gnupg"
-LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}"
+GPG_CONFIG_DIR="${XDG_CONFIG_HOME:-${ZDOTDIR:-$HOME}/.config}/gnupg"
+LOG_DIR="${XDG_STATE_HOME:-${ZDOTDIR:-$HOME}/.local/state}"
 LOG_FILE="$LOG_DIR/gnupg-hook.log"
 
 DRY_RUN=0

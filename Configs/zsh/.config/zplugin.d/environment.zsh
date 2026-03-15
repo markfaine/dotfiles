@@ -91,7 +91,7 @@ export SYSTEMD_PAGER="$PAGER"
 
 # SSH authentication prompt program (for passphrase input)
 # Only set if ssh-askpass is available
-if command -v ssh-askpass &>/dev/null; then
+if (( $+commands[ssh-askpass] )); then
   export SSH_ASKPASS="$(command -v ssh-askpass)"
 fi
 
@@ -100,7 +100,7 @@ fi
 # ==============================================================================
 # Set default virtual environment
 # Prefer to default to a single shared virtual environment
-export UV_PROJECT_ENVIRONMENT="$HOME/.venv"
+export UV_PROJECT_ENVIRONMENT="${ZDOTDIR:-$HOME}/.venv"
 
 # ==============================================================================
 # File Operations
@@ -112,7 +112,8 @@ export HIST_ALLOW_CLOBBER="true"
 # Shell History Configuration
 # ==============================================================================
 # History file location
-export HISTFILE="$HOME/.zsh_history"
+
+export HISTFILE="${ZDOTDIR:-$HOME}/.zsh_history"
 
 # Number of history lines to keep in memory
 export HISTSIZE="5000"
@@ -137,6 +138,35 @@ export HIST_NO_FUNCTIONS="true"
 
 # Commands to ignore when recording history (wildcard patterns)
 export HISTORY_IGNORE="(ls*|ll*|pwd|exit|cd*|vi|vim)"
+
+
+# ==============================================================================
+# CLI Tools - Integration and Completion
+# ==============================================================================
+
+# Use 'fd'
+if (( $+commands[fzf] && $+commands[fd] )); then
+    export FZF_DEFAULT_COMMAND='fd --type f --strip-cwd-prefix --hidden --exclude .git'
+    export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+    export FZF_ALT_C_COMMAND='fd --type d --strip-cwd-prefix --hidden --exclude .git'
+fi
+
+# UI and Previews
+export FZF_DEFAULT_OPTS="--height 40% --layout=reverse --border --inline-info \
+  --bind 'ctrl-/:toggle-preview' --color='header:italic'"
+
+# File Previews (CTRL-T)
+if (( $+commands[bat] )); then
+    export FZF_CTRL_T_OPTS="--preview 'bat --color=always --line-range :500 {}'"
+fi
+
+# Directory Previews (ALT-C)
+if (( $+commands[eza] )); then
+    export FZF_ALT_C_OPTS="--preview 'eza --tree --level=2 --color=always {} | head -200'"
+elif (( $+commands[tree] )); then
+    export FZF_ALT_C_OPTS="--preview 'tree -C {} | head -200'"
+fi
+
 
 # ==============================================================================
 # Terminal & Display

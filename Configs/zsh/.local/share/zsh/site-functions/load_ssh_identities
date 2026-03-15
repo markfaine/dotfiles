@@ -1,7 +1,7 @@
 
 # Identity loading function
   # Only run if ssh-agent is available
-  if ! command -v ssh-add &>/dev/null; then
+  if (( ! $+commands[ssh-add] )); then
     return 0
   fi
 
@@ -13,11 +13,11 @@
   fi
 
   # Case 1: Check for YubiKey (requires lsusb or system_profiler)
-  if command -v lsusb &>/dev/null && lsusb 2>/dev/null | grep -q "1050"; then
+  if (( $+commands[lsusb] && lsusb 2>/dev/null | grep -q "1050")); then
     zdebug "load_ssh_identities: YubiKey detected via lsusb, adding hardware keys"
     ssh-add -K 2>/dev/null
     return 0
-  elif command -v system_profiler &>/dev/null && system_profiler SPUSBDataType 2>/dev/null | grep -q "Yubico"; then
+  elif (( $+commands[system_profiler] && system_profiler SPUSBDataType 2>/dev/null | grep -q "Yubico")); then
     zdebug "load_ssh_identities: YubiKey detected via system_profiler, adding hardware keys"
     ssh-add -K 2>/dev/null
     return 0

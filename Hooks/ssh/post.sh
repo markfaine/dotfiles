@@ -9,10 +9,10 @@ set -euo pipefail
 # Downloads SSH public keys from URLs and adds them to ~/.ssh/authorized_keys
 # Prevents duplicate keys while allowing unique keys to be appended
 
-SSH_CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/ssh/authorized_keys"
+SSH_CONFIG="${XDG_CONFIG_HOME:-${ZDOTDIR:-$HOME}/.config}/ssh/authorized_keys"
 SSH_DIR="$HOME/.ssh"
 AUTHORIZED_KEYS="$SSH_DIR/authorized_keys"
-LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}"
+LOG_DIR="${XDG_STATE_HOME:-${ZDOTDIR:-$HOME}/.local/state}"
 LOG_FILE="$LOG_DIR/ssh-hook.log"
 
 DRY_RUN=0

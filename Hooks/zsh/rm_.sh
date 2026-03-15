@@ -6,10 +6,10 @@ set -euo pipefail
 # Zsh Clean Hook
 # ==============================================================================
 
-ZSH_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/zsh"
-SITE_FUNCTIONS_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/zsh/site-functions"
-CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/zsh"
-LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}"
+ZSH_CONFIG_DIR="${XDG_CONFIG_HOME:-${ZDOTDIR:-$HOME}/.config}/zsh"
+SITE_FUNCTIONS_DIR="${XDG_DATA_HOME:-${ZDOTDIR:-$HOME}/.local/share}/zsh/site-functions"
+CACHE_DIR="${XDG_CACHE_HOME:-${ZDOTDIR:-$HOME}/.cache}/zsh"
+LOG_DIR="${XDG_STATE_HOME:-${ZDOTDIR:-$HOME}/.local/state}"
 LOG_FILE="$LOG_DIR/zsh-hook.log"
 
 DRY_RUN=0
@@ -146,5 +146,8 @@ fi
 run_cmd "Remove zsh config directory" rm -rf "$ZSH_CONFIG_DIR"
 run_cmd "Remove zsh cache directory" rm -rf "$CACHE_DIR"
 run_cmd "Remove zsh site-functions directory" rm -rf "$SITE_FUNCTIONS_DIR"
+
+run_cmd "Remove compiled zsh cache files" find "${ZDOTDIR:-$HOME}" -type f -name '*.zwc' -delete
+run_cmd "Delete completion cache" rm -f "${ZSH_COMPDUMP:-${ZDOTDIR:-$HOME}/.zcompdump}"
 
 info "Zsh clean hook complete"

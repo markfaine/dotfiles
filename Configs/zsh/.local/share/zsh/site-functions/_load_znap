@@ -3,10 +3,10 @@
 # ==============================================================================
 # Initialize the znap plugin manager
   if [[ -f "$ZNAP_HOME/znap.zsh" ]]; then
-    zdebug ".znaprc: Sourcing $ZNAP_HOME/znap.zsh"
+    zdebug "_load_znap: Sourcing $ZNAP_HOME/znap.zsh"
     source "$ZNAP_HOME/znap.zsh"
   else
-    zdebug ".znaprc: Failed to source $ZNAP_HOME/znap.zsh!"
+    zdebug "_load_znap: Failed to source $ZNAP_HOME/znap.zsh!"
     printf "See log file at '%s'\n" "$ZLOG_FILE"
     return
   fi

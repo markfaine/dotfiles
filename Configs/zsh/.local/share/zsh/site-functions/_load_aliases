@@ -2,11 +2,11 @@
 # File Sourcing: Aliases
 # ==============================================================================
 # Load command aliases
-  ZALIASES="$HOME/.aliases"
+  ZALIASES="$ZDOTDIR:-$HOME}/.aliases"
   if [[ -e "$ZALIASES" ]]; then
     #shellcheck source=/dev/null
     . "$ZALIASES"
-    zdebug ".zshenv: Sourcing $ZALIASES"
+    zdebug "_load_aliases: Sourcing $ZALIASES"
   else
-    zdebug ".zshenv: Failed to source $ZALIASES"
+    zdebug "_load_aliases: Failed to source $ZALIASES"
   fi

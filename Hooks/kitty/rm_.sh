@@ -9,11 +9,11 @@ set -euo pipefail
 # Kitty Clean Hook
 # ==============================================================================
 
-KITTY_APP_DIR="$HOME/.local/kitty.app"
-LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}"
+KITTY_APP_DIR="${ZDOTDIR:-$HOME}/.local/kitty.app"
+LOG_DIR="${XDG_STATE_HOME:-${ZDOTDIR:-$HOME}/.local/state}"
 LOG_FILE="$LOG_DIR/kitty-clean-hook.log"
-LOCAL_BIN_DIR="$HOME/.local/bin"
-LOCAL_APPS_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/applications"
+LOCAL_BIN_DIR="${ZDOTDIR:-$HOME}/.local/bin"
+LOCAL_APPS_DIR="${XDG_DATA_HOME:-${ZDOTDIR:-$HOME}/.local/share}/applications"
 
 DRY_RUN=0
 DEBUG=0
@@ -142,8 +142,8 @@ run_cmd() {
 # Remove directories and symlinks
 # ==============================================================================
 info "Remove kitty directories and symlinks"
-kitty_config_dir="${XDG_CONFIG_HOME:-$HOME/.config}/kitty"
-xdg_config_dir="${XDG_CONFIG_HOME:-$HOME/.config}"
+kitty_config_dir="${XDG_CONFIG_HOME:-${ZDOTDIR:-$HOME}/.config}/kitty"
+xdg_config_dir="${XDG_CONFIG_HOME:-${ZDOTDIR:-$HOME}/.config}"
 run_cmd "Remove $kitty_config_dir directory" rm -rf "$kitty_config_dir"
 run_cmd "Remove $KITTY_APP_DIR directory" rm -rf "$KITTY_APP_DIR"
 run_cmd "Remove $LOG_FILE" rm -f "$LOG_FILE"
@@ -152,3 +152,7 @@ run_cmd "Remove kitten binary symlink" rm -f "$LOCAL_BIN_DIR/kitten"
 run_cmd "Remove kitty desktop file" rm -f "$LOCAL_APPS_DIR/kitty.desktop"
 run_cmd "Remove kitty-open desktop file" rm -f "$LOCAL_APPS_DIR/kitty-open.desktop"
 run_cmd "Remove xdg-terminals list" rm -f "$xdg_config_dir/xdg-terminals.list"
+
+run_cmd "Remove compiled zsh cache files" find "${ZDOTDIR:-$HOME}" -type f -name '*.zwc' -delete
+run_cmd "Delete completion cache" rm -f "${ZSH_COMPDUMP:-${ZDOTDIR:-$HOME}/.zcompdump}"
+

@@ -6,7 +6,7 @@ set -euo pipefail
 # Neovim Post Hook
 # ==============================================================================
 
-LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}"
+LOG_DIR="${XDG_STATE_HOME:-${ZDOTDIR:-$HOME}/.local/state}"
 LOG_FILE="$LOG_DIR/nvim-hook.log"
 
 DRY_RUN=0
@@ -144,7 +144,7 @@ fi
 # ==============================================================================
 
 info "Syncing Neovim plugins with Lazy..."
-if run_cmd "Neovim lazy.nvim sync" nvim --headless -u ~/.config/nvim/init.lua -c 'lua require("lazy").sync()' -c 'qa!'; then
+if run_cmd "Neovim lazy.nvim sync" nvim --headless -u "${XDG_CONFIG_HOME:-$HOME/.config}/nvim/init.lua" -c 'lua require("lazy").sync()' -c 'qa!'; then
     info "Neovim plugins synced successfully."
 else
 	log_msg ERROR "Failed to sync Neovim plugins with lazy.nvim"
@@ -152,5 +152,7 @@ else
     exit 1
 fi
 
-info "Neovim post hook complete."
+run_cmd "Remove compiled zsh cache files" find "${ZDOTDIR:-$HOME}" -type f -name '*.zwc' -delete
+run_cmd "Delete completion cache" rm -f "${ZSH_COMPDUMP:${ZDOTDIR:-$HOME}/.zcompdump}"
 
+info "Neovim post hook complete."

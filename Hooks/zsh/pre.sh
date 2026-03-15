@@ -6,10 +6,12 @@ set -euo pipefail
 # Zsh Pre Hook
 # ==============================================================================
 
-ZSH_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/zsh"
-SITE_FUNCTIONS_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/zsh/site-functions"
-CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/zsh"
-LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}"
+ZSH_CONFIG_DIR="${XDG_CONFIG_HOME:-${ZDOTDIR:-$HOME}/.config}/zsh"
+ZPLUGIN_CONFIG_DIR="${XDG_CONFIG_HOME:-${ZDOTDIR:-$HOME}/.config}/zplugin.d"
+ZSH_DATA_DIR="${XDG_DATA_HOME:-${ZDOTDIR:-$HOME}/.local/share}/zsh"
+SITE_FUNCTIONS_DIR="${XDG_DATA_HOME:-${ZDOTDIR:-$HOME}/.local/share}/zsh/site-functions"
+CACHE_DIR="${XDG_CACHE_HOME:-${ZDOTDIR:-$HOME}/.cache}/zsh"
+LOG_DIR="${XDG_STATE_HOME:-${ZDOTDIR:-$HOME}/.local/state}"
 LOG_FILE="$LOG_DIR/zsh-hook.log"
 
 DRY_RUN=0
@@ -144,7 +146,9 @@ if (( DEBUG )); then
 fi
 
 run_cmd "Create zsh config directory" mkdir -p "$ZSH_CONFIG_DIR"
-run_cmd "Create zsh site-functions directory" mkdir -p "$SITE_FUNCTIONS_DIR"
+run_cmd "Create zplugin.d config directory" mkdir -p "$ZPLUGIN_CONFIG_DIR"
+run_cmd "Create zsh data directory" mkdir -p "$ZSH_DATA_DIR"
+run_cmd "Remove existing zsh site-functions path" rm -rf "$SITE_FUNCTIONS_DIR"
 run_cmd "Create zsh cache directory" mkdir -p "$CACHE_DIR"
 
 info "Zsh pre hook complete"

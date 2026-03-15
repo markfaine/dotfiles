@@ -7,8 +7,8 @@ set -euo pipefail
 # ==============================================================================
 # Install mise if missing, without modifying shell rc files.
 
-MISE_BIN="$HOME/.local/bin/mise"
-LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}"
+MISE_BIN="${ZDOTDIR:-$HOME}/.local/bin/mise"
+LOG_DIR="${XDG_STATE_HOME:-${ZDOTDIR:-$HOME}/.local/state}"
 LOG_FILE="$LOG_DIR/mise-pre-hook.log"
 
 DRY_RUN=0
@@ -148,7 +148,7 @@ info "Installing mise..."
 
 info "Create parent directories"
 local_bin_dir="$(dirname "$MISE_BIN")"
-mise_config_dir="${XDG_CONFIG_HOME:-$HOME/.config}/mise"
+mise_config_dir="${XDG_CONFIG_HOME:-${ZDOTDIR:-$HOME}/.config}/mise"
 run_cmd "Create $local_bin_dir directory" mkdir -p "$local_bin_dir"
 run_cmd "Create $mise_config_dir directory" mkdir -p "$mise_config_dir"
 

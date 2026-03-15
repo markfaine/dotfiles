@@ -8,9 +8,9 @@ set -euo pipefail
 # ==============================================================================
 # Downloads and installs tools listed in the sources file.
 
-TOOLS_CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/tools/sources"
-INSTALL_DIR="$HOME/.local/bin"
-LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}"
+TOOLS_CONFIG="${XDG_CONFIG_HOME:-${ZDOTDIR:-$HOME}/.config}/tools/sources"
+INSTALL_DIR="${ZDOTDIR:-$HOME}/.local/bin"
+LOG_DIR="${XDG_STATE_HOME:-${ZDOTDIR:-$HOME}/.local/state}"
 LOG_FILE="$LOG_DIR/tools-hook.log"
 
 DRY_RUN=0
@@ -398,6 +398,12 @@ if (( failed > 0 )); then
 	echo "Check $LOG_FILE for details on failures" >&2
 	exit 1
 fi
+
+info "Remove compiled zsh cache files"
+find "${ZDOTDIR:-$HOME}" -type f -name '*.zwc' -delete
+
+info "Delete completion cache"
+rm -f "${ZSH_COMPDUMP:${ZDOTDIR:-$HOME}/.zcompdump}"
 
 info "Tools post hook complete."
 

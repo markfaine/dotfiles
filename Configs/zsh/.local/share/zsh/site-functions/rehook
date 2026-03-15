@@ -1,6 +1,9 @@
 # ==============================================================================
 # Rerun pre/post hooks
 # ==============================================================================
+if (( ! $+commands[tuckr] )); then
+  return 0
+fi
 # Function to relink dotfiles using tuckr
 echo "Linking and running post hooks with tuckr..."
 tuckr set -fy '*'

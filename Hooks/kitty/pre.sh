@@ -8,8 +8,8 @@ set -euo pipefail
 # Kitty Pre Hook
 # ==============================================================================
 
-LOCAL_APPS_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/applications"
-LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}"
+LOCAL_APPS_DIR="${XDG_DATA_HOME:-${ZDOTDIR:-$HOME}/.local/share}/applications"
+LOG_DIR="${XDG_STATE_HOME:-${ZDOTDIR:-$HOME}/.local/state}"
 LOG_FILE="$LOG_DIR/kitty-pre-hook.log"
 
 DRY_RUN=0
@@ -141,5 +141,5 @@ run_cmd() {
 info "Create kitty directories"
 
 run_cmd "Create $LOCAL_APPS_DIR directory" mkdir -p "$LOCAL_APPS_DIR"
-kitty_config_dir="${XDG_CONFIG_HOME:-$HOME/.config}/kitty"
+kitty_config_dir="${XDG_CONFIG_HOME:-${ZDOTDIR:-$HOME}/.config}/kitty"
 run_cmd "Create $kitty_config_dir directory" mkdir -p "$kitty_config_dir"

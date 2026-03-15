@@ -142,7 +142,7 @@ read_repo_list() {
 clone_repo_if_missing() {
 	local repo_url="$1"
 	local relative_target="$2"
-	local target_dir="$HOME/$relative_target"
+	local target_dir="${ZDOTDIR:-$HOME}/$relative_target"
 
 	if [[ -d "$target_dir/.git" || -d "$target_dir" ]]; then
 		info "Repo target already exists: $target_dir"

@@ -1,350 +1,301 @@
 # Dotfiles
 
-A theme-agnostic, highly customized dotfiles configuration for a consistent and productive development environment across Ubuntu and WSL2.
-
 ## Overview
 
-These configurations provide a modern terminal environment with:
+This repository is a Tuckr-managed dotfiles setup for Linux/WSL. It is organized by module so not everything has to be used.  
 
-- **Shell:** Zsh with custom configuration
-- **Terminal:** Kitty with Tokyo Night theme
-- **Multiplexer:** Tmux with comprehensive plugin system
-- **Editor:** Neovim (Lua-based configuration)
-- **Version Control:** Git with theme-aware colors
-- **Tool Management:** mise for CLI tool versions
-- **Secrets Management:** Doppler
+High-level structure:
 
-The setup uses **theme-agnostic color configuration** — all tools automatically adapt to your active terminal theme by using ANSI color indices instead of hardcoded values.
+1. `Configs/<module>/...`: files that Tuckr symlinks.
+2. `Hooks/<module>/pre.sh`: setup before symlinking.
+3. `Hooks/<module>/post.sh`: setup after symlinking.
+4. `Hooks/<module>/rm_.sh`: cleanup on `tuckr unset` (where implemented).
 
-## Key Features
+Design goals:
 
-### Theme-Agnostic Color System
+1. Modular adoption instead of all-or-nothing.
+2. Automated setup/teardown via hooks.
+3. XDG-oriented paths with sensible fallbacks.
+4. Easy containerized testing before host adoption.
 
-- **Any Theme, Automatic Adaptation:** Switch kitty themes without reconfiguring tools
-- **ANSI Index Mapping:** All colors reference terminal palette (0-15) instead of hex values
-- **Centralized Control:** Single `.theme-colors` file manages all tool colors
-- **60+ CLI Tools:** bat, fzf, ripgrep, eza, jq, git, and more automatically adapt
+## Quickstart/Test
 
-### Modern Tooling & Configuration
-
-- **Consistent Formatting:** Clean section headers, no fold markers, readable structure
-- **Modular Organization:** Each application in separate, well-documented configs
-- **Automated Deployment:** Ansible-based deployment with Tuckr symlink management
-- **WSL2 Optimized:** Seamless experience on native Linux and WSL2
-- **Performance Tuned:** Optimized settings for fast shell startup and smooth operation
-
-## Directory Structure
-
-The repository is organized for deployment with [Tuckr](https://github.com/RaphGL/Tuckr):
-
-```
-dotfiles/
-├── Configs/          # Application configurations (symlinked by Tuckr)
-│   ├── zsh/         # Shell config with theme-agnostic colors
-│   ├── kitty/       # Terminal config with Tokyo Night theme
-│   ├── tmux/        # Multiplexer config with session management
-│   ├── nvim/        # Neovim with Lua-based configuration
-│   ├── git/         # Git with ANSI color indices
-│   ├── mise/        # Tool version management
-│   └── docker/      # Docker configurations
-├── Hooks/           # Pre/post symlink scripts
-│   ├── kitty/       # Kitty installation hooks
-│   ├── nvim/        # Neovim setup hooks
-│   ├── mise/        # Tool installation hooks
-│   └── zsh/         # Shell initialization hooks
-└── README.md        # This file
-```
-
-## Color System
-
-All tools use **ANSI terminal color indices (0-15)** that automatically adapt to your active kitty theme:
-
-### How It Works
-
-1. **Kitty theme defines colors:** `current-theme.conf` sets what colors 0-15 actually display
-1. **Tools reference indices:** bat, fzf, git, etc. use "color 4" instead of "#7aa2f7"
-1. **Automatic adaptation:** Change theme → all tools instantly match new palette
-
-### Configured Tools
-
-| Tool        | Configuration      | Location        |
-| ----------- | ------------------ | --------------- |
-| **bat**     | `BAT_THEME=ansi`   | `.theme-colors` |
-| **fzf**     | ANSI color indices | `.theme-colors` |
-| **ripgrep** | Terminal palette   | `.ripgreprc`    |
-| **eza**     | EZA_COLORS         | `.theme-colors` |
-| **git**     | Color indices 0-15 | `.gitconfig`    |
-| **tmux**    | colour0-colour15   | `.tmux-colors`  |
-| **jq**      | ANSI format        | `.theme-colors` |
-
-### Switching Themes
+### Install On A Host
 
 ```bash
-# 1. Update theme
-cp new-theme.conf ~/.config/kitty/current-theme.conf
-
-# 2. Reload kitty (restart or reload config)
-
-# 3. Done! All tools automatically adapt
-```
-
-## Configuration Highlights
-
-### Zsh Shell
-
-- **Fast startup:** Optimized loading with znap plugin manager
-- **SSH agent:** Persistent across sessions, tmux-aware
-- **Completions:** fpath-based system with tmuxinator support
-- **Theme colors:** Centralized in `.theme-colors`
-- **Location:** `Configs/zsh/`
-
-### Kitty Terminal
-
-- **GPU-accelerated:** Hardware rendering for smooth scrolling
-- **Tokyo Night theme:** Cool-toned, eye-friendly color scheme
-- **Fira Code font:** 20+ OpenType features configured
-- **Mouse support:** Extensive click/scroll mappings
-- **Location:** `Configs/kitty/.config/kitty/`
-
-### Tmux Multiplexer
-
-- **Plugin manager:** TPM with 15+ plugins
-- **Session management:** tmux-resurrect with manual restore
-- **Auto-save:** Every 15 minutes (auto-restore disabled)
-- **Tmuxinator:** Compatible session configuration
-- **Theme-aware:** Colors adapt to terminal palette
-- **Location:** `Configs/tmux/`
-
-### Git Configuration
-
-- **ANSI colors:** Theme-agnostic diff/status output
-- **Nvim mergetool:** DiffviewOpen integration
-- **GitHub CLI:** Credential helper configured
-- **Smart aliases:** `lg`, `up`, `amend`, and more
-- **Location:** `Configs/git/.gitconfig`
-
-### Tool Versions (mise)
-
-- **60+ tools:** bat, fzf, ripgrep, eza, node, python, etc.
-- **Version pinning:** Consistent tools across machines
-- **Auto-activation:** Per-directory .tool-versions support
-- **Location:** `Configs/mise/.config/mise/`
-
-## Formatting Conventions
-
-All configuration files follow consistent formatting standards:
-
-- **Section headers:** Clean `====` style separators
-- **No fold markers:** Removed `{{{ }}}` markers for cleaner diffs
-- **Comments:** Descriptive, explain "why" not "what"
-- **Indentation:** Tabs for shell/config, spaces for code
-- **Structure:** Logical grouping with clear boundaries
-
-## Deployment
-
-### Automated (Ansible)
-
-These dotfiles deploy via the `user` role in the [net.markfaine](https://github.com/markfaine/net-markfaine) collection:
-
-```bash
-# Run ansible playbook that includes the user role
-ansible-playbook site.yml
-```
-
-The directory structure is compatible with [Tuckr](https://github.com/RaphGL/Tuckr), which manages symlinking configurations to their appropriate locations. The `Hooks/` directory contains scripts that run at different stages to ensure dependencies are met.
-
-### Manual (Tuckr)
-
-```bash
-# 1. Clone repository
-git clone <repo-url> ~/.config/dotfiles
+git clone https://github.com/markfaine/dotfiles.git ~/.config/dotfiles
 cd ~/.config/dotfiles
-
-# 2. Install tuckr (if not installed)
-cargo install tuckr
-
-# 3. Symlink all configurations
-tuckr set -fy '*'
-
-# 4. Install dependencies (optional)
-./Hooks/*/pre.sh   # Run pre-hooks
-./Hooks/*/post.sh  # Run post-hooks
+bash install.sh
 ```
 
-## Git Hook Guardrails
-
-This repo includes two layers to keep scripts executable:
-
-- Local git hook in `.githooks/pre-commit`:
-  - Auto-fixes executable bits for `Hooks/**/*.sh` and `Configs/**/bin/*.sh`
-  - Stages the permission change and asks you to re-run commit
-- Optional `pre-commit` framework config in `.pre-commit-config.yaml`:
-  - Validates executable scripts have shebangs
-  - Validates shebang scripts are executable
-
-Enable the local hook path:
+Install from a branch:
 
 ```bash
-git config core.hooksPath .githooks
+bash install.sh --branch development
 ```
 
-Enable the `pre-commit` framework (recommended for team consistency):
+### Quick Docker Test Before Adopting
+
+Run the installer in a throwaway Ubuntu container:
 
 ```bash
-pre-commit install
-pre-commit run --all-files
+cd ~/.config/dotfiles
+./test.sh
 ```
 
-## Quick Start
+Useful options:
 
-### First Time Setup
+1. `--branch <name>`: test a non-default dotfiles branch.
+2. `--debug`: verbose output.
+3. `--keep`: keep container running for manual inspection.
+4. `--no-cleanup`: skip docker prune before image build.
+5. `--zsh-bench`: run `romkatv/zsh-bench` inside the container after install.
 
-1. **Deploy dotfiles** (see Deployment section above)
-1. **Reload shell:** `exec zsh` or restart terminal
-1. **Verify colors:** Tools should match your terminal theme
-1. **Install tmux plugins:** `<prefix>I` (prefix defaults to C-j)
-
-### Verify Installation
+Examples:
 
 ```bash
-# Check environment
-echo $BAT_THEME        # Should be: ansi
-echo $COLORTERM        # Should be: truecolor
-
-# Test tools
-echo "print('test')" | bat -l python
-echo -e "opt1\nopt2" | fzf
-rg "pattern" ~/.config/dotfiles/
-eza -la --icons
-
-# Verify git colors
-git log --oneline --color=always | head
+./test.sh --branch development --debug
+./test.sh --keep --zsh-bench
 ```
 
-### Common Tasks
+## Tuckr Config Catalog
 
-**Switch themes:**
+### `apt`
+
+1. Dotfiles provided:
+   `Configs/apt/.config/apt/install`, `Configs/apt/.config/apt/remove`
+2. Hooks:
+   `pre.sh` ensures apt config files exist.
+   `post.sh` installs/removes packages from lists.
+   `rm_.sh` removes module config.
+3. External dependencies:
+   `apt-get`, `dpkg-query`, and either root or `sudo`.
+4. Assumptions:
+   Debian/Ubuntu-like host package manager.
+
+### `docker`
+
+1. Dotfiles provided:
+   Docker client config/state files under `.docker/...`.
+2. Hooks:
+   No dedicated `Hooks/docker` currently.
+3. External dependencies:
+   Docker CLI/daemon as needed by your workflows.
+4. Assumptions:
+   Often paired with `pass`/`gpg` if using pass credential helper.
+
+### `fonts`
+
+1. Dotfiles provided:
+   `Configs/fonts/.config/fonts/install` (archive URLs).
+2. Hooks:
+   `pre.sh` ensures install list exists.
+   `post.sh` downloads/extracts fonts and refreshes cache.
+   `rm_.sh` removes module config.
+3. External dependencies:
+   `curl` or `wget`, `tar`, `unzip` for zip archives, `fc-cache` on Linux.
+4. Assumptions:
+   Network access to font URLs.
+
+### `gpg`
+
+1. Dotfiles provided:
+   GPG helper scripts and key import files under `Configs/gpg/...`.
+2. Hooks:
+   `pre.sh` prepares `GNUPGHOME` and key import directories.
+   `post.sh` imports `.asc` keys into keyring.
+   `rm_.sh` removes module config directory.
+3. External dependencies:
+   `gpg` or `gpg2`.
+4. Assumptions:
+   Used by `pass` workflows for encrypted password storage.
+
+### `kitty`
+
+1. Dotfiles provided:
+   Kitty config plus helper scripts under `Configs/kitty/...`.
+2. Hooks:
+   `pre.sh` prepares target dirs.
+   `post.sh` installs kitty (if missing), links binaries, patches desktop entries, writes terminal list.
+   `rm_.sh` removes generated artifacts and module config.
+3. External dependencies:
+   `curl`, `xz`, `sed`, standard POSIX tooling.
+4. Assumptions:
+   Linux desktop integration paths available if desktop entries are used.
+
+### `mise`
+
+1. Dotfiles provided:
+   `Configs/mise/.config/mise/config.toml`
+2. Hooks:
+   `pre.sh` installs mise if missing.
+   `post.sh` bootstraps Node, installs toolchain, reshim/prune.
+   `rm_.sh` removes module config.
+3. External dependencies:
+   `curl` or `wget`, network access.
+4. Assumptions:
+   Other modules may depend on tools installed via mise.
+
+### `nvim`
+
+1. Dotfiles provided:
+   Full Neovim tree under `Configs/nvim/.config/nvim/...`.
+2. Hooks:
+   `pre.sh` clears existing target for directory-level relink.
+   `post.sh` runs headless lazy sync.
+   `rm_.sh` removes module config.
+3. External dependencies:
+   `nvim`.
+4. Assumptions:
+   Better experience when language tools are already installed (often via `mise`).
+
+### `pass`
+
+1. Dotfiles provided:
+   `Configs/pass/.config/pass/repos`
+2. Hooks:
+   `pre.sh` ensures config files exist.
+   `post.sh` clones listed repos and writes docker-pass initialization marker.
+   `rm_.sh` removes module config.
+3. External dependencies:
+   `git`, `pass`.
+4. Assumptions:
+   Usually paired with working `gpg` setup.
+
+### `ssh`
+
+1. Dotfiles provided:
+   `Configs/ssh/.config/ssh/authorized_keys` (URL list).
+2. Hooks:
+   `pre.sh` prepares ssh config and `~/.ssh` perms.
+   `post.sh` downloads keys, deduplicates by fingerprint, appends to `~/.ssh/authorized_keys`.
+   `rm_.sh` removes module config.
+3. External dependencies:
+   `curl`, `sha256sum`, `awk`, `grep`.
+4. Assumptions:
+   Network access to key URLs.
+
+### `tools`
+
+1. Dotfiles provided:
+   `Configs/tools/.config/tools/sources`
+2. Hooks:
+   `pre.sh` ensures sources file exists.
+   `post.sh` downloads binaries/archives and installs to `~/.local/bin`.
+   `rm_.sh` removes module config.
+3. External dependencies:
+   `curl`, `tar`, `unzip` for zip archives.
+4. Assumptions:
+   Complements `mise` for tools not managed there.
+
+### `wsl_wsl`
+
+1. Dotfiles provided:
+   WSL-specific files including `.wsl`.
+2. Hooks:
+   `post.sh` is currently a placeholder/prototype for WSL configuration behavior.
+3. External dependencies:
+   WSL environment, `sudo`, writable Windows mount paths.
+4. Assumptions:
+   Intended for WSL only.
+
+### `zsh`
+
+1. Dotfiles provided:
+   Main shell files (`.zshrc`, `.zplugins`, `.paths`, aliases, plugin snippets, site-functions).
+2. Hooks:
+   `pre.sh` prepares config/data/cache and relink behavior for `site-functions`.
+   `post.sh` validates startup files and runs zsh startup checks.
+   `rm_.sh` removes module dirs and shell caches.
+3. External dependencies:
+   `zsh`; plugin repositories fetched by znap during startup.
+4. Assumptions:
+   Core module used by most workflows in this repo.
+
+## Additional Notes
+
+### Safety: Existing Dotfiles, Backups, and Revert
+
+If you already manage dotfiles, do this before first install.
+
+1. Backup existing dotfiles directory if present:
 
 ```bash
-cd ~/.config/kitty
-cp themes/new-theme.conf current-theme.conf
-# Restart kitty - all tools adapt automatically
+if [ -d ~/.config/dotfiles ]; then
+  mv ~/.config/dotfiles ~/.config/dotfiles.backup.$(date +%Y%m%d-%H%M%S)
+fi
 ```
 
-**Update tmux plugins:**
+2. Backup currently active files you care about before symlinking:
 
 ```bash
-<prefix>U  # prefix is C-j by default
+mkdir -p ~/.dotfiles-preinstall-backup
+cp -a ~/.zshrc ~/.zplugins ~/.paths ~/.zlogout ~/.dotfiles-preinstall-backup/ 2>/dev/null || true
+cp -a ~/.config/kitty ~/.config/nvim ~/.dotfiles-preinstall-backup/ 2>/dev/null || true
 ```
 
-**Reload configurations:**
+3. Find existing symlinks in common locations:
 
 ```bash
-exec zsh                    # Reload shell
-<prefix>r                   # Reload tmux
-kitty @ load-config         # Reload kitty (from within kitty)
+find ~ -maxdepth 2 -type l \( -name '.zshrc' -o -name '.zplugins' -o -name '.paths' -o -name '.zlogout' \)
+find ~/.config -maxdepth 3 -type l 2>/dev/null
 ```
 
-**Restore tmux session:**
+4. Remove old symlinks only (leave regular files intact):
 
 ```bash
-<prefix>C-r  # Manual restore (auto-restore disabled)
+find ~ -maxdepth 2 -type l \( -name '.zshrc' -o -name '.zplugins' -o -name '.paths' -o -name '.zlogout' \) -delete
+find ~/.config -maxdepth 3 -type l -delete 2>/dev/null || true
 ```
 
-## Troubleshooting
-
-### Colors Don't Match Theme
-
-**Issue:** Tool colors don't adapt to new theme
-
-**Check:**
+5. Revert installation (safe default):
 
 ```bash
-echo $BAT_THEME           # Should be 'ansi', not a theme name
-echo $FZF_DEFAULT_OPTS    # Should have --color= with numbers
-echo $COLORTERM           # Should be 'truecolor'
+cd ~/.config/dotfiles
+~/.local/bin/tuckr unset -fy '*'
 ```
 
-**Fix:** Reload shell or source `.zshenv`
+6. Revert installation (module-by-module):
 
 ```bash
-source ~/.zshenv
+~/.local/bin/tuckr unset -fy zsh nvim kitty mise pass ssh tools gpg fonts apt wsl
 ```
 
-### Tmux Colors Wrong
-
-**Issue:** Tmux doesn't match terminal colors
-
-**Check:**
+7. Restore your backups:
 
 ```bash
-tmux show-options -g | grep terminal-overrides
+cp -a ~/.dotfiles-preinstall-backup/.zshrc ~/.dotfiles-preinstall-backup/.zplugins ~/.dotfiles-preinstall-backup/.paths ~/.dotfiles-preinstall-backup/.zlogout ~/
+cp -a ~/.dotfiles-preinstall-backup/kitty ~/.config/ 2>/dev/null || true
+cp -a ~/.dotfiles-preinstall-backup/nvim ~/.config/ 2>/dev/null || true
 ```
 
-**Fix:** Reload tmux config
+### Incremental Adoption Is Recommended
+
+Start with a subset and expand gradually.
+
+1. Begin with `zsh` and `mise`.
+2. Add `kitty` and `nvim`.
+3. Add `pass`, `gpg`, and `ssh` only if needed.
+
+### Validation Commands
 
 ```bash
-<prefix>r  # Or manually: tmux source ~/.tmux.conf
+# Hook syntax sanity
+find Hooks -type f -name '*.sh' -print0 | xargs -0 -n1 bash -n
+
+# Container test
+./test.sh --debug
+
+# Container test with zsh benchmark
+./test.sh --zsh-bench
 ```
 
-### SSH Loading Causes Tmux Exit
+### Customization Points
 
-**Issue:** Tmux immediately exits on startup
-
-**Fix:** Already handled - `.load_ssh` detects TMUX and skips initialization
-
-```bash
-# Verify in .load_ssh:
-if [[ -n "${TMUX:-}" ]]; then return 0; fi
-```
-
-### Completions Not Working
-
-**Issue:** Tab completion missing for tmuxinator or other tools
-
-**Check:**
-
-```bash
-echo $fpath  # Should include home directory
-ls -la ~/    # Should see _tmuxinator file
-```
-
-**Fix:** Rebuild completions
-
-```bash
-rm ~/.zcompdump*
-exec zsh
-```
-
-### Session Restore Conflicts
-
-**Issue:** Tmuxinator sessions overridden by continuum
-
-**Solution:** Auto-restore is disabled. Use manual restore:
-
-```bash
-<prefix>C-r  # Manually restore last saved session only when needed
-```
-
-## Additional Documentation
-
-For detailed information on specific components:
-
-- **Color system details:** See `COLOR_CONFLICT_RESOLUTION.md`
-- **Tool reference:** See `TOOL_COLOR_REFERENCE.md`
-- **Tmux colors:** See `Configs/tmux/TMUX_COLORS.md`
-- **Implementation summary:** See `IMPLEMENTATION_SUMMARY.md`
-- **Verification script:** Run `./verify-colors.sh`
-
-## Contributing
-
-When modifying configurations:
-
-1. **Maintain formatting:** Use `====` headers, no fold markers
-1. **Use ANSI colors:** Reference terminal indices (0-15), not hex values
-1. **Document changes:** Add comments explaining non-obvious choices
-1. **Test thoroughly:** Verify changes don't break theme adaptation
+1. Add machine-local shell overrides in `~/.zshrc.local`.
+2. Edit package/tool/font source lists in `Configs/*/.config/*/...`.
+3. Keep secrets and host-specific values out of tracked files.
 
 ## License
 
-Personal dotfiles - use at your own risk. Feel free to adapt for your own use.
+Personal dotfiles published for reuse and adaptation. Use at your own risk.

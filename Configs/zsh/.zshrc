@@ -7,6 +7,9 @@
 # Preferred editor keymap
 bindkey -e
 
+# Default for dotfiles directory is $HOME
+export ZDOTDIR="$HOME"
+
 # ==============================================================================
 # Debug & Logging Configuration
 # ==============================================================================
@@ -20,7 +23,7 @@ ZSH_TRACE="${ZSH_TRACE:-}"
 # Logging Setup
 # ==============================================================================
 # Log file for debug output
-ZLOG_DIR="$HOME/.local/bin"
+ZLOG_DIR="$ZDOTDIR/.local/bin"
 mkdir -p "$ZLOG_DIR"
 export ZLOG_FILE="$ZLOG_DIR/zsh.log"
 
@@ -30,45 +33,54 @@ export ZLOG_FILE="$ZLOG_DIR/zsh.log"
 # ==============================================================================
 # Setup fpath and autoload
 # ==============================================================================
-local site_func_dir="${XDG_DATA_HOME:-$HOME/.local/share}/zsh/site-functions"
-if [[ -d "$site_func_dir" ]]; then
-  fpath=("$site_func_dir" $fpath)
-  autoload -Uz "$site_func_dir"/*(N)
-fi
+function _autoload_fpath(){
+  local site_func_dir
+  local funcs=("$@")
+
+  site_func_dir="${XDG_DATA_HOME:-${ZDOTDIR:-$HOME}/.local/share}/zsh/site-functions"
+
+  if [[ -d "$site_func_dir" ]]; then
+    fpath=("$site_func_dir" $fpath)
+
+    if (( $#funcs == 0 )); then
+      # Default: Load everything in the directory
+      autoload -Uz "$site_func_dir"/*(N:t)
+    else
+      # Specific: Validate each requested function before loading
+      local func
+      for func in "${funcs[@]}"; do
+        if [[ -f "$site_func_dir/$func" ]]; then
+          autoload -Uz "$func"
+        else
+          echo "zsh: function file not found: $site_func_dir/$func" >&2
+        fi
+      done
+    fi
+  fi
+}
 
 # ==============================================================================
-# Znap Setup & Plugin Loading
+# Znap Setup
 # ==============================================================================
 # Docs: https://github.com/marlonrichert/zsh-snap
-ZNAP_HOME="${XDG_CONFIG_HOME:-$HOME/.config}/repos/znap"
-zdebug ".znaprc: ZNAP_HOME: $ZNAP_HOME"
-zstyle ':znap:*' "$ZNAP_HOME"
+ZNAP_HOME="${XDG_CONFIG_HOME:-${ZDOTDIR:-$HOME}/.config}/repos/znap"
+zstyle ':znap:*' repos-dir "${ZNAP_HOME:h}" # parent dir
 export ZNAP_HOME
+_autoload_fpath
 _download_znap || return
 _load_znap || return
+
+# ==============================================================================
+# Znap Plugin Loading
+# ==============================================================================
+# Docs: https://github.com/marlonrichert/zsh-snap
 _load_plugins || return
 
 # ==============================================================================
-# ZSH Module: Completion
+# Auto suggestions
 # ==============================================================================
-# Load zsh completion module and configure globbing
-# Uses fast compinit cache to avoid slow initialization on every shell startup
-function _load_complist(){
-  zdebug ".zshrc: Loading zsh/complist"
-
-  # Fail fast if module not available
-  zmodload zsh/complist || { zdebug ".zshrc: Failed to load zsh/complist"; return 1; }
-
-  # Use cached completions for speed (only regenerate if needed)
-  autoload -U compinit
-  if [[ -z "$COMPDUMP" ]]; then
-    COMPDUMP="$HOME/.cache/zsh/zcompdump"
-    [[ ! -d "${COMPDUMP%/*}" ]] && mkdir -p "${COMPDUMP%/*}"
-  fi
-  compinit -d "$COMPDUMP" -C
-  _comp_options+=(globdots)    # Include hidden files.
-}
-_load_complist
+# This one has to be last, loaded separately from _load_plugins function
+znap source zsh-users/zsh-autosuggestions
 
 # ==============================================================================
 # SSH Identity Management
@@ -77,7 +89,7 @@ _load_complist
 # systemd, gpg-agent, keychain, or system default)
 
 # Define key paths
-CONFIG_KEY=$(grep -m1 "IdentityFile" "$HOME/.ssh/config" 2>/dev/null | awk '{print $2}' | sed "s|^~|$HOME|")
+CONFIG_KEY=$(grep -m1 "IdentityFile" "$ZDOTDIR/.ssh/config" 2>/dev/null | awk '{print $2}' | sed "s|^~|$HOME|")
 DEFAULT_KEY="$HOME/.ssh/id_rsa"
 SSH_ENV="$HOME/.ssh/agent.env"
 
@@ -96,10 +108,10 @@ load_ssh_identities
 # ==============================================================================
 # Load Shell Aliases
 # ==============================================================================
-if [[ -f "$HOME/.aliases" ]]; then
+if [[ -f "$ZDOTDIR/.aliases" ]]; then
   zdebug ".zshrc: Loading shell aliases"
   # shellcheck source=/dev/null
-  . "$HOME/.aliases"
+  . "$ZDOTDIR/.aliases"
 else
   zdebug ".zshrc: No aliases file found"
 fi
@@ -135,7 +147,7 @@ _load_aliases
 # ==============================================================================
 # Load zcolors, requires znap zcolors plugin
 if [ -x /usr/bin/dircolors ]; then
-  test -r "$HOME/.dircolors" && eval "$(dircolors -b "$HOME/.dircolors")" || eval "$(dircolors -b)"
+  test -r "$ZDOTDIR/.dircolors" && eval "$(dircolors -b "$ZDOTDIR/.dircolors")" || eval "$(dircolors -b)"
 fi
 
 # ==============================================================================
@@ -149,39 +161,50 @@ _load_paths
 # ==============================================================================
 # Load theme color settings that work with any kitty theme
 # Uses terminal color indexes (0-15) instead of hardcoded hex colors
-if [[ -f "$HOME/.theme-colors" ]]; then
+if [[ -f "$ZDOTDIR/.theme-colors" ]]; then
   # shellcheck source=/dev/null
-  source "$HOME/.theme-colors"
+  source "$ZDOTDIR/.theme-colors"
 fi
 
 # ==============================================================================
 # Third-Party Tool Configuration: Ripgrep
 # ==============================================================================
 # Setup ripgrep configuration file path (only set if file exists)
-if [[ -f "$HOME/.ripgreprc" ]]; then
-  export RIPGREP_CONFIG_PATH="$HOME/.ripgreprc"
+if [[ -f "$ZDOTDIR/.ripgreprc" ]]; then
+  export RIPGREP_CONFIG_PATH="$ZDOTDIR/.ripgreprc"
   zdebug ".zshrc: Ripgrep config loaded from $RIPGREP_CONFIG_PATH"
 else
-  zdebug ".zshrc: Ripgrep config not found at $HOME/.ripgreprc (optional)"
+  zdebug ".zshrc: Ripgrep config not found at $ZDOTDIR/.ripgreprc (optional)"
 fi
 
 # ==============================================================================
 # Activate Mise
 # ==============================================================================
-eval "$(mise activate zsh)"
+if (( $+commands[mise] )); then
+  eval "$("${ZDOTDIR:-$HOME}/.local/bin/mise" activate zsh)"
+fi
 
 # ==============================================================================
 # Activate Zoxide
 # ==============================================================================
-eval "$(zoxide init zsh)"
+if (( $+commands[zoxide] )); then
+  eval "$(zoxide init zsh)"
+fi
 
 # ==============================================================================
 # User Extension Hooks
 # ==============================================================================
 # Allow users to add custom initialization without modifying this file
 # Create ~/.zshrc.local for local customizations that won't be version controlled
-if [[ -f "$HOME/.zshrc.local" ]]; then
+if [[ -f "$ZDOTDIR/.zshrc.local" ]]; then
   zdebug ".zshrc: Loading local overrides from ~/.zshrc.local"
   # shellcheck source=/dev/null
-  . "$HOME/.zshrc.local"
+  . "$ZDOTDIR/.zshrc.local"
+fi
+
+# ==============================================================================
+# Activate fzf
+# ==============================================================================
+if (( $+commands[fzf] )); then
+  source <(fzf --zsh)
 fi
