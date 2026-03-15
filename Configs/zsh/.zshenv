@@ -179,39 +179,3 @@ fi
 if [[ "${TZ:-}" == "" ]]; then
   export TZ="America/Chicago"
 fi
-
-# ==============================================================================
-# Keybindings
-# ==============================================================================
-# Assumes Emacs mode bindkey -e # set in ~/.zshrc
-
-# Standard Keys using Terminfo
-bindkey "${terminfo[kbs]}"    backward-delete-char   # Backspace
-bindkey "${terminfo[kdch1]}"  delete-char            # Delete
-bindkey "${terminfo[kich1]}"  overwrite-mode         # Insert
-bindkey "${terminfo[khome]}"  beginning-of-line      # Home
-bindkey "${terminfo[kend]}"   end-of-line            # End
-bindkey "${terminfo[kpp]}"    up-line-or-history     # PageUp
-bindkey "${terminfo[knp]}"    down-line-or-history   # PageDown
-bindkey "${terminfo[kcuu1]}"  up-line-or-history     # Up Arrow
-bindkey "${terminfo[kcud1]}"  down-line-or-history   # Down Arrow
-bindkey "${terminfo[kcub1]}"  backward-char          # Left Arrow
-bindkey "${terminfo[kcuf1]}"  forward-char           # Right Arrow
-bindkey "${terminfo[kcbt]}"   reverse-menu-complete  # Shift-Tab
-
-# Terminal-Specific Fixes (Ctrl + Arrows for Word Jumping)
-# These codes work across Kitty, Windows Terminal, and Konsole
-bindkey '^[[1;5C' forward-word       # Ctrl+Right
-bindkey '^[[1;5D' backward-word      # Ctrl+Left
-
-# Open current command in EDITOR (Ctrl-X, Ctrl-E)
-autoload -z edit-command-line
-zle -N edit-command-line
-bindkey "^X^E" edit-command-line
-
-# Double dot expansion
-# Bind the dot key to the widget
-bindkey "." _double_dot_expand
-
-# Optional: Ensure the expansion doesn't break normal completion
-bindkey -M isearch "." self-insert

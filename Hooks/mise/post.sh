@@ -152,6 +152,6 @@ run_cmd "Rebuild mise shims" "$MISE_BIN" reshim
 run_cmd "Prune unused mise tool versions" "$MISE_BIN" prune --tools --yes
 
 run_cmd "Remove compiled zsh cache files" find "${ZDOTDIR:-$HOME}" -type f -name '*.zwc' -delete
-run_cmd "Delete completion cache" rm -f "${ZSH_COMPDUMP:${ZDOTDIR:-$HOME}/.zcompdump}"
+run_cmd "Delete completion cache" rm -f "${ZSH_COMPDUMP:-${ZDOTDIR:-$HOME}/.zcompdump}"
 
 info "Mise post hook complete."

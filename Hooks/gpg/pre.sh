@@ -8,8 +8,6 @@ set -euo pipefail
 # ==============================================================================
 
 GPG_CONFIG_DIR="${XDG_CONFIG_HOME:-${ZDOTDIR:-$HOME}/.config}/gnupg"
-IMPORT_DIR="$GPG_CONFIG_DIR/keys"
-GPGDIR="${GNUPGHOME:-${ZDOTDIR:-$HOME}/.gnupg}"
 LOG_DIR="${XDG_STATE_HOME:-${ZDOTDIR:-$HOME}/.local/state}"
 LOG_FILE="$LOG_DIR/gnupg-hook.log"
 
@@ -144,9 +142,5 @@ if (( DEBUG )); then
 	info "Debug mode enabled"
 fi
 
-run_cmd "Create gpg config directory" mkdir -p "$GPG_CONFIG_DIR"
-run_cmd "Create gpg import directory" mkdir -p "$IMPORT_DIR"
-run_cmd "Create GNUPGHOME directory" mkdir -p "$GPGDIR"
-run_cmd "Secure GNUPGHOME permissions" chmod 700 "$GPGDIR"
-
+run_cmd "Create gpg import directory" mkdir -p "$GPG_CONFIG_DIR"
 info "GPG pre hook complete"

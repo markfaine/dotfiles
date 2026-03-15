@@ -104,7 +104,7 @@ if ! command -v zsh >/dev/null 2>&1; then
 	exit 0
 fi
 
-required_files=("${ZDOTDIR:-$HOME}/.zshrc" "${ZDOTDIR:-$HOME}/.zplugins" "${ZDOTDIR:-$HOME}/.zlogout" "${ZDOTDIR:-$HOME}/.paths")
+required_files=("${ZDOTDIR:-$HOME}/.zshrc" "${ZDOTDIR:-$HOME}/.paths")
 for file in "${required_files[@]}"; do
 	if [[ ! -f "$file" ]]; then
 		log_msg ERROR "required zsh startup file missing: $file"
@@ -114,8 +114,6 @@ for file in "${required_files[@]}"; do
 done
 
 run_cmd "Syntax check ~/.paths" zsh -n "${ZDOTDIR:-$HOME}/.paths"
-run_cmd "Syntax check ~/.zplugins" zsh -n "${ZDOTDIR:-$HOME}/.zplugins"
-run_cmd "Syntax check ~/.zlogout" zsh -n "${ZDOTDIR:-$HOME}/.zlogout"
 run_cmd "Syntax check ~/.zshrc" zsh -n "${ZDOTDIR:-$HOME}/.zshrc"
 
 run_cmd "Remove compiled zsh cache files" find "${ZDOTDIR:-$HOME}" -type f -name '*.zwc' -delete

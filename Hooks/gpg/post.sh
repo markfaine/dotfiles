@@ -2,7 +2,6 @@
 # shellcheck shell=bash
 
 set -euo pipefail
-
 # ==============================================================================
 # GPG Post Hook
 # ==============================================================================
@@ -159,7 +158,7 @@ if [[ ! -d "$GPGDIR" ]]; then
 fi
 
 # Find all .asc files in ~/.gnupg
-mapfile -t asc_files < <(find "$IMPORT_DIR" -maxdepth 1 -name "*.asc" -type f 2>/dev/null | sort)
+mapfile -t asc_files < <(find -L "$IMPORT_DIR" -maxdepth 1 -name "*.asc" -type f 2>/dev/null | sort)
 
 total=${#asc_files[@]}
 imported=0

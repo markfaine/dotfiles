@@ -40,6 +40,9 @@ function _autoload_fpath(){
   site_func_dir="${XDG_DATA_HOME:-${ZDOTDIR:-$HOME}/.local/share}/zsh/site-functions"
 
   if [[ -d "$site_func_dir" ]]; then
+    # Stale compiled function files can load outdated logic and break ZLE wrappers.
+    find "$site_func_dir" -maxdepth 1 -type f -name '*.zwc' -delete 2>/dev/null || true
+
     fpath=("$site_func_dir" $fpath)
 
     if (( $#funcs == 0 )); then
@@ -98,16 +101,14 @@ fi
 # Docs: https://github.com/marlonrichert/zsh-snap
 _load_plugins \
   "zimfw/utility,functions" \
-  "sindresorhus/pure,,." \
   "chrissicool/zsh-256color" \
   "marlonrichert/zcolors" \
-  "zimfw/input" \
   "zimfw/termtitle" \
   "zimfw/run-help" \
-  "Aloxaf/fzf-tab" \
   "thetic/extract,,,extract" \
   "laggardkernel/zsh-thefuck,,,tf" || return
 
+# "Aloxaf/fzf-tab" \ # temporarily remove for testing
 
 # ==============================================================================
 # SSH Identity Management
@@ -221,15 +222,54 @@ fi
 # ==============================================================================
 # Auto suggestions
 # ==============================================================================
-# These have to be last and in a specific order, specifically completions last
-# and syntax-hightlighting after autosuggestions.
-# Prevent autosuggestions from trying to clear the substring search widget
-ZSH_AUTOSUGGEST_CLEAR_WIDGETS+=(history-substring-search-up history-substring-search-down)
+# Keep this block near the end so ZLE widget wrappers are applied once, in order.
+# Load order here avoids autosuggestions/pure recursion on Enter.
 
 _load_plugins "zsh-users/zsh-completions,,src" || return
 _load_plugins "zsh-users/zsh-history-substring-search" || return
-_load_plugins "zsh-users/zsh-autosuggestions" || return
 _load_plugins "zsh-users/zsh-syntax-highlighting" || return
+_load_plugins "zsh-users/zsh-autosuggestions" || return
+_load_plugins "sindresorhus/pure,,." || return
+
+# ==============================================================================
+# Keybindings
+# ==============================================================================
+# Assumes Emacs mode bindkey -e # set in ~/.zshrc
+
+# Standard Keys using Terminfo
+bindkey "${terminfo[kbs]}"    backward-delete-char   # Backspace
+bindkey "${terminfo[kdch1]}"  delete-char            # Delete
+bindkey "${terminfo[kich1]}"  overwrite-mode         # Insert
+bindkey "${terminfo[khome]}"  beginning-of-line      # Home
+bindkey "${terminfo[kend]}"   end-of-line            # End
+bindkey "${terminfo[kpp]}"    up-line-or-history     # PageUp
+bindkey "${terminfo[knp]}"    down-line-or-history   # PageDown
+bindkey "${terminfo[kcuu1]}"  up-line-or-history     # Up Arrow
+bindkey "${terminfo[kcud1]}"  down-line-or-history   # Down Arrow
+bindkey "${terminfo[kcub1]}"  backward-char          # Left Arrow
+bindkey "${terminfo[kcuf1]}"  forward-char           # Right Arrow
+bindkey "${terminfo[kcbt]}"   reverse-menu-complete  # Shift-Tab
+
+# Terminal-Specific Fixes (Ctrl + Arrows for Word Jumping)
+# These codes work across Kitty, Windows Terminal, and Konsole
+bindkey '^[[1;5C' forward-word       # Ctrl+Right
+bindkey '^[[1;5D' backward-word      # Ctrl+Left
+
+# Open current command in EDITOR (Ctrl-X, Ctrl-E)
+autoload -z edit-command-line
+zle -N edit-command-line
+bindkey "^X^E" edit-command-line
+
+# Double dot expansion
+# Bind the dot key to the widget
+bindkey "." _double_dot_expand
+
+# Optional: Ensure the expansion doesn't break normal completion
+bindkey -M isearch "." self-insert
+
+# Accept suggestion with right arrow
+#bindkey '^[[C' autosuggest-accept
+
 # ==============================================================================
 # User Extension Hooks
 # ==============================================================================
