@@ -1,0 +1,23 @@
+
+# ==============================================================================
+# Normalize paths
+# ==============================================================================
+# Normalize path entries from .paths (trim whitespace/quotes and expand $HOME/~)
+local raw="$1"
+
+# Trim leading and trailing whitespace
+raw="${raw#"${raw%%[![:space:]]*}"}"
+raw="${raw%"${raw##*[![:space:]]}"}"
+
+# Strip optional surrounding quotes from CSV values
+raw="${raw#\"}"
+raw="${raw%\"}"
+raw="${raw#\'}"
+raw="${raw%\'}"
+
+# Expand common home-directory forms used in config
+raw="${raw//\$HOME/$HOME}"
+if [[ "$raw" == "~"* ]]; then
+  raw="${raw/#\~/$HOME}"
+fi
+printf '%s' "$raw"

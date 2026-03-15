@@ -3,11 +3,13 @@
 set -euo pipefail
 
 # ==============================================================================
-# Neovim Post Hook
+# Fonts Pre Hook
 # ==============================================================================
 
+FONTS_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/fonts"
+INSTALL_LIST="$FONTS_CONFIG_DIR/install"
 LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}"
-LOG_FILE="$LOG_DIR/nvim-hook.log"
+LOG_FILE="$LOG_DIR/fonts-hook.log"
 
 DRY_RUN=0
 DEBUG=0
@@ -15,10 +17,10 @@ USE_SPINNER=1
 
 usage() {
     cat <<'EOF'
-Usage: post.sh [--dry-run|-n] [--debug|-d] [--no-spinner] [--help|-h]
+Usage: pre.sh [--dry-run|-n] [--debug|-d] [--no-spinner] [--help|-h]
 
 Options:
-  -n, --dry-run    Show what would run, but do not execute commands
+  -n, --dry-run    Show what would run, but do not execute changes
   -d, --debug      Verbose output; show commands and command output
       --no-spinner Disable spinner/progress animation
   -h, --help       Show this help
@@ -132,25 +134,15 @@ run_cmd() {
     return 1
 }
 
-info "Checking for Neovim..."
-if ! command -v nvim >/dev/null 2>&1; then
-	log_msg ERROR "Neovim not found in PATH"
-    echo "Error: Neovim not found. Please install Neovim first." >&2
-    exit 1
+info "Running fonts pre hook"
+if (( DRY_RUN )); then
+    info "Dry-run mode enabled"
+fi
+if (( DEBUG )); then
+    info "Debug mode enabled"
 fi
 
-# ==============================================================================
-# Plugin Sync (lazy.nvim)
-# ==============================================================================
+run_cmd "Create fonts config directory" mkdir -p "$FONTS_CONFIG_DIR"
+run_cmd "Ensure install list exists" touch "$INSTALL_LIST"
 
-info "Syncing Neovim plugins with Lazy..."
-if run_cmd "Neovim lazy.nvim sync" nvim --headless -u ~/.config/nvim/init.lua -c 'lua require("lazy").sync()' -c 'qa!'; then
-    info "Neovim plugins synced successfully."
-else
-	log_msg ERROR "Failed to sync Neovim plugins with lazy.nvim"
-    echo "Error: Failed to sync Neovim plugins." >&2
-    exit 1
-fi
-
-info "Neovim post hook complete."
-
+info "Fonts pre hook complete"

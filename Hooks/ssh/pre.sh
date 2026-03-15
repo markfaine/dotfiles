@@ -1,16 +1,17 @@
 #!/usr/bin/env bash
+# shellcheck shell=bash
 
 set -euo pipefail
 
 # ==============================================================================
-# Pass Post Hook
+# SSH Pre Hook
 # ==============================================================================
 
-REPOS_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/pass/repos"
+SSH_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/ssh"
+SSH_CONFIG_FILE="$SSH_CONFIG_DIR/authorized_keys"
+SSH_DIR="$HOME/.ssh"
 LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}"
-LOG_FILE="$LOG_DIR/pass-hook.log"
-PASS_INIT_ENTRY="docker-credential-helpers/docker-pass-initialized-check"
-PASS_INIT_VALUE="pass is initialized"
+LOG_FILE="$LOG_DIR/ssh-hook.log"
 
 DRY_RUN=0
 DEBUG=0
@@ -18,7 +19,7 @@ USE_SPINNER=1
 
 usage() {
 	cat <<'EOF'
-Usage: post.sh [--dry-run|-n] [--debug|-d] [--no-spinner] [--help|-h]
+Usage: pre.sh [--dry-run|-n] [--debug|-d] [--no-spinner] [--help|-h]
 
 Options:
   -n, --dry-run    Show what would run, but do not execute changes
@@ -135,53 +136,7 @@ run_cmd() {
 	return 1
 }
 
-read_repo_list() {
-	grep -Ev '^\s*($|#)' "$REPOS_FILE" 2>/dev/null || true
-}
-
-clone_repo_if_missing() {
-	local repo_url="$1"
-	local relative_target="$2"
-	local target_dir="$HOME/$relative_target"
-
-	if [[ -d "$target_dir/.git" || -d "$target_dir" ]]; then
-		info "Repo target already exists: $target_dir"
-		return 0
-	fi
-
-	run_cmd "Clone $(basename "$relative_target")" git clone "$repo_url" "$target_dir"
-}
-
-ensure_pass_initialized_marker() {
-	if ! command -v pass >/dev/null 2>&1; then
-		log_msg ERROR "pass command not found; cannot verify initialization marker"
-		info "pass command not found. Skipping initialization marker setup."
-		return 0
-	fi
-
-	local existing_value=""
-	if existing_value=$(pass show "$PASS_INIT_ENTRY" 2>/dev/null); then
-		if [[ "$existing_value" == "$PASS_INIT_VALUE" ]]; then
-			info "Pass initialization marker already present."
-			return 0
-		fi
-	fi
-
-	if (( DRY_RUN )); then
-		info "[dry-run] Initialize pass marker"
-		info "          pass insert -m $PASS_INIT_ENTRY"
-		return 0
-	fi
-
-	if printf '%s\n' "$PASS_INIT_VALUE" | pass insert -m -f "$PASS_INIT_ENTRY" >/dev/null 2>&1; then
-		info "Pass initialization marker created."
-	else
-		log_msg ERROR "Failed to create pass initialization marker: $PASS_INIT_ENTRY"
-		return 1
-	fi
-}
-
-info "Running pass post hook"
+info "Running SSH pre hook"
 if (( DRY_RUN )); then
 	info "Dry-run mode enabled"
 fi
@@ -189,22 +144,11 @@ if (( DEBUG )); then
 	info "Debug mode enabled"
 fi
 
-if [[ ! -f "$REPOS_FILE" ]]; then
-	info "No repo list found at $REPOS_FILE"
-	exit 0
+run_cmd "Create SSH config directory" mkdir -p "$SSH_CONFIG_DIR"
+run_cmd "Ensure SSH key URL list exists" touch "$SSH_CONFIG_FILE"
+run_cmd "Create ~/.ssh directory" mkdir -p "$SSH_DIR"
+if (( ! DRY_RUN )); then
+	run_cmd "Set ~/.ssh permissions" chmod 700 "$SSH_DIR"
 fi
 
-if ! command -v git >/dev/null 2>&1; then
-	log_msg ERROR "git command not found; cannot clone pass repositories"
-	echo "Error: git not found" >&2
-	exit 1
-fi
-
-while IFS=',' read -r repo_url relative_target; do
-	[[ -z "$repo_url" || -z "$relative_target" ]] && continue
-	clone_repo_if_missing "$repo_url" "$relative_target"
-done < <(read_repo_list)
-
-ensure_pass_initialized_marker
-
-info "Pass post hook complete"
+info "SSH pre hook complete"

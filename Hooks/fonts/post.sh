@@ -20,9 +20,9 @@ usage() {
     cat <<'EOF'
 Usage: post.sh [--dry-run|-n] [--debug|-d] [--no-spinner] [--help|-h]
 
-Install fonts listed in ~/.fontlist.
+Install fonts listed in ${XDG_CONFIG_HOME:-$HOME/.config}/fonts/install.
 
-Each non-comment line in ~/.fontlist must be a downloadable font archive URL.
+Each non-comment line in the install file must be a downloadable font archive URL.
 
 Options:
   -n, --dry-run    Show what would run, but do not execute changes
@@ -63,12 +63,22 @@ if (( DEBUG )); then
     USE_SPINNER=0
 fi
 
+mkdir -p "$LOG_DIR"
+
+log_msg() {
+    local level="$1"
+    shift
+    printf '[%s] [%s] %s\n' "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" "$level" "$*" >> "$LOG_FILE"
+}
+
 info() {
+    log_msg INFO "$*"
     printf '%s\n' "$*"
 }
 
 debug() {
     if (( DEBUG )); then
+        log_msg DEBUG "$*"
         printf '[debug] %s\n' "$*"
     fi
 }
@@ -113,6 +123,7 @@ run_cmd() {
             printf '\r✓ %s\n' "$label"
         else
             printf '\r✗ %s\n' "$label"
+            log_msg ERROR "$label failed: $*"
         fi
 
         return $status
@@ -124,6 +135,7 @@ run_cmd() {
         return 0
     fi
     printf '✗ %s\n' "$label"
+    log_msg ERROR "$label failed: $*"
     return 1
 }
 
@@ -137,8 +149,7 @@ fi
 # Helper function to log failures
 log_failure() {
     local message="$1"
-    mkdir -p "$LOG_DIR"
-    printf '[%s] %s\n' "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" "$message" >> "$LOG_FILE"
+    log_msg ERROR "$message"
 	if (( DEBUG )); then
 		printf '[error] %s\n' "$message" >&2
 	fi
@@ -297,10 +308,8 @@ if (( DEBUG )); then
 	info "Debug mode enabled"
 fi
 
-# Create parent directories
-mkdir -p "$(dirname "$INSTALL_LIST")"
-
 install_fonts_from_file
 refresh_font_cache
 
 info "Fonts post hook complete"
+

@@ -9,6 +9,8 @@ set -euo pipefail
 
 DRY_RUN=0
 DEBUG=0
+LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}"
+LOG_FILE="$LOG_DIR/zsh-hook.log"
 
 usage() {
 	cat <<'EOF'
@@ -48,12 +50,22 @@ for arg in "$@"; do
 	esac
 done
 
+mkdir -p "$LOG_DIR"
+
+log_msg() {
+	local level="$1"
+	shift
+	printf '[%s] [%s] %s\n' "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" "$level" "$*" >> "$LOG_FILE"
+}
+
 info() {
+	log_msg INFO "$*"
 	printf '%s\n' "$*"
 }
 
 debug() {
 	if (( DEBUG )); then
+		log_msg DEBUG "$*"
 		printf '[debug] %s\n' "$*"
 	fi
 }
@@ -95,6 +107,7 @@ fi
 required_files=("$HOME/.zshenv" "$HOME/.zprofile" "$HOME/.zshrc")
 for file in "${required_files[@]}"; do
 	if [[ ! -f "$file" ]]; then
+		log_msg ERROR "required zsh startup file missing: $file"
 		echo "Error: required zsh startup file missing: $file" >&2
 		exit 1
 	fi
@@ -108,3 +121,4 @@ run_cmd "Syntax check ~/.zshrc" zsh -n "$HOME/.zshrc"
 run_cmd "Validate login interactive zsh startup" zsh -lic 'exit 0'
 
 info "Zsh post hook complete"
+

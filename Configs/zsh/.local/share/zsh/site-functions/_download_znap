@@ -1,0 +1,8 @@
+# ==============================================================================
+# Znap Bootstrap
+# ==============================================================================
+# Download znap plugin manager if not already present
+if [[ ! -d "$ZNAP_HOME" ]]; then
+    zdebug ".znaprc: $ZNAP_HOME does not exist cloning the repo"
+    git clone --depth 1 -- "https://github.com/marlonrichert/zsh-snap.git" "$ZNAP_HOME"
+fi

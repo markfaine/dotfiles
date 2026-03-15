@@ -1,0 +1,14 @@
+# ==============================================================================
+# Rerun pre/post hooks
+# ==============================================================================
+# Function to relink dotfiles using tuckr
+echo "Linking and running post hooks with tuckr..."
+tuckr set -fy '*'
+local exit_code=$?
+if [[ $exit_code -eq 0 ]]; then
+  echo "✓ Dotfiles hooks executed successfully"
+  echo "Reload your shell to apply changes: exec zsh"
+else
+  echo "✗ Failed to run hooks (exit code: $exit_code)"
+  return $exit_code
+fi

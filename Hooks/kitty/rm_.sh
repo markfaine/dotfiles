@@ -13,6 +13,7 @@ KITTY_APP_DIR="$HOME/.local/kitty.app"
 LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}"
 LOG_FILE="$LOG_DIR/kitty-clean-hook.log"
 LOCAL_BIN_DIR="$HOME/.local/bin"
+LOCAL_APPS_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/applications"
 
 DRY_RUN=0
 DEBUG=0
@@ -121,6 +122,7 @@ run_cmd() {
             printf '\r✓ %s\n' "$label"
         else
             printf '\r✗ %s\n' "$label"
+            log_msg ERROR "$label failed: $*"
         fi
 
         return $status
@@ -141,8 +143,12 @@ run_cmd() {
 # ==============================================================================
 info "Remove kitty directories and symlinks"
 kitty_config_dir="${XDG_CONFIG_HOME:-$HOME/.config}/kitty"
+xdg_config_dir="${XDG_CONFIG_HOME:-$HOME/.config}"
 run_cmd "Remove $kitty_config_dir directory" rm -rf "$kitty_config_dir"
 run_cmd "Remove $KITTY_APP_DIR directory" rm -rf "$KITTY_APP_DIR"
 run_cmd "Remove $LOG_FILE" rm -f "$LOG_FILE"
 run_cmd "Remove kitty binary symlink" rm -f "$LOCAL_BIN_DIR/kitty"
 run_cmd "Remove kitten binary symlink" rm -f "$LOCAL_BIN_DIR/kitten"
+run_cmd "Remove kitty desktop file" rm -f "$LOCAL_APPS_DIR/kitty.desktop"
+run_cmd "Remove kitty-open desktop file" rm -f "$LOCAL_APPS_DIR/kitty-open.desktop"
+run_cmd "Remove xdg-terminals list" rm -f "$xdg_config_dir/xdg-terminals.list"

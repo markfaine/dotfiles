@@ -58,17 +58,27 @@ if (( DEBUG )); then
 	USE_SPINNER=0
 fi
 
+mkdir -p "$LOG_DIR"
+
 if ! command -v curl >/dev/null 2>&1 && ! command -v wget >/dev/null 2>&1; then
 	echo "Error: curl or wget is required to install mise." >&2
 	exit 1
 fi
 
+log_msg() {
+	local level="$1"
+	shift
+	printf '[%s] [%s] %s\n' "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" "$level" "$*" >> "$LOG_FILE"
+}
+
 info() {
+	log_msg INFO "$*"
 	printf '%s\n' "$*"
 }
 
 debug() {
 	if (( DEBUG )); then
+		log_msg DEBUG "$*"
 		printf '[debug] %s\n' "$*"
 	fi
 }
@@ -95,8 +105,6 @@ run_cmd() {
 		local idx=0
 		local pid
 		local status=0
-		local local_bin_dir
-    local mise_config_dir
 
 		printf '→ %s ' "$label"
 		"$@" >/dev/null 2>&1 &
@@ -115,6 +123,7 @@ run_cmd() {
 			printf '\r✓ %s\n' "$label"
 		else
 			printf '\r✗ %s\n' "$label"
+			log_msg ERROR "$label failed: $*"
 		fi
 
 		return $status
@@ -126,6 +135,7 @@ run_cmd() {
 		return 0
 	fi
 	printf '✗ %s\n' "$label"
+	log_msg ERROR "$label failed: $*"
 	return 1
 }
 

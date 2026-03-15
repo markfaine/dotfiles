@@ -9,3 +9,4 @@
 if [[ ! -o interactive ]]; then
   return 0 2>/dev/null || exit 0
 fi
+clear

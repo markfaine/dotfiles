@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
+# shellcheck shell=bash
 
 set -euo pipefail
 
 # ==============================================================================
-# Mise Post Hook
+# GPG Pre Hook
 # ==============================================================================
-# Ensure dependency ordering after dotfiles are deployed:
-#   1) bootstrap Node first
-#   2) install full mise toolchain (including npm:* tools)
 
-MISE_BIN="$HOME/.local/bin/mise"
+GPG_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/gnupg"
+IMPORT_DIR="$GPG_CONFIG_DIR/keys"
+GPGDIR="${GNUPGHOME:-$HOME/.gnupg}"
 LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}"
-LOG_FILE="$LOG_DIR/mise-post-hook.log"
+LOG_FILE="$LOG_DIR/gnupg-hook.log"
 
 DRY_RUN=0
 DEBUG=0
@@ -19,13 +19,13 @@ USE_SPINNER=1
 
 usage() {
 	cat <<'EOF'
-Usage: post.sh [--dry-run|-n] [--debug|-d] [--no-spinner] [--help|-h]
+Usage: pre.sh [--dry-run|-n] [--debug|-d] [--no-spinner] [--help|-h]
 
 Options:
-  -n, --dry-run    Show what would run, but do not execute commands
+  -n, --dry-run    Show what would run, but do not execute changes
   -d, --debug      Verbose output; show commands and command output
       --no-spinner Disable spinner/progress animation
-  -h, --help       Show this help
+  -h, --help       Show this help message
 EOF
 }
 
@@ -73,10 +73,10 @@ info() {
 	printf '%s\n' "$*"
 }
 
-debug() {
+debug_msg() {
 	if (( DEBUG )); then
 		log_msg DEBUG "$*"
-		printf '[debug] %s\n' "$*"
+		printf 'DEBUG: %s\n' "$*" >&2
 	fi
 }
 
@@ -92,7 +92,7 @@ run_cmd() {
 
 	if (( DEBUG )); then
 		info "[run] $label"
-		debug "cmd: $*"
+		debug_msg "cmd: $*"
 		"$@"
 		return $?
 	fi
@@ -136,19 +136,17 @@ run_cmd() {
 	return 1
 }
 
-if [[ ! -x "$MISE_BIN" ]]; then
-	info "Mise not installed yet. Skipping Node bootstrap."
-	exit 0
+info "Running gpg pre hook"
+if (( DRY_RUN )); then
+	info "Dry-run mode enabled"
+fi
+if (( DEBUG )); then
+	info "Debug mode enabled"
 fi
 
-# Ensure Node is available before installing npm:* tools.
-run_cmd "Bootstrap Node via mise" "$MISE_BIN" exec -y --silent node@latest -- node -v
+run_cmd "Create gpg config directory" mkdir -p "$GPG_CONFIG_DIR"
+run_cmd "Create gpg import directory" mkdir -p "$IMPORT_DIR"
+run_cmd "Create GNUPGHOME directory" mkdir -p "$GPGDIR"
+run_cmd "Secure GNUPGHOME permissions" chmod 700 "$GPGDIR"
 
-# Install configured toolchain under node-enabled context.
-run_cmd "Install all configured mise tools" "$MISE_BIN" exec -y --silent node@latest -- "$MISE_BIN" install
-
-# Refresh command shims and prune stale installs.
-run_cmd "Rebuild mise shims" "$MISE_BIN" reshim
-run_cmd "Prune unused mise tool versions" "$MISE_BIN" prune --tools --yes
-
-info "Mise post hook complete."
+info "GPG pre hook complete"

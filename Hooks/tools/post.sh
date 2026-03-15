@@ -6,8 +6,7 @@ set -euo pipefail
 # ==============================================================================
 # Tools Post Hook
 # ==============================================================================
-# Downloads and installs tools from "${XDG_CONFIG_HOME:-$HOME/.config}/tools/sources
-# that are not available via mise. Supports raw text scripts, binary files, and archives.
+# Downloads and installs tools listed in the sources file.
 
 TOOLS_CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/tools/sources"
 INSTALL_DIR="$HOME/.local/bin"
@@ -26,7 +25,9 @@ usage() {
 	cat <<'EOF'
 Usage: post.sh [--dry-run|-n] [--debug|-d] [--no-spinner] [--help|-h]
 
-Downloads and installs tools from config that aren't available via mise.
+Downloads and installs tools from:
+  ${XDG_CONFIG_HOME:-$HOME/.config}/tools/sources
+
 Each line in the config should be a URL to a binary or archive.
 
 Options:
@@ -73,18 +74,30 @@ if (( DEBUG )); then
 	USE_SPINNER=0
 fi
 
+mkdir -p "$LOG_DIR"
+
 # ==============================================================================
 # Logging & Output Functions
 # ==============================================================================
 
+log_msg() {
+	local level="$1"
+	shift
+	printf '[%s] [%s] %s\n' "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" "$level" "$*" >> "$LOG_FILE"
+}
+
+info() {
+	log_msg INFO "$*"
+	printf '%s\n' "$*"
+}
+
 log_error() {
-	{
-		printf '%s: %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$*"
-	} >> "$LOG_FILE" 2>&1
+	log_msg ERROR "$*"
 }
 
 debug_msg() {
 	if (( DEBUG )); then
+		log_msg DEBUG "$*"
 		echo "DEBUG: $*" >&2
 	fi
 }
@@ -132,18 +145,27 @@ get_filename_from_url() {
 	basename "${url%\?*}"
 }
 
-# Detect if file is an archive
-is_archive() {
+# Detect archive type from filename
+archive_type_for() {
 	local file="$1"
 	case "$file" in
-		*.tar.gz|*.tgz)
+		*.tar.gz)
 			echo "tar.gz"
 			;;
-		*.tar.bz2|*.tbz2)
+		*.tgz)
+			echo "tgz"
+			;;
+		*.tar.bz2)
 			echo "tar.bz2"
 			;;
-		*.tar.xz|*.txz)
+		*.tbz2)
+			echo "tbz2"
+			;;
+		*.tar.xz)
 			echo "tar.xz"
+			;;
+		*.txz)
+			echo "txz"
 			;;
 		*.tar)
 			echo "tar"
@@ -157,68 +179,74 @@ is_archive() {
 	esac
 }
 
-# Extract archive and find the executable
-extract_and_find_binary() {
+strip_archive_extension() {
+	local filename="$1"
+	case "$filename" in
+		*.tar.gz) printf '%s' "${filename%.tar.gz}" ;;
+		*.tgz) printf '%s' "${filename%.tgz}" ;;
+		*.tar.bz2) printf '%s' "${filename%.tar.bz2}" ;;
+		*.tbz2) printf '%s' "${filename%.tbz2}" ;;
+		*.tar.xz) printf '%s' "${filename%.tar.xz}" ;;
+		*.txz) printf '%s' "${filename%.txz}" ;;
+		*.tar) printf '%s' "${filename%.tar}" ;;
+		*.zip) printf '%s' "${filename%.zip}" ;;
+		*) printf '%s' "$filename" ;;
+	esac
+}
+
+extract_archive() {
 	local archive="$1"
 	local archive_type="$2"
-	local extract_dir
-	extract_dir=$(mktemp -d)
+	local extract_dir="$3"
 	debug_msg "Extracting $archive to $extract_dir"
 
 	case "$archive_type" in
 		tar.gz|tgz)
-			tar -xzf "$archive" -C "$extract_dir" 2>/dev/null || {
-				log_error "Failed to extract $archive (tar.gz)"
-				rm -rf "$extract_dir"
-				return 1
-			}
+			tar -xzf "$archive" -C "$extract_dir"
 			;;
 		tar.bz2|tbz2)
-			tar -xjf "$archive" -C "$extract_dir" 2>/dev/null || {
-				log_error "Failed to extract $archive (tar.bz2)"
-				rm -rf "$extract_dir"
-				return 1
-			}
+			tar -xjf "$archive" -C "$extract_dir"
 			;;
 		tar.xz|txz)
-			tar -xJf "$archive" -C "$extract_dir" 2>/dev/null || {
-				log_error "Failed to extract $archive (tar.xz)"
-				rm -rf "$extract_dir"
-				return 1
-			}
+			tar -xJf "$archive" -C "$extract_dir"
 			;;
 		tar)
-			tar -xf "$archive" -C "$extract_dir" 2>/dev/null || {
-				log_error "Failed to extract $archive (tar)"
-				rm -rf "$extract_dir"
-				return 1
-			}
+			tar -xf "$archive" -C "$extract_dir"
 			;;
 		zip)
-			unzip -q "$archive" -d "$extract_dir" 2>/dev/null || {
-				log_error "Failed to extract $archive (zip)"
-				rm -rf "$extract_dir"
+			if ! command -v unzip >/dev/null 2>&1; then
+				log_error "zip archive requires unzip, but unzip is not installed"
 				return 1
-			}
+			fi
+			unzip -oq "$archive" -d "$extract_dir"
+			;;
+		*)
+			log_error "Unsupported archive type: $archive_type"
+			return 1
 			;;
 	esac
 
-	# Find the first executable in the extracted directory
+	return 0
+}
+
+find_executable_in_dir() {
+	local extract_dir="$1"
 	local executable
-	executable=$(find "$extract_dir" -type f -executable 2>/dev/null | head -1)
+
+	executable=$(find "$extract_dir" -type f -executable 2>/dev/null | head -1 || true)
 
 	if [[ -z "$executable" ]]; then
-		executable=$(find "$extract_dir" -type f ! -name "*.txt" ! -name "*.md" ! -name "*.LICENSE" ! -name "*.sh" 2>/dev/null | head -1)
+		executable=$(find "$extract_dir" -type f ! -name "*.txt" ! -name "*.md" ! -name "*.LICENSE" ! -name "*.sh" 2>/dev/null | head -1 || true)
 	fi
 
 	if [[ -z "$executable" ]]; then
-		log_error "No executable found in extracted archive: $archive"
-		rm -rf "$extract_dir"
+		log_error "No executable found in extracted archive directory: $extract_dir"
 		return 1
 	fi
 
-	echo "$executable"
 	debug_msg "Found executable: $executable"
+	echo "$executable"
+	return 0
 }
 
 # ==============================================================================
@@ -229,28 +257,23 @@ install_utility() {
 	local url="$1"
 	local filename
 	local archive_type
-	local temp_file
 	local install_name
+	local temp_dir
+	local temp_file
 
 	filename=$(get_filename_from_url "$url")
-	archive_type=$(is_archive "$filename")
+	archive_type=$(archive_type_for "$filename")
+	install_name=$(strip_archive_extension "$filename")
 
-	temp_file=$(mktemp)
-	# shellcheck disable=SC2064
-	trap "rm -f $temp_file" RETURN
+	temp_dir=$(mktemp -d)
+	temp_file="$temp_dir/$filename"
 
 	debug_msg "Downloading: $url"
 
-	if [[ -n "$archive_type" ]]; then
-		install_name="${filename%.*}"
-		[[ "$install_name" == *.tar ]] && install_name="${install_name%.*}"
-	else
-		install_name="$filename"
-	fi
-
 	if (( DRY_RUN )); then
-		debug_msg "[DRY-RUN] Would download: $url → $INSTALL_DIR/$install_name"
-		echo "[DRY-RUN] Download: $url → $INSTALL_DIR/$install_name"
+		info "[dry-run] Download and install: $url"
+		info "          $INSTALL_DIR/$install_name"
+		rm -rf "$temp_dir"
 		return 0
 	fi
 
@@ -260,14 +283,27 @@ install_utility() {
 		stop_spinner_fail
 		log_error "Failed to download: $url"
 		echo "[✗] Failed to download: $url" >&2
+		rm -rf "$temp_dir"
 		return 1
 	fi
 
 	if [[ -n "$archive_type" ]]; then
 		local extracted_binary
-		if ! extracted_binary=$(extract_and_find_binary "$temp_file" "$archive_type"); then
+		local extract_dir
+		extract_dir="$temp_dir/extracted"
+		mkdir -p "$extract_dir"
+
+		if ! extract_archive "$temp_file" "$archive_type" "$extract_dir"; then
 			stop_spinner_fail
 			echo "[✗] Failed to extract: $filename" >&2
+			rm -rf "$temp_dir"
+			return 1
+		fi
+
+		if ! extracted_binary=$(find_executable_in_dir "$extract_dir"); then
+			stop_spinner_fail
+			echo "[✗] Failed to extract: $filename" >&2
+			rm -rf "$temp_dir"
 			return 1
 		fi
 
@@ -275,17 +311,15 @@ install_utility() {
 			stop_spinner_fail
 			log_error "Failed to copy extracted binary to $INSTALL_DIR/$install_name"
 			echo "[✗] Failed to copy: $install_name" >&2
+			rm -rf "$temp_dir"
 			return 1
 		fi
-
-		local extract_dir
-		extract_dir=$(dirname "$extracted_binary")
-		rm -rf "$extract_dir" 2>/dev/null || true
 	else
 		if ! cp "$temp_file" "$INSTALL_DIR/$install_name" 2>/dev/null; then
 			stop_spinner_fail
 			log_error "Failed to copy binary to $INSTALL_DIR/$install_name"
 			echo "[✗] Failed to copy: $install_name" >&2
+			rm -rf "$temp_dir"
 			return 1
 		fi
 	fi
@@ -294,11 +328,13 @@ install_utility() {
 		stop_spinner_fail
 		log_error "Failed to make executable: $INSTALL_DIR/$install_name"
 		echo "[✗] Failed to chmod: $install_name" >&2
+		rm -rf "$temp_dir"
 		return 1
 	fi
 
 	stop_spinner
-	echo "[✓] Installed: $install_name"
+	info "[✓] Installed: $install_name"
+	rm -rf "$temp_dir"
 	return 0
 }
 
@@ -308,13 +344,23 @@ install_utility() {
 
 mkdir -p "$INSTALL_DIR" "$LOG_DIR" 2>/dev/null || true
 
+info "Running tools post hook"
+if (( DRY_RUN )); then
+	info "Dry-run mode enabled"
+fi
+if (( DEBUG )); then
+	info "Debug mode enabled"
+fi
+
 if [[ ! -f "$TOOLS_CONFIG" ]]; then
+	log_error "Config file not found: $TOOLS_CONFIG"
 	echo "Error: Config file not found: $TOOLS_CONFIG" >&2
 	exit 1
 fi
 
-for cmd in curl tar unzip; do
+for cmd in curl tar; do
 	if ! command -v "$cmd" &>/dev/null; then
+		log_error "Required command not found: $cmd"
 		echo "Error: Required command not found: $cmd" >&2
 		exit 1
 	fi
@@ -338,18 +384,21 @@ while IFS= read -r url || [[ -n "$url" ]]; do
 	fi
 done < "$TOOLS_CONFIG"
 
-echo ""
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "Tools Installation Summary"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "Total:     $total"
-echo "Installed: $installed"
-echo "Failed:    $failed"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+info ""
+info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+info "Tools Installation Summary"
+info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+info "Total:     $total"
+info "Installed: $installed"
+info "Failed:    $failed"
+info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 if (( failed > 0 )); then
+	log_error "One or more tools failed to install"
 	echo "Check $LOG_FILE for details on failures" >&2
 	exit 1
 fi
+
+info "Tools post hook complete."
 
 exit 0

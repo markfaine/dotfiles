@@ -6,12 +6,12 @@
 # 1. Clones the plugin repository (if not already present)
 # 2. Adds second comma-separated field to PATH (if provided)
 # 3. Adds third comma-separated field to FPATH for completions (if provided)
-# 4. Sources the plugin
+# 4. Adds fourth comma-separated field to trigger_cmds for lazy loading
 #
 # Per-plugin configuration can be placed in ~/.config/zplugin.d/plugin-name.zsh
 #
 # Format:
-# github-repo-path,path-addition,fpath-addition
+# github-repo-path,path-addition,fpath-addition,trigger_cmds
 #
 # Notes:
 # - Order mostly matters for completions (should go last)
@@ -24,6 +24,7 @@
 zimfw/environment
 zimfw/utility,functions
 zimfw/prompt-pwd
+sindresorhus/pure
 
 # ==============================================================================
 # Terminal & Display
@@ -44,13 +45,10 @@ zsh-users/zsh-syntax-highlighting
 # ==============================================================================
 # CLI Tools & Integrations
 # ==============================================================================
-MohamedElashri/eza-zsh
-zimfw/fzf
-joke/zim-github-cli
-joke/zim-mise
-joke/zim-yq
-kiesman99/zim-zoxide
-thetic/extract
+MohamedElashri/eza-zsh,,,eza
+zimfw/fzf,,,fzf
+thetic/extract,,,extract
+laggardkernel/zsh-thefuck,,,tf
 
 # ==============================================================================
 # Completions (should be loaded last)

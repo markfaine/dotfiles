@@ -1,0 +1,6 @@
+# ==============================================================================
+# ZSH Module: Terminal Information
+# ==============================================================================
+zdebug "_load_terminfo: Loading zsh/terminfo"
+# Fail fast if module not available
+zmodload -F zsh/terminfo +p:terminfo || { zdebug "_load_terminfo: Failed to load zsh/terminfo"; return 1; }

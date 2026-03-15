@@ -1,0 +1,14 @@
+# ==============================================================================
+# Load paths from ~/.paths
+# ==============================================================================
+# Load all PATH entries from .paths file
+ZPATHS="$HOME/.paths"
+if [[ -f "$ZPATHS" ]]; then
+  _add_to_path
+  export PATH
+  zdebug "_load_paths: Adding paths from $ZPATHS"
+else
+  zdebug "_load_paths: Failed to add paths from $ZPATHS"
+fi
+zdebug "_load_paths: Deduping \$PATH"
+typeset -U PATH

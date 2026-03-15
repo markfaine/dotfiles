@@ -1,0 +1,44 @@
+
+# ==============================================================================
+# Plugin Loading
+# ==============================================================================
+# Load plugins from .zplugins file
+# Handles:
+#   - Per-plugin configuration files (~/.config/zplugin.d/plugin-name.zsh)
+#   - Cloning repositories
+#   - Adding plugin paths to PATH
+#   - Adding plugin completion paths to FPATH
+#   - Lazy loading
+#
+# File format: ~/.zplugins
+# CSV format: github-org/repo,path-addition,fpath-addition
+# - Empty lines and comments (starting with #) are ignored
+local plugins_file="${1:-$HOME/.zplugins}"
+local zconfig_home="${XDG_CONFIG_HOME:-$HOME/.config}"
+[[ -f "$plugins_file" ]] || return 1
+
+# 1. Clone all in parallel first
+local repos=($(grep -v '^#' "$plugins_file" | cut -d, -f1))
+znap clone $repos
+
+# 2. Loop to source or lazy-load
+local repo inc fpc triggers plugin
+while IFS=',' read -r repo inc fpc triggers; do
+    [[ -z "$repo" || "$repo" == \#* ]] && continue
+    plugin="${repo#*/}"
+
+    # Source config first
+    [[ -f "$zconfig_home/zplugin.d/$plugin.zsh" ]] && source "$zconfig_home/zplugin.d/$plugin.zsh"
+
+    # Handle pathing
+    [[ -n "$inc" ]] && path=( ~[$repo]/$inc $path )
+    [[ -n "$fpc" ]] && fpath=( ~[$repo]/$fpc $fpath )
+
+    # Decide: Source immediately OR Lazy-load
+    if [[ -n "$triggers" ]]; then
+        # 'triggers' can be a space-separated list of commands
+        znap function ${(s: :)triggers} "znap source $repo"
+    else
+        znap source "$repo"
+    fi
+done < "$plugins_file"

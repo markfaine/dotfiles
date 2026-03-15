@@ -23,7 +23,7 @@ USE_SPINNER=1
 
 usage() {
     cat <<'EOF'
-Usage: pre.sh [--dry-run|-n] [--debug|-d] [--no-spinner] [--help|-h]
+Usage: post.sh [--dry-run|-n] [--debug|-d] [--no-spinner] [--help|-h]
 
 Options:
   -n, --dry-run    Show what would run, but do not execute changes
@@ -124,6 +124,7 @@ run_cmd() {
             printf '\r✓ %s\n' "$label"
         else
             printf '\r✗ %s\n' "$label"
+            log_msg ERROR "$label failed: $*"
         fi
 
         return $status
@@ -178,13 +179,17 @@ info "Setting up symbolic links for Kitty..."
 run_cmd "Create local bin directory" mkdir -p "$LOCAL_BIN_DIR"
 
 # Create symbolic links for kitty and kitten
-if [[ ! -x "$KITTY_BIN_DIR/kitty" ]]; then
-  run_cmd "Link kitty binary" ln -sf "$KITTY_BIN_DIR/kitty" "$LOCAL_BIN_DIR/kitty"
+if [[ -x "$KITTY_BIN_DIR/kitty" ]]; then
+        run_cmd "Link kitty binary" ln -sf "$KITTY_BIN_DIR/kitty" "$LOCAL_BIN_DIR/kitty"
+else
+        info "Kitty binary missing at $KITTY_BIN_DIR/kitty; skipping symlink"
 fi
 
 # Create symbolic links for kitty and kitten
-if [[ ! -x "$KITTY_BIN_DIR/kitten" ]]; then
-  run_cmd "Link kitten binary" ln -sf "$KITTY_BIN_DIR/kitten" "$LOCAL_BIN_DIR/kitten"
+if [[ -x "$KITTY_BIN_DIR/kitten" ]]; then
+        run_cmd "Link kitten binary" ln -sf "$KITTY_BIN_DIR/kitten" "$LOCAL_BIN_DIR/kitten"
+else
+        info "Kitten binary missing at $KITTY_BIN_DIR/kitten; skipping symlink"
 fi
 
 info "Copying desktop files..."
@@ -201,13 +206,14 @@ run_cmd "Patch desktop exec path" sed -i "s|Exec=kitty|Exec=$KITTY_BIN_DIR/kitty
 info "Desktop files updated."
 
 info "Setting up xdg-terminal-exec..."
-run_cmd "Create ~/.config" mkdir -p "$HOME/.config"
+XDG_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}"
+run_cmd "Create $XDG_CONFIG_DIR" mkdir -p "$XDG_CONFIG_DIR"
 if (( DRY_RUN )); then
-    info "[dry-run] Write $HOME/.config/xdg-terminals.list"
+    info "[dry-run] Write $XDG_CONFIG_DIR/xdg-terminals.list"
     info "          kitty.desktop"
 else
-    echo 'kitty.desktop' >"$HOME/.config/xdg-terminals.list"
-    info "✓ Wrote $HOME/.config/xdg-terminals.list"
+    echo 'kitty.desktop' >"$XDG_CONFIG_DIR/xdg-terminals.list"
+    info "✓ Wrote $XDG_CONFIG_DIR/xdg-terminals.list"
 fi
 info "xdg-terminal-exec configured."
 

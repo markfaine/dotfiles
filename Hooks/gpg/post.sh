@@ -9,7 +9,7 @@ set -euo pipefail
 # Imports GPG public keys from ~/.gnupg/*.asc into the local keyring
 
 GPGDIR="${GNUPGHOME:-$HOME/.gnupg}"
-IMPORT_DIR="$HOME/.config/gnupg/keys"
+IMPORT_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/gnupg/keys"
 LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}"
 LOG_FILE="$LOG_DIR/gnupg-hook.log"
 
@@ -71,19 +71,30 @@ if (( DEBUG )); then
 	USE_SPINNER=0
 fi
 
+mkdir -p "$LOG_DIR"
+
 # ==============================================================================
 # Logging & Output Functions
 # ==============================================================================
 
+log_msg() {
+	local level="$1"
+	shift
+	printf '[%s] [%s] %s\n' "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" "$level" "$*" >> "$LOG_FILE"
+}
+
+info() {
+	log_msg INFO "$*"
+	printf '%s\n' "$*"
+}
+
 log_error() {
-	mkdir -p "$LOG_DIR"
-	{
-		printf '%s: %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$*"
-	} >> "$LOG_FILE" 2>&1
+	log_msg ERROR "$*"
 }
 
 debug_msg() {
 	if (( DEBUG )); then
+		log_msg DEBUG "$*"
 		echo "DEBUG: $*" >&2
 	fi
 }
@@ -127,6 +138,7 @@ stop_spinner_fail() {
 
 # Check if gpg is available
 if ! command -v gpg &>/dev/null && ! command -v gpg2 &>/dev/null; then
+	log_error "gpg hook failed: gpg or gpg2 not found"
 	echo "Error: gpg or gpg2 not found" >&2
 	exit 1
 fi
@@ -141,6 +153,7 @@ debug_msg "Using GPG command: $GPG_CMD"
 # Check if ~/.gnupg exists
 "$GPG_CMD" --list-keys &>/dev/null
 if [[ ! -d "$GPGDIR" ]]; then
+	log_error "gpg hook failed: $GPGDIR not found"
 	echo "Error: $GPGDIR not found" >&2
 	exit 1
 fi
@@ -153,7 +166,7 @@ imported=0
 failed=0
 
 if (( total == 0 )); then
-	echo "No .asc key files found in $IMPORT_DIR"
+	info "No .asc key files found in $IMPORT_DIR"
 	exit 0
 fi
 
@@ -166,7 +179,7 @@ for key_file in "${asc_files[@]}"; do
 	debug_msg "Processing: $key_file"
 
 	if (( DRY_RUN )); then
-		echo "[DRY-RUN] Import: $key_name"
+		info "[dry-run] Import: $key_name"
 		((imported++))
 		continue
 	fi
@@ -176,7 +189,7 @@ for key_file in "${asc_files[@]}"; do
 	# Import the key
 	if $GPG_CMD --import "$key_file" >/dev/null 2>&1; then
 		stop_spinner
-		echo "[✓] Imported: $key_name"
+		info "[✓] Imported: $key_name"
 		((imported++))
 	else
 		stop_spinner_fail
@@ -187,14 +200,14 @@ for key_file in "${asc_files[@]}"; do
 done
 
 # Summary
-echo ""
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "GPG Key Import Summary"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "Total:     $total"
-echo "Imported:  $imported"
-echo "Failed:    $failed"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+info ""
+info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+info "GPG Key Import Summary"
+info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+info "Total:     $total"
+info "Imported:  $imported"
+info "Failed:    $failed"
+info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 if (( failed > 0 )); then
 	echo "Check $LOG_FILE for details on failures" >&2

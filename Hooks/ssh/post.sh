@@ -27,7 +27,7 @@ usage() {
   cat <<'EOF'
 Usage: post.sh [--dry-run|-n] [--debug|-d] [--no-spinner] [--help|-h]
 
-Downloads SSH public keys from URLs in ~/.config/ssh/config and adds them to
+Downloads SSH public keys from URLs in ~/.config/ssh/authorized_keys and adds them to
 ~/.ssh/authorized_keys. Prevents duplicates while allowing unique keys.
 
 Options:
@@ -74,19 +74,30 @@ if ((DEBUG)); then
   USE_SPINNER=0
 fi
 
+mkdir -p "$LOG_DIR"
+
 # ==============================================================================
 # Logging & Output Functions
 # ==============================================================================
 
+log_msg() {
+  local level="$1"
+  shift
+  printf '[%s] [%s] %s\n' "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" "$level" "$*" >>"$LOG_FILE"
+}
+
+info() {
+  log_msg INFO "$*"
+  printf '%s\n' "$*"
+}
+
 log_error() {
-  mkdir -p "$LOG_DIR"
-  {
-    printf '%s: %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$*"
-  } >>"$LOG_FILE" 2>&1
+  log_msg ERROR "$*"
 }
 
 debug_msg() {
   if ((DEBUG)); then
+    log_msg DEBUG "$*"
     echo "DEBUG: $*" >&2
   fi
 }
@@ -216,12 +227,14 @@ add_key_to_authorized_keys() {
 
 # Check if curl is available
 if ! command -v curl &>/dev/null; then
+  log_error "curl command not found"
   echo "Error: curl not found" >&2
   exit 1
 fi
 
 # Check if config file exists
 if [[ ! -f "$SSH_CONFIG" ]]; then
+  log_error "Config file not found: $SSH_CONFIG"
   echo "Error: Config file not found: $SSH_CONFIG" >&2
   exit 1
 fi
@@ -246,7 +259,7 @@ while IFS= read -r url || [[ -n "$url" ]]; do
   debug_msg "Processing URL $total: $url"
 
   if ((DRY_RUN)); then
-    echo "[DRY-RUN] Add key from: $url"
+    info "[dry-run] Add key from: $url"
     ((added++))
     continue
   fi
@@ -265,11 +278,11 @@ while IFS= read -r url || [[ -n "$url" ]]; do
   # Add key to authorized_keys
   if add_key_to_authorized_keys "$key_content" "$url"; then
     stop_spinner
-    echo "[✓] Added key from: $url"
+    info "[✓] Added key from: $url"
     ((added++))
   elif [[ $? -eq 2 ]]; then
     stop_spinner
-    echo "[≈] Key already exists: $url"
+    info "[≈] Key already exists: $url"
     ((duplicate++))
   else
     stop_spinner_fail
@@ -285,19 +298,22 @@ if [[ -f "$AUTHORIZED_KEYS" ]]; then
 fi
 
 # Summary
-echo ""
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "SSH Key Management Summary"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "Total URLs:    $total"
-echo "Keys Added:    $added"
-echo "Duplicates:    $duplicate"
-echo "Failed:        $failed"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+info ""
+info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+info "SSH Key Management Summary"
+info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+info "Total URLs:    $total"
+info "Keys Added:    $added"
+info "Duplicates:    $duplicate"
+info "Failed:        $failed"
+info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 if ((failed > 0)); then
+  log_error "One or more SSH key URLs failed during processing"
   echo "Check $LOG_FILE for details on failures" >&2
   exit 1
 fi
+
+info "SSH post hook complete."
 
 exit 0

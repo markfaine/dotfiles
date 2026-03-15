@@ -1,0 +1,43 @@
+
+# Identity loading function
+  # Only run if ssh-agent is available
+  if ! command -v ssh-add &>/dev/null; then
+    return 0
+  fi
+
+  # Check if agent is accessible
+  if ! ssh-add -l &>/dev/null && [[ $? -ne 1 ]]; then
+    # Exit code 2 = no agent running, 1 = agent running but no identities
+    zdebug "load_ssh_identities: No SSH agent available, skipping identity load"
+    return 0
+  fi
+
+  # Case 1: Check for YubiKey (requires lsusb or system_profiler)
+  if command -v lsusb &>/dev/null && lsusb 2>/dev/null | grep -q "1050"; then
+    zdebug "load_ssh_identities: YubiKey detected via lsusb, adding hardware keys"
+    ssh-add -K 2>/dev/null
+    return 0
+  elif command -v system_profiler &>/dev/null && system_profiler SPUSBDataType 2>/dev/null | grep -q "Yubico"; then
+    zdebug "load_ssh_identities: YubiKey detected via system_profiler, adding hardware keys"
+    ssh-add -K 2>/dev/null
+    return 0
+  fi
+
+  # Case 2: Load file-based keys if not already in agent
+  local target_key=""
+  if [[ -f "$CONFIG_KEY" ]]; then
+    target_key="$CONFIG_KEY"
+  elif [[ -f "$DEFAULT_KEY" ]]; then
+    target_key="$DEFAULT_KEY"
+  fi
+
+  if [[ -n "$target_key" ]]; then
+    # Only add if the fingerprint isn't already in the agent
+    local fingerprint=$(ssh-keygen -lf "$target_key" 2>/dev/null | awk '{print $2}')
+    if [[ -n "$fingerprint" ]] && ! ssh-add -l 2>/dev/null | grep -q "$fingerprint"; then
+      zdebug "load_ssh_identities: Loading SSH key: $target_key"
+      ssh-add "$target_key" 2>/dev/null
+    else
+      zdebug "load_ssh_identities: SSH key already loaded or no valid key found"
+    fi
+  fi

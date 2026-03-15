@@ -1,0 +1,9 @@
+
+# ==============================================================================
+# Environment Detection
+# ==============================================================================
+# Export a variable if this is WSL
+if grep -q Microsoft /proc/version; then
+  zdebug ".zshenv: Session is in WSL"
+  export IS_WSL=1
+fi
