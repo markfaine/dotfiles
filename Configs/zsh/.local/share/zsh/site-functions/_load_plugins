@@ -2,7 +2,7 @@
 # ==============================================================================
 # Plugin Loading
 # ==============================================================================
-# Load plugins from .zplugins file
+# Load plugins from provided plugin spec lines
 # Handles:
 #   - Per-plugin configuration files (~/.config/zplugin.d/plugin-name.zsh)
 #   - Cloning repositories
@@ -10,17 +10,18 @@
 #   - Adding plugin completion paths to FPATH
 #   - Lazy loading
 #
-# File format: ~/.zplugins
 # CSV format: github-org/repo,path-addition,fpath-addition
 # - Empty lines and comments (starting with #) are ignored
-local plugins_file="${1:-${ZDOTDIR:-$HOME}/.zplugins}"
 local zconfig_home="${XDG_CONFIG_HOME:-${ZDOTDIR:-$HOME}/.config}"
-[[ -f "$plugins_file" ]] || return 1
+
+if (( $# == 0 )); then
+    return 0
+fi
 
 # 1. Clone all repositories first (skip comments/blank/malformed rows).
 local repo_line repo_clone
 local repos=()
-while IFS= read -r repo_line || [[ -n "$repo_line" ]]; do
+for repo_line in "$@"; do
     # Trim leading/trailing whitespace.
     repo_line="${repo_line#${repo_line%%[![:space:]]*}}"
     repo_line="${repo_line%${repo_line##*[![:space:]]}}"
@@ -32,13 +33,15 @@ while IFS= read -r repo_line || [[ -n "$repo_line" ]]; do
 
     [[ -z "$repo_clone" ]] && continue
     repos+=("$repo_clone")
-done < "$plugins_file"
+done
 
 (( ${#repos[@]} > 0 )) && znap clone "${repos[@]}"
 
 # 2. Loop to source or lazy-load
-local repo inc fpc triggers plugin
-while IFS=',' read -r repo inc fpc triggers; do
+local repo inc fpc triggers plugin spec
+for spec in "$@"; do
+    IFS=',' read -r repo inc fpc triggers <<< "$spec"
+
     # Trim whitespace around CSV fields.
     repo="${repo#${repo%%[![:space:]]*}}"
     repo="${repo%${repo##*[![:space:]]}}"
@@ -68,4 +71,4 @@ while IFS=',' read -r repo inc fpc triggers; do
             printf 'warning: failed to source plugin %s\n' "$repo" >&2
         fi
     fi
-done < "$plugins_file"
+done

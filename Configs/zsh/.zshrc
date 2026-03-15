@@ -71,16 +71,43 @@ _download_znap || return
 _load_znap || return
 
 # ==============================================================================
+# Smart URL Pasting
+# ==============================================================================
+# Load the bracketed-paste-magic and url-quote-magic functions
+autoload -Uz bracketed-paste-magic url-quote-magic
+zle -N bracketed-paste bracketed-paste-magic
+zstyle :bracketed-paste-magic filter-active url-quote-magic
+
+
+# ==============================================================================
+# Double dot expansion
+# ==============================================================================
+# Also see: ~/.zshenv for bindkeys
+zle -N _double_dot_expand
+
+# ==============================================================================
+# Activate Mise
+# ==============================================================================
+if (( $+commands[mise] )); then
+  znap eval mise 'mise activate zsh'
+fi
+
+# ==============================================================================
 # Znap Plugin Loading
 # ==============================================================================
 # Docs: https://github.com/marlonrichert/zsh-snap
-_load_plugins || return
+_load_plugins \
+  "zimfw/utility,functions" \
+  "sindresorhus/pure,,." \
+  "chrissicool/zsh-256color" \
+  "marlonrichert/zcolors" \
+  "zimfw/input" \
+  "zimfw/termtitle" \
+  "zimfw/run-help" \
+  "Aloxaf/fzf-tab" \
+  "thetic/extract,,,extract" \
+  "laggardkernel/zsh-thefuck,,,tf" || return
 
-# ==============================================================================
-# Auto suggestions
-# ==============================================================================
-# This one has to be last, loaded separately from _load_plugins function
-znap source zsh-users/zsh-autosuggestions
 
 # ==============================================================================
 # SSH Identity Management
@@ -178,19 +205,31 @@ else
 fi
 
 # ==============================================================================
-# Activate Mise
-# ==============================================================================
-if (( $+commands[mise] )); then
-  eval "$("${ZDOTDIR:-$HOME}/.local/bin/mise" activate zsh)"
-fi
-
-# ==============================================================================
 # Activate Zoxide
 # ==============================================================================
 if (( $+commands[zoxide] )); then
-  eval "$(zoxide init zsh)"
+  znap eval zoxide 'zoxide init zsh'
 fi
 
+# ==============================================================================
+# Activate fzf
+# ==============================================================================
+if (( $+commands[fzf] )); then
+  znap eval fzf-init 'fzf --zsh'
+fi
+
+# ==============================================================================
+# Auto suggestions
+# ==============================================================================
+# These have to be last and in a specific order, specifically completions last
+# and syntax-hightlighting after autosuggestions.
+# Prevent autosuggestions from trying to clear the substring search widget
+ZSH_AUTOSUGGEST_CLEAR_WIDGETS+=(history-substring-search-up history-substring-search-down)
+
+_load_plugins "zsh-users/zsh-completions,,src" || return
+_load_plugins "zsh-users/zsh-history-substring-search" || return
+_load_plugins "zsh-users/zsh-autosuggestions" || return
+_load_plugins "zsh-users/zsh-syntax-highlighting" || return
 # ==============================================================================
 # User Extension Hooks
 # ==============================================================================
@@ -200,11 +239,4 @@ if [[ -f "$ZDOTDIR/.zshrc.local" ]]; then
   zdebug ".zshrc: Loading local overrides from ~/.zshrc.local"
   # shellcheck source=/dev/null
   . "$ZDOTDIR/.zshrc.local"
-fi
-
-# ==============================================================================
-# Activate fzf
-# ==============================================================================
-if (( $+commands[fzf] )); then
-  source <(fzf --zsh)
 fi
