@@ -403,7 +403,7 @@ info "Remove compiled zsh cache files"
 find "${ZDOTDIR:-$HOME}" -type f -name '*.zwc' -delete
 
 info "Delete completion cache"
-rm -f "${ZSH_COMPDUMP:${ZDOTDIR:-$HOME}/.zcompdump}"
+rm -f "${ZSH_COMPDUMP:-${ZDOTDIR:-$HOME}/.zcompdump}"
 
 info "Tools post hook complete."
 

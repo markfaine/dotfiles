@@ -23,7 +23,7 @@ ZSH_TRACE="${ZSH_TRACE:-}"
 # Logging Setup
 # ==============================================================================
 # Log file for debug output
-ZLOG_DIR="$ZDOTDIR/.local/bin"
+ZLOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}"
 mkdir -p "$ZLOG_DIR"
 export ZLOG_FILE="$ZLOG_DIR/zsh.log"
 
@@ -101,6 +101,7 @@ fi
 # Docs: https://github.com/marlonrichert/zsh-snap
 _load_plugins \
   "zimfw/utility,functions" \
+  "Aloxaf/fzf-tab" \ # temporarily remove for testing
   "chrissicool/zsh-256color" \
   "marlonrichert/zcolors" \
   "zimfw/termtitle" \
@@ -108,7 +109,7 @@ _load_plugins \
   "thetic/extract,,,extract" \
   "laggardkernel/zsh-thefuck,,,tf" || return
 
-# "Aloxaf/fzf-tab" \ # temporarily remove for testing
+
 
 # ==============================================================================
 # SSH Identity Management

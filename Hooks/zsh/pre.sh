@@ -6,7 +6,6 @@ set -euo pipefail
 # Zsh Pre Hook
 # ==============================================================================
 
-ZPLUGIN_CONFIG_DIR="${XDG_CONFIG_HOME:-${ZDOTDIR:-$HOME}/.config}/zplugin.d"
 ZSH_DATA_DIR="${XDG_DATA_HOME:-${ZDOTDIR:-$HOME}/.local/share}/zsh"
 SITE_FUNCTIONS_DIR="$ZSH_DATA_DIR/zsh/site-functions"
 CACHE_DIR="${XDG_CACHE_HOME:-${ZDOTDIR:-$HOME}/.cache}/zsh"
