@@ -143,11 +143,7 @@ fi
 
 
 # Cleanup directories
-zplugin_dir="${XDG_CONFIG_HOME:-${ZDOTDIR:-$HOME}/.config}/zplugin.d"
-site_functions="${XDG_DATA_HOME:-${ZDOTDIR:-$HOME}/.local/share}/zsh/site-functions"
 run_cmd "Remove mise config directory" rm -rf "$MISE_CONFIG_DIR"
-run_cmd "Remove $zplugin_dir directory" rm -rf "$zplugin_dir"
-run_cmd "Remvoe $site_functions directory" rm -rf "$site_functions"
 
 # Cleanup cache files
 run_cmd "Remove compiled zsh cache files" find "${ZDOTDIR:-$HOME}" -type f -name '*.zwc' -delete
@@ -156,6 +152,6 @@ run_cmd "Delete completion cache" rm -f "${ZSH_COMPDUMP:-${ZDOTDIR:-$HOME}/.zcom
 # Set decent path
 cp -f /etc/zsh/zshenv "${ZDOTDIR:-$HOME}/.zshenv"
 path+=("${ZDOTDIR:-$HOME}/.local/bin" /usr/local/bin)
-echo 'path=("${ZDOTDIR:-$HOME}/.local/bin" $path /usr/local/bin)' >> ~/.zshenv
+echo 'path=("${ZDOTDIR:-$HOME}/.local/bin" $path)' >> ~/.zshenv
 
 info "Mise clean hook complete"

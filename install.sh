@@ -377,71 +377,7 @@ ensure_xdg_directories() {
     done
 }
 
-# Step 4: Deploy dotfiles with tuckr
-deploy_dotfiles() {
-    info "Deploying dotfiles with tuckr..."
-
-    # Ensure tuckr is in PATH
-    debug_msg "Adding ${LOCAL_BIN} to PATH"
-    export PATH="${LOCAL_BIN}:${PATH}"
-    debug_msg "Current PATH: $PATH"
-
-    if ! command_exists tuckr; then
-        error "Tuckr not found in PATH"
-        debug_msg "tuckr location: $(which tuckr 2>&1 || echo 'not found')"
-        exit 1
-    fi
-    debug_msg "tuckr found: $(which tuckr)"
-
-    # Create XDG directories before symlink operations
-    ensure_xdg_directories
-
-    # Ensure hook scripts are executable before running tuckr hooks.
-    ensure_hook_scripts_executable "$DOTFILES_DIR"
-
-    # Discover all dotfile groups by basename and sort in natural version order.
-    # This supports ordered prefixes like apt, fonts, ... and avoids
-    # mixing full paths with group names.
-
-    info "Deploying dotfiles with tuckr set..."
-
-    debug_msg "Running: tuckr set for non-dependent configs"
-    if ! tuckr set -fy \* -e mise,pass,nvim,wsl,zsh  ; then
-        error "Tuckr non-dependent config deployment failed"
-        exit 1
-    fi
-
-    debug_msg "Running: tuckr set mise"
-    if ! tuckr set -fy mise; then
-        error "Tuckr mise config deployment failed"
-        exit 1
-    fi
-
-    debug_msg "Running: tuckr set pass"
-    if ! tuckr set -fy pass; then
-        warn "Tuckr pass config deployment failed"
-    fi
-
-    debug_msg "Running: tuckr set nvim"
-    if ! tuckr set -fy nvim; then
-        warn "Tuckr nvim config deployment failed"
-    fi
-
-    debug_msg "Running: tuckr set wsl"
-    if ! tuckr set -fy wsl; then
-        warn "Tuckr wsl config deployment failed"
-    fi
-
-    debug_msg "Running: tuckr set zsh"
-    if ! tuckr set -fy zsh; then
-        error "Tuckr zsh config deployment failed"
-        exit 1
-    fi
-
-    success "Dotfiles deployed successfully"
-}
-
-# Step 5: Post-installation setup
+# Step 4: Post-installation setup
 post_install() {
     info "Post-installation setup..."
 
@@ -449,10 +385,6 @@ post_install() {
     # Check if ~/.local/bin is in PATH
     if [[ ":$PATH:" != *":${LOCAL_BIN}:"* ]]; then
         warn "${LOCAL_BIN} is not in your PATH"
-        info "Add this to your shell profile:"
-        echo ""
-        echo "    export PATH=\"${LOCAL_BIN}:\$PATH\""
-        echo ""
     else
         debug_msg "${LOCAL_BIN} is already in PATH"
     fi
@@ -475,12 +407,42 @@ post_install() {
     fi
 
     success "Installation complete!"
-    echo ""
     info "Next steps:"
-    echo "  1. Restart your shell or run: exec zsh"
-    echo "  2. Review deployed configs in your home directory"
-    echo "  3. Customize as needed with local overrides (~/.zshrc.local, etc.)"
-    echo ""
+cat <<-'EOF'
+
+If ~/.local/bin isn't on your path add that now:
+
+echo 'path=("${ZDOTDIR:-$HOME}/.local/bin" $path)' >> ~/.zshenv
+
+Restart your shell or run: exec zsh
+
+Run: tuckr ls hooks
+
+    ╭─────────┬─────────┬──────────┬────────╮
+    │  Group  │ Prehook │ Posthook │ Remove │
+    ├─────────┼─────────┼──────────┼────────┤
+    │   apt   │    ✓    │    ✓     │   ✓    │
+    │  pass   │    ✓    │    ✓     │   ✓    │
+    │  tools  │    ✓    │    ✓     │   ✓    │
+    │   ssh   │    ✓    │    ✓     │   ✓    │
+    │  nvim   │    ✓    │    ✓     │   ✓    │
+    │   gpg   │    ✓    │    ✓     │   ✓    │
+    │  kitty  │    ✓    │    ✓     │   ✓    │
+    │  mise   │    ✓    │    ✓     │   ✓    │
+    │   zsh   │    ✓    │    ✓     │   ✓    │
+    │  fonts  │    ✓    │    ✓     │   ✓    │
+    ╰─────────┴─────────┴──────────┴────────╯
+
+You can choose to install any of these or all of them:
+
+tuckr set -fy \* # all of them
+
+tuckr set -fy apt # Install packages from distro
+
+Note: You may need to restart your shell after running some of these commands.
+
+EOF
+
 }
 
 # ==============================================================================
@@ -511,7 +473,6 @@ main() {
     install_tuckr
     ensure_xdg_directories
     ensure_hook_scripts_executable "$DOTFILES_DIR"
-    #deploy_dotfiles
     post_install
 
     echo ""

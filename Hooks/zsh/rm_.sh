@@ -6,7 +6,7 @@ set -euo pipefail
 # Zsh Clean Hook
 # ==============================================================================
 
-ZSH_CONFIG_DIR="${XDG_CONFIG_HOME:-${ZDOTDIR:-$HOME}/.config}/zsh"
+ZSH_PLUGIN_DIR="${XDG_CONFIG_HOME:-${ZDOTDIR:-$HOME}/.config}/zplugin.d"
 SITE_FUNCTIONS_DIR="${XDG_DATA_HOME:-${ZDOTDIR:-$HOME}/.local/share}/zsh/site-functions"
 CACHE_DIR="${XDG_CACHE_HOME:-${ZDOTDIR:-$HOME}/.cache}/zsh"
 LOG_DIR="${XDG_STATE_HOME:-${ZDOTDIR:-$HOME}/.local/state}"
@@ -143,8 +143,8 @@ if (( DEBUG )); then
 	info "Debug mode enabled"
 fi
 
-run_cmd "Remove zsh config directory" rm -rf "$ZSH_CONFIG_DIR"
 run_cmd "Remove zsh cache directory" rm -rf "$CACHE_DIR"
+run_cmd "Remove zsh site-functions directory" rm -rf "$ZSH_PLUGIN_DIR"
 run_cmd "Remove zsh site-functions directory" rm -rf "$SITE_FUNCTIONS_DIR"
 
 run_cmd "Remove compiled zsh cache files" find "${ZDOTDIR:-$HOME}" -type f -name '*.zwc' -delete
