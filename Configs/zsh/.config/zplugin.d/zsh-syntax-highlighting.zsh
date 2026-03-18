@@ -16,7 +16,8 @@ ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets pattern regexp root)
 # Pattern highlighter styles.
 # Keep these modest and readable; adjust later to taste.
 typeset -gA ZSH_HIGHLIGHT_PATTERNS
-ZSH_HIGHLIGHT_PATTERNS+=('rm -rf *' 'fg=white,bg=red,bold')
+# Use a deeper red index to avoid washed-out pink reds on some terminal themes.
+ZSH_HIGHLIGHT_PATTERNS+=('rm -rf *' 'fg=160,bold')
 ZSH_HIGHLIGHT_PATTERNS+=('sudo *' 'fg=yellow')
 
 # Style overrides for built-in highlight groups.
@@ -31,7 +32,7 @@ ZSH_HIGHLIGHT_STYLES[alias]='fg=cyan'
 ZSH_HIGHLIGHT_STYLES[reserved-word]='fg=yellow,bold'
 
 # Keep unknown tokens obvious without being harsh.
-ZSH_HIGHLIGHT_STYLES[unknown-token]='fg=red,bold'
+ZSH_HIGHLIGHT_STYLES[unknown-token]='fg=160,bold'
 
 # Bracket highlight styles.
 ZSH_HIGHLIGHT_STYLES[bracket-level-1]='fg=cyan,bold'

@@ -2,6 +2,11 @@
 # shellcheck shell=bash
 
 set -euo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=../../includes/functions.sh
+source "$SCRIPT_DIR/../../includes/functions.sh"
+# Common helpers from includes/functions.sh.
+
 
 # ==============================================================================
 # SSH Post Hook
@@ -65,78 +70,10 @@ for arg in "$@"; do
   esac
 done
 
-# Disable spinner if not a TTY or in debug mode
-if [[ ! -t 1 ]]; then
-  USE_SPINNER=0
-fi
-
-if ((DEBUG)); then
-  USE_SPINNER=0
-fi
-
-mkdir -p "$LOG_DIR"
+hook_init_defaults
 
 # ==============================================================================
-# Logging & Output Functions
-# ==============================================================================
-
-log_msg() {
-  local level="$1"
-  shift
-  printf '[%s] [%s] %s\n' "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" "$level" "$*" >>"$LOG_FILE"
-}
-
-info() {
-  log_msg INFO "$*"
-  printf '%s\n' "$*"
-}
-
-log_error() {
-  log_msg ERROR "$*"
-}
-
-debug_msg() {
-  if ((DEBUG)); then
-    log_msg DEBUG "$*"
-    echo "DEBUG: $*" >&2
-  fi
-}
-
-# Spinner for progress indication
-spinner_pid=""
-start_spinner() {
-  if ((!USE_SPINNER)); then
-    return
-  fi
-  (
-    while true; do
-      printf '\r→ '
-      sleep 0.1
-    done
-  ) &
-  spinner_pid=$!
-}
-
-stop_spinner() {
-  if [[ -n "$spinner_pid" ]]; then
-    kill "$spinner_pid" 2>/dev/null || true
-    wait "$spinner_pid" 2>/dev/null || true
-    spinner_pid=""
-    printf '\r✓ '
-  fi
-}
-
-stop_spinner_fail() {
-  if [[ -n "$spinner_pid" ]]; then
-    kill "$spinner_pid" 2>/dev/null || true
-    wait "$spinner_pid" 2>/dev/null || true
-    spinner_pid=""
-    printf '\r✗ '
-  fi
-}
-
-# ==============================================================================
-# Utility Functions
+# SSH Key Utility Functions
 # ==============================================================================
 
 # Get fingerprint/hash of a key for deduplication

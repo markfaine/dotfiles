@@ -29,16 +29,6 @@ alias claer='clear'
 alias clar='clear'
 
 # ==============================================================================
-# Code Editors
-# ==============================================================================
-# VS Code Insiders with workaround for OS crypt module
-function code-insiders {
-  /usr/bin/code-insiders --vmodule="*/components/os_crypt/*=1" "$@"
-}
-alias code='code-insiders'
-alias ci='code-insiders'
-
-# ==============================================================================
 # Disk & File Management
 # ==============================================================================
 alias df='df -kTh'
@@ -75,7 +65,7 @@ fi
 # Move with safety confirmation
 alias mv='mv -i'
 
-# Pager alternatives
+# Pager alternatives and typo protection
 alias moer='more'
 alias moew='more'
 alias more='less'
@@ -91,7 +81,9 @@ alias ps='ps -ef'
 alias j='jobs -l'
 
 # Better process monitoring
-function top(){if command -v htop &>/dev/null; then htop; else /usr/bin/top; fi}
+if (( $+commands[htop] )); then
+  alias top=htop
+fi
 
 # ==============================================================================
 # History & Command Help
@@ -100,11 +92,6 @@ alias h='history'
 
 # which → command -v (shows where command comes from)
 alias which='command -v'
-
-# Better man pages with tldr fallback
-function man(){
-  if tldr --search "$*" &>/dev/null; then tldr "$*"; else /usr/bin/man "$@"; fi
-}
 
 # ==============================================================================
 # Trash/Recycle Bin

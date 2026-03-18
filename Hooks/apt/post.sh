@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 
 set -euo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=../../includes/functions.sh
+source "$SCRIPT_DIR/../../includes/functions.sh"
+# Common helpers from includes/functions.sh.
+
 
 # ==============================================================================
 # Apt Post Hook
@@ -50,41 +55,7 @@ for arg in "$@"; do
 	esac
 done
 
-if [[ ! -t 1 ]]; then
-	USE_SPINNER=0
-fi
-
-if (( DEBUG )); then
-	USE_SPINNER=0
-fi
-
-mkdir -p "$LOG_DIR"
-
-log_msg() {
-	local level="$1"
-	shift
-	printf '[%s] [%s] %s\n' "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" "$level" "$*" >> "$LOG_FILE"
-}
-
-info() {
-	log_msg INFO "$*"
-	printf '%s\n' "$*"
-}
-
-debug() {
-	if (( DEBUG )); then
-		log_msg DEBUG "$*"
-		printf '[debug] %s\n' "$*"
-	fi
-}
-
-log_failure() {
-	local message="$1"
-	log_msg ERROR "$message"
-	if (( DEBUG )); then
-		printf '[error] %s\n' "$message" >&2
-	fi
-}
+hook_init_defaults
 
 run_apt() {
 	local label="$1"

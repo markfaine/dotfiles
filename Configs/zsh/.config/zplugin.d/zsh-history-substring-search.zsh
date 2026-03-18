@@ -41,8 +41,8 @@ if [[ -n "${terminfo[kcud1]:-}" ]]; then
 fi
 
 # Fallback ANSI arrow key bindings.
-bindkey '^[[A' history-substring-search-up
-bindkey '^[[B' history-substring-search-down
+bindkey '^[OA' history-substring-search-up
+bindkey '^[OB' history-substring-search-down
 
 # Also support emacs-style ctrl-p/ctrl-n navigation.
 bindkey -M emacs '^P' history-substring-search-up

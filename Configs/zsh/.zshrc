@@ -100,16 +100,12 @@ fi
 # ==============================================================================
 # Docs: https://github.com/marlonrichert/zsh-snap
 _load_plugins \
-  "zimfw/utility,functions" \
-  "Aloxaf/fzf-tab" \ # temporarily remove for testing
-  "chrissicool/zsh-256color" \
+  "Aloxaf/fzf-tab" \
+  "MichaelAquilina/zsh-you-should-use" \
+  "MrXcitement/zsh-bat" \
   "marlonrichert/zcolors" \
-  "zimfw/termtitle" \
-  "zimfw/run-help" \
   "thetic/extract,,,extract" \
   "laggardkernel/zsh-thefuck,,,tf" || return
-
-
 
 # ==============================================================================
 # SSH Identity Management
@@ -227,9 +223,9 @@ fi
 # Load order here avoids autosuggestions/pure recursion on Enter.
 
 _load_plugins "zsh-users/zsh-completions,,src" || return
-_load_plugins "zsh-users/zsh-history-substring-search" || return
 _load_plugins "zsh-users/zsh-syntax-highlighting" || return
 _load_plugins "zsh-users/zsh-autosuggestions" || return
+_load_plugins "zsh-users/zsh-history-substring-search" || return
 _load_plugins "sindresorhus/pure,,." || return
 
 # ==============================================================================

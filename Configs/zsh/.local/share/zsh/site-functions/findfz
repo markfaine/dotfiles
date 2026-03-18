@@ -1,0 +1,138 @@
+# zsh-optimized findfz()
+# Usage:
+#   findfz PATH MIN MAX TERM [--open|-o] [--editor 'editor args']
+# Examples:
+#   findfz /my/project 1 3 TODO
+#   findfz . 2 4 "fixme" --open
+#   findfz /path 1 5 "foo" --open --editor "code --goto"
+#
+# Notes:
+# - fd and rg are required. fzf is required for interactive selection.
+# - This implementation is NUL-safe end-to-end when fzf supports --read0/--print0.
+# - Filenames with literal newlines are handled when the --read0/--print0 path is used.
+#
+rehash
+emulate -L zsh
+setopt localoptions NO_NOMATCH  # avoid glob errors if patterns look like globs
+
+if (( $# < 4 )); then
+  cat <<'USAGE'
+Usage: findfz PATH MIN MAX TERM [--open|-o] [--editor 'editor_cmd']
+  PATH         starting directory to search (fd will be run from here)
+  MIN          minimum depth (1 = files directly under PATH)
+  MAX          maximum depth (fd -d MAX)
+  TERM         ripgrep search term (quoted if it contains spaces)
+  --open, -o   open selected files in editor instead of printing matches
+  --editor CMD specify editor command (default: $VISUAL, $EDITOR, or vim)
+USAGE
+    return 2
+  fi
+
+  local path=$1; local min=$2; local max=$3; local term=$4
+  shift 4
+
+  local open=false
+  local editor_cmd=${VISUAL:-${EDITOR:-vim}}
+
+  # parse optional flags
+  while (( $# )); do
+    case $1 in
+      --open|-o) open=true; shift ;;
+      --editor) shift; editor_cmd=$1; shift ;;
+      --help|-h) echo "See usage above"; return 0 ;;
+      *) printf 'Unknown option: %s\n' "$1" >&2; return 2 ;;
+    esac
+  done
+
+  if [[ ! -d $path ]]; then
+    printf 'Path not found or not a directory: %s\n' "$path" >&2
+    return 2
+  fi
+
+  # check required commands
+  for cmd in fd rg fzf xargs; do
+    if (( ! $+commands["$cmd"]  )); then
+      printf 'Required command not found: %s\n' "$cmd" >&2
+      return 2
+    fi
+  done
+
+  # Detect if fzf supports NUL I/O
+  local fzf_has_read0=false
+  if fzf --help 2>&1 | grep -q -- '--read0'; then
+    fzf_has_read0=true
+  fi
+
+  # Build candidate file list (NUL-separated) using fd, then filter by min depth.
+  # Run fd from inside the $path so results are paths relative to $path.
+  local -a candidates
+  local file
+  # Use file descriptor 3 for process substitution (works in zsh)
+  while IFS= read -r -d $'\0' file; do
+    # file is relative path like "a" or "dir/a"
+    # count slashes to determine depth: depth = 1 + number_of_slashes
+    local slashes=${file//[^\/]/}      # string containing only slashes
+    local depth=$(( ${#slashes} + 1 ))
+    if (( depth >= min )); then
+      candidates+=$file
+    fi
+  done 3< <(cd -- "$path" && fd -0 -t f -d "$max" .)
+
+  if (( ${#candidates[@]} == 0 )); then
+    printf 'No files found within depth range.\n' >&2
+    return 1
+  fi
+
+  # Filter candidates to files that actually contain TERM using rg -l --null
+  local -a matched
+  if (( ${#candidates[@]} )); then
+    # printf NUL-separated candidates into rg via xargs -0
+    # rg --null prints NUL-separated matches; read them into array
+    while IFS= read -r -d $'\0' file; do
+      matched+=$file
+    done < <(printf '%s\0' "${candidates[@]}" | xargs -0 -r rg -l --null --no-messages -- "$term")
+  fi
+
+  if (( ${#matched[@]} == 0 )); then
+    printf 'No files contain the term: %s\n' "$term" >&2
+    return 1
+  fi
+
+  # Present matches to fzf. If fzf supports --read0/--print0 use NUL mode so filenames with newlines are safe.
+  local selected_raw
+  if $fzf_has_read0; then
+    # feed NULs in, get NULs out
+    selected_raw=$(printf '%s\0' "${matched[@]}" \
+      | fzf --read0 --print0 -m --preview "rg --line-number --color=always -- '$term' {}" --preview-window=down:wrap)
+  else
+    # fallback: convert to newline-separated list (warn about newline-in-filename caveat)
+    printf 'Warning: fzf on this system does not support --read0/--print0; filenames containing newlines may be handled incorrectly.\n' >&2
+    selected_raw=$(printf '%s\n' "${matched[@]}" \
+      | fzf -m --preview "rg --line-number --color=always -- '$term' {}" --preview-window=down:wrap)
+  fi
+
+  # if user cancelled, selected_raw will be empty
+  if [[ -z $selected_raw ]]; then
+    return 130
+  fi
+
+  # Convert selected_raw into an array 'selected' handling either NUL or newline output
+  local -a selected
+  if $fzf_has_read0; then
+    while IFS= read -r -d $'\0' file; do
+      selected+=$file
+    done <<<"$selected_raw"
+  else
+    # split on newlines
+    IFS=$'\n' read -r -d '' -A selected <<<"$selected_raw"$'\0'
+  fi
+
+  if $open; then
+    # Use zsh word-splitting ${(z)str} to produce proper argv array from editor_cmd
+    local -a edcmd=(${(z)editor_cmd})
+    # Launch editor with selected files (paths are relative to $path)
+    printf '%s\0' "${selected[@]}" | xargs -0 -r -- "${edcmd[@]}"
+  else
+    # Show matching lines from the selected files
+    printf '%s\0' "${selected[@]}" | xargs -0 -r rg -n --color=always -- "$term"
+  fi

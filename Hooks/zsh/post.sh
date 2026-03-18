@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 
 set -euo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=../../includes/functions.sh
+source "$SCRIPT_DIR/../../includes/functions.sh"
+# Common helpers from includes/functions.sh.
+
 
 # ==============================================================================
 # Zsh Post Hook
@@ -50,46 +55,7 @@ for arg in "$@"; do
 	esac
 done
 
-mkdir -p "$LOG_DIR"
-
-log_msg() {
-	local level="$1"
-	shift
-	printf '[%s] [%s] %s\n' "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" "$level" "$*" >> "$LOG_FILE"
-}
-
-info() {
-	log_msg INFO "$*"
-	printf '%s\n' "$*"
-}
-
-debug() {
-	if (( DEBUG )); then
-		log_msg DEBUG "$*"
-		printf '[debug] %s\n' "$*"
-	fi
-}
-
-run_cmd() {
-	local description="$1"
-	shift
-
-	if (( DRY_RUN )); then
-		info "[dry-run] $description"
-		info "          $*"
-		return 0
-	fi
-
-	if (( DEBUG )); then
-		info "[run] $description"
-		debug "cmd: $*"
-		"$@"
-		return $?
-	fi
-
-	info "$description"
-	"$@" >/dev/null 2>&1
-}
+hook_init_defaults
 
 info "Running zsh post hook"
 if (( DRY_RUN )); then

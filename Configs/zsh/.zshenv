@@ -109,21 +109,21 @@ export UV_PROJECT_ENVIRONMENT="${ZDOTDIR:-$HOME}/.venv"
 # Primary editor for environment
 export EDITOR="nvim"
 
-# Pager for various commands (bat provides syntax highlighting)
-if (( $+commands[fzf] )); then
-  export PAGER="bat"
-else
-  export PAGER="less"
-fi
+# # Pager for various commands (bat provides syntax highlighting)
+# if (( $+commands[bat] )); then
+#   export PAGER="bat"
+# else
+#   export PAGER="less"
+# fi
 
-# Pager for git commands (use default PAGER)
-export GIT_PAGER="$PAGER"
+# # Pager for git commands (use default PAGER)
+# export GIT_PAGER="$PAGER"
 
-# Pager for man pages (use default PAGER)
-export MANPAGER="$PAGER"
+# # Pager for man pages (use default PAGER)
+# export MANPAGER="$PAGER"
 
-# Pager for systemd commands
-export SYSTEMD_PAGER="$PAGER"
+# # Pager for systemd commands
+# export SYSTEMD_PAGER="$PAGER"
 
 # ==============================================================================
 # Input
