@@ -73,6 +73,9 @@ _autoload_fpath
 _download_znap || return
 _load_znap || return
 
+# Load prompt
+znap prompt sindresorhus/pure
+
 # ==============================================================================
 # Smart URL Pasting
 # ==============================================================================
@@ -100,11 +103,11 @@ fi
 # ==============================================================================
 # Docs: https://github.com/marlonrichert/zsh-snap
 _load_plugins \
-  "Aloxaf/fzf-tab" \
   "MichaelAquilina/zsh-you-should-use" \
   "MrXcitement/zsh-bat" \
   "marlonrichert/zcolors" \
   "thetic/extract,,,extract" \
+  "zap-zsh/sudo" \
   "laggardkernel/zsh-thefuck,,,tf" || return
 
 # ==============================================================================

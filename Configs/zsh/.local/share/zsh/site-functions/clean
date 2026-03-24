@@ -6,7 +6,7 @@ if (( ! $+commands[tuckr] )); then
   return 0
 fi
 echo "Removing links and runing rm_ hooks with tuckr..."
-tuckr unset -fy '*'
+tuckr unset '*'
 local exit_code=$?
 if [[ $exit_code -eq 0 ]]; then
   echo "✓ Dotfiles unlinked and rm_ hooks executed successfully"

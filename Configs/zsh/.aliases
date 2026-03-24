@@ -38,19 +38,19 @@ alias du='du -kh'
 # If eza
 if (( $+commands[eza] )); then
   # General listing
-  alias ls='eza --icons --group-directories-first'
-  alias l='eza -lbF --git --icons'                     # Detailed list
-  alias ll='eza -lbGF --header --git --icons'          # Long list with headers
-  alias llm='eza -lbGd --git --sort=modified --icons'  # Sort by date
+  alias ls='eza --icons=always --group-directories-first'
+  alias l='eza -lbF --git --icons=always'                     # Detailed list
+  alias ll='eza -lbGF --header --git --icons=always'          # Long list with headers
+  alias llm='eza -lbGd --git --sort=modified --icons=always'  # Sort by date
 
   # "All" views (including hidden files)
-  alias la='eza -lbhHigUmuSa --time-style=long-iso --git --color-scale --icons'
-  alias lx='eza -lbhHigUmuSa@ --time-style=long-iso --git --color-scale --icons'
+  alias la='eza -lbhHigUmuSa --time-style=long-iso --git --color-scale --icons=always'
+  alias lx='eza -lbhHigUmuSa@ --time-style=long-iso --git --color-scale --icons=always'
 
   # Specialty views
-  alias lS='eza -1 --icons'                            # Single column
-  alias lt='eza --tree --level=2 --icons'              # 2-level deep tree
-  alias tree='eza --tree --icons'                      # Full tree
+  alias lS='eza -1 --icons=always'                            # Single column
+  alias lt='eza --tree --level=2 --icons=always'              # 2-level deep tree
+  alias tree='eza --tree --icons=always'                      # Full tree
   # typo protection
   alias ls-la='la'
 else
@@ -89,6 +89,8 @@ fi
 # History & Command Help
 # ==============================================================================
 alias h='history'
+alias hf='history | fzf'
+alias hg='history | grep'
 
 # which → command -v (shows where command comes from)
 alias which='command -v'
