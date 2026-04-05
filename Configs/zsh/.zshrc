@@ -92,6 +92,12 @@ zstyle :bracketed-paste-magic filter-active url-quote-magic
 zle -N _double_dot_expand
 
 # ==============================================================================
+# Load paths from ~/.paths
+# ==============================================================================
+# Load all PATH entries from .paths file
+_load_paths
+
+# ==============================================================================
 # Activate Mise
 # ==============================================================================
 if (( $+commands[mise] )); then
@@ -102,8 +108,8 @@ fi
 # Znap Plugin Loading
 # ==============================================================================
 # Docs: https://github.com/marlonrichert/zsh-snap
+# "MichaelAquilina/zsh-you-should-use" \
 _load_plugins \
-  "MichaelAquilina/zsh-you-should-use" \
   "MrXcitement/zsh-bat" \
   "marlonrichert/zcolors" \
   "thetic/extract,,,extract" \
@@ -116,33 +122,18 @@ _load_plugins \
 # Load SSH identities into existing agent (assumes agent is already running via
 # systemd, gpg-agent, keychain, or system default)
 
-# Define key paths
-CONFIG_KEY=$(grep -m1 "IdentityFile" "$ZDOTDIR/.ssh/config" 2>/dev/null | awk '{print $2}' | sed "s|^~|$HOME|")
-DEFAULT_KEY="$HOME/.ssh/id_rsa"
-SSH_ENV="$HOME/.ssh/agent.env"
+# SSH Identity Management
 
-if [ -f "${SSH_ENV}" ]; then
-    zdebug ".zshrc: Sourcing $SSH_ENV"
-    . "${SSH_ENV}" > /dev/null
-    ps -ff | grep ${SSH_AGENT_PID} | grep ssh-agent > /dev/null || start_agent
-else
-    zdebug ".zshrc: Starting ssh-agent"
-    start_agent
+# Fallback if systemd agent isn't running
+if [[ ! -S "$SSH_AUTH_SOCK" ]]; then
+    if [[ -f "$SSH_ENV" ]]; then
+        . "$SSH_ENV" > /dev/null
+    fi
+    # If still not running after sourcing, start it
+    ps -p "$SSH_AGENT_PID" >/dev/null 2>&1 || start_agent
 fi
 
-# Load identities once per shell initialization
 load_ssh_identities
-
-# ==============================================================================
-# Load Shell Aliases
-# ==============================================================================
-if [[ -f "$ZDOTDIR/.aliases" ]]; then
-  zdebug ".zshrc: Loading shell aliases"
-  # shellcheck source=/dev/null
-  . "$ZDOTDIR/.aliases"
-else
-  zdebug ".zshrc: No aliases file found"
-fi
 
 # ==============================================================================
 # Trash/Recycle Bin Management
@@ -177,12 +168,6 @@ _load_aliases
 if [ -x /usr/bin/dircolors ]; then
   test -r "$ZDOTDIR/.dircolors" && eval "$(dircolors -b "$ZDOTDIR/.dircolors")" || eval "$(dircolors -b)"
 fi
-
-# ==============================================================================
-# Load paths from ~/.paths
-# ==============================================================================
-# Load all PATH entries from .paths file
-_load_paths
 
 # ==============================================================================
 # Theme-Agnostic Color Configuration
@@ -249,6 +234,10 @@ bindkey "${terminfo[kcud1]}"  down-line-or-history   # Down Arrow
 bindkey "${terminfo[kcub1]}"  backward-char          # Left Arrow
 bindkey "${terminfo[kcuf1]}"  forward-char           # Right Arrow
 bindkey "${terminfo[kcbt]}"   reverse-menu-complete  # Shift-Tab
+
+bindkey "^H" backward-delete-char
+bindkey '\e[H' beginning-of-line
+bindkey '\e[F' end-of-line
 
 # Terminal-Specific Fixes (Ctrl + Arrows for Word Jumping)
 # These codes work across Kitty, Windows Terminal, and Konsole

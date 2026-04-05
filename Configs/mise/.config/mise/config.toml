@@ -23,14 +23,10 @@ terraform-lsp = "latest"
 terraform-validator = "latest"
 tflint = "latest"
 packer = "latest"
-make = "latest"
 gh = "latest"
 glab = "latest"
 gopass = "latest"
 "ubi:docker/docker-credential-helpers" = { version = "latest", matching = "pass", rename_exe = "docker-credential-pass" }
-
-# Development Tools
-"aqua:neovim/neovim" = "latest"
 lua-language-server = "latest"
 stylua = "latest"
 tree-sitter = "latest"
@@ -83,6 +79,9 @@ tmux = "latest"
 glow = "latest"
 lazydocker = "latest"
 yarn = "latest"
+neovim = "latest"
+"aqua:Mikescher/better-docker-ps" = "latest"
+yt-dlp = { version = "latest", rename_exe = "yt-dlp" }
 
 [env]
 _.source = '.env'

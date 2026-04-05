@@ -107,7 +107,8 @@ export UV_PROJECT_ENVIRONMENT="${ZDOTDIR:-$HOME}/.venv"
 # Editor & Pager Configuration
 # ==============================================================================
 # Primary editor for environment
-export EDITOR="nvim"
+export EDITOR=nvim
+export SYSTEMD_EDITOR=nvim
 
 # # Pager for various commands (bat provides syntax highlighting)
 # if (( $+commands[bat] )); then

@@ -2,7 +2,7 @@
 # File Sourcing: Aliases
 # ==============================================================================
 # Load command aliases
-  ZALIASES="$ZDOTDIR:-$HOME}/.aliases"
+  ZALIASES="${ZDOTDIR:-$HOME}/.aliases"
   if [[ -e "$ZALIASES" ]]; then
     #shellcheck source=/dev/null
     . "$ZALIASES"

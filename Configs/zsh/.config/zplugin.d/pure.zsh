@@ -13,5 +13,8 @@ PROMPT_EOL_MARK=""
 # Use git untracked dirty indicator
 PURE_GIT_UNTRACKED_DIRTY=1
 
+# Disable automatic git fetch to avoid repeated SSH key PIN prompts
+export PURE_GIT_PULL=0
+
 # Force minimal processing to reduce rendering issues
 PURE_PROMPT_TCSETPGRP=1

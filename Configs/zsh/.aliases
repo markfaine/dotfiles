@@ -9,7 +9,7 @@ alias vim='nvim'
 alias vi='nvim'
 
 # Stock vim/vi access (for when you really need the original)
-alias svim="/usr/bin/vi"
+alias svim="/usr/bin/vim"
 
 # ==============================================================================
 # Directory Navigation
@@ -177,3 +177,5 @@ alias mypath='echo -e ${PATH//:/\\n}'
 # ==============================================================================
 # Reload shell configuration
 alias zbrc='exec zsh'
+
+alias ssh='kitten ssh'

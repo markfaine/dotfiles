@@ -1,43 +1,41 @@
+CONFIG_KEY=$(grep -m1 "IdentityFile" "$HOME/.ssh/config" 2>/dev/null | awk '{print $2}' | sed "s|^~|$HOME|")
+DEFAULT_KEY="$HOME/.ssh/id_rsa"
 
-# Identity loading function
-  # Only run if ssh-agent is available
-  if (( ! $+commands[ssh-add] )); then
+# Only run if ssh-add is available
+(( $+commands[ssh-add] )) || return 0
+
+# Check if agent is accessible
+ssh-add -l &>/dev/null
+local agent_status=$?
+if [[ $agent_status -eq 2 ]]; then
+    zdebug "load_ssh_identities: No SSH agent available"
     return 0
-  fi
+fi
 
-  # Check if agent is accessible
-  if ! ssh-add -l &>/dev/null && [[ $? -ne 1 ]]; then
-    # Exit code 2 = no agent running, 1 = agent running but no identities
-    zdebug "load_ssh_identities: No SSH agent available, skipping identity load"
+# Case 1: Check for YubiKey
+local has_yubikey=0
+if (( $+commands[lsusb] )) && lsusb 2>/dev/null | grep -q "1050"; then
+    has_yubikey=1
+elif (( $+commands[system_profiler] )) && system_profiler SPUSBDataType 2>/dev/null | grep -q "Yubico"; then
+    has_yubikey=1
+fi
+
+if [[ $has_yubikey -eq 1 ]]; then
+    # Check if a YubiKey (sk-) key is already in the agent
+    if ! ssh-add -l 2>/dev/null | grep -q "sk-"; then
+        zdebug "load_ssh_identities: Adding YubiKey keys"
+        # Only attempt to add if it's the first time in this session or agent is empty
+        # This will trigger the PIN prompt ONCE.
+        SSH_ASKPASS=$SSH_ASKPASS SSH_ASKPASS_REQUIRE=$SSH_ASKPASS_REQUIRE ssh-add -K 2>/dev/null
+    fi
     return 0
-  fi
+fi
 
-  # Case 1: Check for YubiKey (requires lsusb or system_profiler)
-  if (( $+commands[lsusb] && lsusb 2>/dev/null | grep -q "1050")); then
-    zdebug "load_ssh_identities: YubiKey detected via lsusb, adding hardware keys"
-    ssh-add -K 2>/dev/null
-    return 0
-  elif (( $+commands[system_profiler] && system_profiler SPUSBDataType 2>/dev/null | grep -q "Yubico")); then
-    zdebug "load_ssh_identities: YubiKey detected via system_profiler, adding hardware keys"
-    ssh-add -K 2>/dev/null
-    return 0
-  fi
-
-  # Case 2: Load file-based keys if not already in agent
-  local target_key=""
-  if [[ -f "$CONFIG_KEY" ]]; then
-    target_key="$CONFIG_KEY"
-  elif [[ -f "$DEFAULT_KEY" ]]; then
-    target_key="$DEFAULT_KEY"
-  fi
-
-  if [[ -n "$target_key" ]]; then
-    # Only add if the fingerprint isn't already in the agent
+# Case 2: Load file-based keys
+local target_key="${CONFIG_KEY:-$DEFAULT_KEY}"
+if [[ -f "$target_key" ]]; then
     local fingerprint=$(ssh-keygen -lf "$target_key" 2>/dev/null | awk '{print $2}')
     if [[ -n "$fingerprint" ]] && ! ssh-add -l 2>/dev/null | grep -q "$fingerprint"; then
-      zdebug "load_ssh_identities: Loading SSH key: $target_key"
-      ssh-add "$target_key" 2>/dev/null
-    else
-      zdebug "load_ssh_identities: SSH key already loaded or no valid key found"
+        ssh-add "$target_key" 2>/dev/null
     fi
-  fi
+fi
