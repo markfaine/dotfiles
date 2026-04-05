@@ -344,7 +344,8 @@ local servers = {
     },
     single_file_support = true,
   },
-
+ local home = os.getenv("HOME")
+ local cache_dir = os.getenv("XDG_CACHE_HOME") or home .. '/.cache'
   -- GitLab CI Language Server
   gitlab_ci_ls = {
     name = 'gitlab_ci_ls',
@@ -352,8 +353,8 @@ local servers = {
     filetypes = { 'yaml.gitlab' },
     root_markers = { '.gitlab-ci.yml', '.git' },
     init_options = {
-      cache = '~/.cache/gitlab-ci-ls/',
-      log_path = '~/.cache/gitlab-ci-ls/log/gitlab-ci-ls.log',
+      cache = cache_dir .. '/gitlab-ci-ls/',
+      log_path = cache_dir .. '/gitlab-ci-ls/log/gitlab-ci-ls.log',
       options = {
         dependencies_autocomplete_stage_filtering = false,
       },

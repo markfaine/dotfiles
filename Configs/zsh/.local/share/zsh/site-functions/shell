@@ -1,0 +1,47 @@
+# ==============================================================================
+# Shell into a docker container
+# ==============================================================================
+# Interactive shell into container by service name
+# Usage: shell <container> [command]
+# Finds containers by service name (exact match or ending match)
+# Falls back to /bin/sh if no command specified
+# Example: shell web-server /bin/bash
+local ctnr cmd
+ctnr="$1"
+if [[ -z "$ctnr" ]]; then
+  echo "Usage: shell <container> [command]" >&2
+  echo "  <container>  Service name (supports partial matches)" >&2
+  echo "  [command]    Shell to execute (default: /bin/sh)" >&2
+  return 1
+fi
+shift
+cmd="${1:-/bin/sh}"
+
+# Find container ID dynamically by service name
+# Matches: exact service name or service names ending with "_<container>"
+local ctnr_ids
+if (( ! $+commands[docker] )); then
+  echo "Error: docker command not found" >&2
+  return 1
+fi
+
+ctnr_ids=$(docker ps --format '{{.ID}} {{.Label "com.docker.swarm.service.name"}}' 2>/dev/null | \
+  awk -v ctnr="$ctnr" '$2 == ctnr || $2 ~ "_"(ctnr)"$" {print $1}')
+
+if [[ -z "$ctnr_ids" ]]; then
+  echo "Error: No container found for '$ctnr'" >&2
+  return 1
+fi
+
+# Error if multiple containers match
+local count
+count=$(echo "$ctnr_ids" | wc -l)
+if (( count > 1 )); then
+  echo "Error: Multiple containers match '$ctnr'. Please be more specific:" >&2
+  docker ps --format '{{.Label "com.docker.swarm.service.name"}}' 2>/dev/null | \
+      awk -v ctnr="$ctnr" '$0 == ctnr || $0 ~ "_"(ctnr)"$"' | sort | uniq
+  return 1
+fi
+
+# Execute command in container
+docker exec -it "$ctnr_ids" "$cmd"

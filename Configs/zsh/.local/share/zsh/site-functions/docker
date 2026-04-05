@@ -1,0 +1,21 @@
+# ==============================================================================
+# Docker Wrapper & Convenience Functions
+# ==============================================================================
+# Enhanced docker command with customized ps output
+# dops (better-docker-ps) provides better terminal-aware formatting
+# See: https://github.com/Mikescher/better-docker-ps
+# Falls back to regular docker ps if dops is not available
+case $1 in
+  ps)
+    shift
+    # Use dops if available for better formatting, fallback to docker ps
+    if command -v dops &>/dev/null; then
+      command dops "$@"
+    else
+      zdebug "docker: dops not available, using docker ps"
+      command docker ps "$@"
+    fi
+    ;;
+  *)
+    command docker "$@";;
+esac

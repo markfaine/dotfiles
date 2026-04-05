@@ -9,13 +9,16 @@ alias vim='nvim'
 alias vi='nvim'
 
 # Stock vim/vi access (for when you really need the original)
-alias svim="/usr/bin/vi"
+alias svim="/usr/bin/vim"
 
 # ==============================================================================
 # Directory Navigation
 # ==============================================================================
 # typo protection
 alias cd..='cd ..'
+
+# Shorter previous dir
+alias -- -='cd -'
 
 # ==============================================================================
 # Screen/Terminal
@@ -26,34 +29,43 @@ alias claer='clear'
 alias clar='clear'
 
 # ==============================================================================
-# Code Editors
-# ==============================================================================
-# VS Code Insiders with workaround for OS crypt module
-function code-insiders {
-  /usr/bin/code-insiders --vmodule="*/components/os_crypt/*=1" "$@"
-}
-alias code='code-insiders'
-alias ci='code-insiders'
-
-# ==============================================================================
 # Disk & File Management
 # ==============================================================================
 alias df='df -kTh'
 alias du='du -kh'
 
-# List files (with modern alternatives)
-alias ls='ls --color'
-if command -v eza &>/dev/null; then
-    alias ls='eza -la --icons'
+# List files
+# If eza
+if (( $+commands[eza] )); then
+  # General listing
+  alias ls='eza --icons=always --group-directories-first'
+  alias l='eza -lbF --git --icons=always'                     # Detailed list
+  alias ll='eza -lbGF --header --git --icons=always'          # Long list with headers
+  alias llm='eza -lbGd --git --sort=modified --icons=always'  # Sort by date
+
+  # "All" views (including hidden files)
+  alias la='eza -lbhHigUmuSa --time-style=long-iso --git --color-scale --icons=always'
+  alias lx='eza -lbhHigUmuSa@ --time-style=long-iso --git --color-scale --icons=always'
+
+  # Specialty views
+  alias lS='eza -1 --icons=always'                            # Single column
+  alias lt='eza --tree --level=2 --icons=always'              # 2-level deep tree
+  alias tree='eza --tree --icons=always'                      # Full tree
+  # typo protection
+  alias ls-la='la'
+else
+  # basic ls aliases
+  alias ls='ls --color'
+  alias ll='ls -la'
+  # typo protection
+  alias kk='ll'
+  alias ls-la='ls -la'
 fi
-alias ll='ls -la'
-alias kk='ll'
-alias ls-la='ls -la'
 
 # Move with safety confirmation
 alias mv='mv -i'
 
-# Pager alternatives
+# Pager alternatives and typo protection
 alias moer='more'
 alias moew='more'
 alias more='less'
@@ -69,20 +81,19 @@ alias ps='ps -ef'
 alias j='jobs -l'
 
 # Better process monitoring
-function top(){if command -v htop &>/dev/null; then htop; else /usr/bin/top; fi}
+if (( $+commands[htop] )); then
+  alias top=htop
+fi
 
 # ==============================================================================
 # History & Command Help
 # ==============================================================================
 alias h='history'
+alias hf='history | fzf'
+alias hg='history | grep'
 
 # which → command -v (shows where command comes from)
 alias which='command -v'
-
-# Better man pages with tldr fallback
-function man(){
-  if tldr --search "$*" &>/dev/null; then tldr "$*"; else /usr/bin/man "$@"; fi
-}
 
 # ==============================================================================
 # Trash/Recycle Bin
@@ -166,3 +177,5 @@ alias mypath='echo -e ${PATH//:/\\n}'
 # ==============================================================================
 # Reload shell configuration
 alias zbrc='exec zsh'
+
+alias ssh='kitten ssh'

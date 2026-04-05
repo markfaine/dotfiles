@@ -1,0 +1,10 @@
+# ==============================================================================
+# Double dot expansion
+# ==============================================================================
+# When you type ..., it automatically expands to ../...
+# Each additional dot adds another level (e.g., .... becomes ../../..).
+if [[ $LBUFFER =~ '\.\.\.?$' ]]; then
+  LBUFFER+='/..'
+else
+  LBUFFER+='.'
+fi

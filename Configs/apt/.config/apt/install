@@ -16,6 +16,7 @@ iproute2
 iptables
 iputils-ping
 jq
+libatomic1
 libcairo2-dev
 libcurl4-openssl-dev
 libevent-dev
@@ -51,7 +52,11 @@ tealdeer
 tmux
 trash-cli
 unzip
+vim-tiny
 wget
+xtermcontrol
+xz
 yacc
+yubikey-manager
 zlib1g-dev
 zsh

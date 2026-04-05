@@ -1,136 +1,271 @@
-# shellcheck shell=zsh
+# shellcheck shell=zsh source=/dev/null
 # User configuration sourced by interactive shells
-# https://zsh.sourceforge.io/Doc/Release/Options.html
-#
-# Initialization Order:
-#   1. .zshenv - Loaded by all shells (environment)
-#   2. .zprofile - Loaded by login shells (login setup)
-#   3. .zshrc - Loaded by interactive shells
-#   4. .zlogin - Loaded by login shells (after .zshrc)
-#
-# This file:
-#   - Loads the znap plugin manager and plugins
-#   - Configures the prompt
-#   - Sets up tool environments
-
 # ==============================================================================
 # Shell Configuration Loading
 # ==============================================================================
-# Set the configuration directory if not already set
-ZCONFIG="${ZCONFIG:-$HOME/.config/dotfiles/Configs/zsh}"
 
-# Load shared functions
-if [[ -f "$ZCONFIG/.zshared" ]]; then
-  zdebug ".zshrc: Loading shared shell functions"
-  # shellcheck source=/dev/null
-  . "$ZCONFIG/.zshared"
-else
-  zdebug ".zshrc: Shared functions not found (optional)"
-fi
+# Preferred editor keymap
+bindkey -e
 
-# Load shell aliases
-if [[ -f "$ZCONFIG/.aliases" ]]; then
-  zdebug ".zshrc: Loading shell aliases"
-  # shellcheck source=/dev/null
-  . "$ZCONFIG/.aliases"
-else
-  zdebug ".zshrc: Aliases file not found (optional)"
-fi
+# Default for dotfiles directory is $HOME
+export ZDOTDIR="$HOME"
 
 # ==============================================================================
-# Plugin Manager: Znap Loading
+# Debug & Logging Configuration
 # ==============================================================================
-# Load znap plugin manager and configuration
-ZNAPRC="$HOME/.znaprc"
-zdebug ".zshrc: Loading znap plugin manager from $ZNAPRC"
+# Enable debug output (set to empty to disable)
+ZSH_DEBUG="${ZSH_DEBUG:-}"
 
-if [[ -f "$ZNAPRC" ]]; then
-  # shellcheck source=/dev/null
-  if source "$ZNAPRC"; then
-    zdebug ".zshrc: Znap loaded successfully"
-  else
-    zdebug ".zshrc: ERROR - Failed to source $ZNAPRC"
-    echo "Warning: Failed to load znap plugin manager" >&2
+# Enable execution tracing (set to empty to disable)
+ZSH_TRACE="${ZSH_TRACE:-}"
+
+# ==============================================================================
+# Logging Setup
+# ==============================================================================
+# Log file for debug output
+ZLOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}"
+mkdir -p "$ZLOG_DIR"
+export ZLOG_FILE="$ZLOG_DIR/zsh.log"
+
+# Initialize log file (truncate on each session)
+: >| "$ZLOG_FILE"
+
+# ==============================================================================
+# Setup fpath and autoload
+# ==============================================================================
+function _autoload_fpath(){
+  local site_func_dir
+  local funcs=("$@")
+
+  site_func_dir="${XDG_DATA_HOME:-${ZDOTDIR:-$HOME}/.local/share}/zsh/site-functions"
+
+  if [[ -d "$site_func_dir" ]]; then
+    # Stale compiled function files can load outdated logic and break ZLE wrappers.
+    find "$site_func_dir" -maxdepth 1 -type f -name '*.zwc' -delete 2>/dev/null || true
+
+    fpath=("$site_func_dir" $fpath)
+
+    if (( $#funcs == 0 )); then
+      # Default: Load everything in the directory
+      autoload -Uz "$site_func_dir"/*(N:t)
+    else
+      # Specific: Validate each requested function before loading
+      local func
+      for func in "${funcs[@]}"; do
+        if [[ -f "$site_func_dir/$func" ]]; then
+          autoload -Uz "$func"
+        else
+          echo "zsh: function file not found: $site_func_dir/$func" >&2
+        fi
+      done
+    fi
   fi
-else
-  zdebug ".zshrc: ERROR - $ZNAPRC not found"
-  echo "Warning: Znap configuration not found at $ZNAPRC" >&2
+}
+
+# ==============================================================================
+# Znap Setup
+# ==============================================================================
+# Docs: https://github.com/marlonrichert/zsh-snap
+ZNAP_HOME="${XDG_CONFIG_HOME:-${ZDOTDIR:-$HOME}/.config}/repos/znap"
+zstyle ':znap:*' repos-dir "${ZNAP_HOME:h}" # parent dir
+export ZNAP_HOME
+_autoload_fpath
+_download_znap || return
+_load_znap || return
+
+# Load prompt
+znap prompt sindresorhus/pure
+
+# ==============================================================================
+# Smart URL Pasting
+# ==============================================================================
+# Load the bracketed-paste-magic and url-quote-magic functions
+autoload -Uz bracketed-paste-magic url-quote-magic
+zle -N bracketed-paste bracketed-paste-magic
+zstyle :bracketed-paste-magic filter-active url-quote-magic
+
+
+# ==============================================================================
+# Double dot expansion
+# ==============================================================================
+# Also see: ~/.zshenv for bindkeys
+zle -N _double_dot_expand
+
+# ==============================================================================
+# Load paths from ~/.paths
+# ==============================================================================
+# Load all PATH entries from .paths file
+_load_paths
+
+# ==============================================================================
+# Activate Mise
+# ==============================================================================
+if (( $+commands[mise] )); then
+  znap eval mise 'mise activate zsh'
 fi
 
 # ==============================================================================
-# Prompt Configuration
+# Znap Plugin Loading
 # ==============================================================================
-# Configure pure prompt theme from sindresorhus
-# Fallback to simple prompt if plugin manager failed
-# Note: Pure can have terminal formatting issues with commented text
-# PROMPT_EOL_MARK helps prevent line wrapping display issues
-if (( ${+commands[znap]} )) || typeset -f znap > /dev/null 2>&1; then
-  zdebug ".zshrc: Setting up pure prompt via znap"
+# Docs: https://github.com/marlonrichert/zsh-snap
+# "MichaelAquilina/zsh-you-should-use" \
+_load_plugins \
+  "MrXcitement/zsh-bat" \
+  "marlonrichert/zcolors" \
+  "thetic/extract,,,extract" \
+  "zap-zsh/sudo" \
+  "laggardkernel/zsh-thefuck,,,tf" || return
 
-  # Prevent invisible characters in line wrapping with comments
-  # This should be set before loading the theme
-  PROMPT_EOL_MARK=""
+# ==============================================================================
+# SSH Identity Management
+# ==============================================================================
+# Load SSH identities into existing agent (assumes agent is already running via
+# systemd, gpg-agent, keychain, or system default)
 
-  # Pure prompt configuration for better visibility
-  # Use git untracked dirty indicator
-  PURE_GIT_UNTRACKED_DIRTY=1
-  # Force minimal processing to reduce rendering issues
-  PURE_PROMPT_TCSETPGRP=1
+# SSH Identity Management
 
-  znap prompt sindresorhus/pure || {
-    zdebug ".zshrc: Failed to load pure prompt, using simple prompt"
-    PS1='%~ %# '
-  }
-else
-  zdebug ".zshrc: Znap not available, using simple prompt"
-  PS1='%~ %# '
+# Fallback if systemd agent isn't running
+if [[ ! -S "$SSH_AUTH_SOCK" ]]; then
+    if [[ -f "$SSH_ENV" ]]; then
+        . "$SSH_ENV" > /dev/null
+    fi
+    # If still not running after sourcing, start it
+    ps -p "$SSH_AGENT_PID" >/dev/null 2>&1 || start_agent
+fi
+
+load_ssh_identities
+
+# ==============================================================================
+# Trash/Recycle Bin Management
+# ==============================================================================
+# Setup trash configuration
+_setup_trash
+
+# ==============================================================================
+# Environment Detection
+# ==============================================================================
+_is_wsl
+
+# ==============================================================================
+# ZSH Module: Terminal Information
+# ==============================================================================
+_load_terminfo
+
+# ==============================================================================
+# ZSH Configuration: Keybindings
+# ==============================================================================
+_load_keybinds
+
+# ==============================================================================
+# File Sourcing: Aliases
+# ==============================================================================
+_load_aliases
+
+# ==============================================================================
+# File Sourcing: Directory Colors
+# ==============================================================================
+# Load zcolors, requires znap zcolors plugin
+if [ -x /usr/bin/dircolors ]; then
+  test -r "$ZDOTDIR/.dircolors" && eval "$(dircolors -b "$ZDOTDIR/.dircolors")" || eval "$(dircolors -b)"
 fi
 
 # ==============================================================================
-# Python UV Environment
+# Theme-Agnostic Color Configuration
 # ==============================================================================
-# Load UV (fast Python package installer/environment manager) if available
-# UV provides fast Python package management and environment handling
-UV_ENV="$HOME/.local/opt/uv/env"
-if [[ -f "$UV_ENV" ]]; then
-  zdebug ".zshrc: Loading UV environment from $UV_ENV"
+# Load theme color settings that work with any kitty theme
+# Uses terminal color indexes (0-15) instead of hardcoded hex colors
+if [[ -f "$ZDOTDIR/.theme-colors" ]]; then
   # shellcheck source=/dev/null
-  . "$UV_ENV"
-else
-  zdebug ".zshrc: UV environment file not found at $UV_ENV (optional)"
+  source "$ZDOTDIR/.theme-colors"
 fi
 
 # ==============================================================================
-# Alias Completion Configuration
+# Third-Party Tool Configuration: Ripgrep
 # ==============================================================================
-# Load completion function mappings for shell aliases
-# This must run after compinit (loaded in .zshenv) to properly register completions
-if [[ -f "$ZCONFIG/completions/alias-completions.zsh" ]]; then
-  zdebug ".zshrc: Loading alias completion mappings"
-  # shellcheck source=/dev/null
-  . "$ZCONFIG/completions/alias-completions.zsh"
+# Setup ripgrep configuration file path (only set if file exists)
+if [[ -f "$ZDOTDIR/.ripgreprc" ]]; then
+  export RIPGREP_CONFIG_PATH="$ZDOTDIR/.ripgreprc"
+  zdebug ".zshrc: Ripgrep config loaded from $RIPGREP_CONFIG_PATH"
 else
-  zdebug ".zshrc: Alias completions file not found (optional)"
+  zdebug ".zshrc: Ripgrep config not found at $ZDOTDIR/.ripgreprc (optional)"
 fi
 
 # ==============================================================================
-# Syntax Highlighting Customization
+# Activate Zoxide
 # ==============================================================================
-# Override zsh-syntax-highlighting plugin's default comment color
-# Default "ansigray" is too faint on dark backgrounds
-# Use bright gray for better contrast and visibility
-if [[ -n "${ZSH_HIGHLIGHT_STYLES+x}" ]]; then
-  ZSH_HIGHLIGHT_STYLES[comment]='fg=7'  # Bright white-ish gray instead of ansigray
-  zdebug ".zshrc: Set ZSH_HIGHLIGHT_STYLES[comment] to bright gray"
+if (( $+commands[zoxide] )); then
+  znap eval zoxide 'zoxide init zsh'
 fi
+
+# ==============================================================================
+# Activate fzf
+# ==============================================================================
+if (( $+commands[fzf] )); then
+  znap eval fzf-init 'fzf --zsh'
+fi
+
+# ==============================================================================
+# Auto suggestions
+# ==============================================================================
+# Keep this block near the end so ZLE widget wrappers are applied once, in order.
+# Load order here avoids autosuggestions/pure recursion on Enter.
+
+_load_plugins "zsh-users/zsh-completions,,src" || return
+_load_plugins "zsh-users/zsh-syntax-highlighting" || return
+_load_plugins "zsh-users/zsh-autosuggestions" || return
+_load_plugins "zsh-users/zsh-history-substring-search" || return
+_load_plugins "sindresorhus/pure,,." || return
+
+# ==============================================================================
+# Keybindings
+# ==============================================================================
+# Assumes Emacs mode bindkey -e # set in ~/.zshrc
+
+# Standard Keys using Terminfo
+bindkey "${terminfo[kbs]}"    backward-delete-char   # Backspace
+bindkey "${terminfo[kdch1]}"  delete-char            # Delete
+bindkey "${terminfo[kich1]}"  overwrite-mode         # Insert
+bindkey "${terminfo[khome]}"  beginning-of-line      # Home
+bindkey "${terminfo[kend]}"   end-of-line            # End
+bindkey "${terminfo[kpp]}"    up-line-or-history     # PageUp
+bindkey "${terminfo[knp]}"    down-line-or-history   # PageDown
+bindkey "${terminfo[kcuu1]}"  up-line-or-history     # Up Arrow
+bindkey "${terminfo[kcud1]}"  down-line-or-history   # Down Arrow
+bindkey "${terminfo[kcub1]}"  backward-char          # Left Arrow
+bindkey "${terminfo[kcuf1]}"  forward-char           # Right Arrow
+bindkey "${terminfo[kcbt]}"   reverse-menu-complete  # Shift-Tab
+
+bindkey "^H" backward-delete-char
+bindkey '\e[H' beginning-of-line
+bindkey '\e[F' end-of-line
+
+# Terminal-Specific Fixes (Ctrl + Arrows for Word Jumping)
+# These codes work across Kitty, Windows Terminal, and Konsole
+bindkey '^[[1;5C' forward-word       # Ctrl+Right
+bindkey '^[[1;5D' backward-word      # Ctrl+Left
+
+# Open current command in EDITOR (Ctrl-X, Ctrl-E)
+autoload -z edit-command-line
+zle -N edit-command-line
+bindkey "^X^E" edit-command-line
+
+# Double dot expansion
+# Bind the dot key to the widget
+bindkey "." _double_dot_expand
+
+# Optional: Ensure the expansion doesn't break normal completion
+bindkey -M isearch "." self-insert
+
+# Accept suggestion with right arrow
+#bindkey '^[[C' autosuggest-accept
 
 # ==============================================================================
 # User Extension Hooks
 # ==============================================================================
 # Allow users to add custom initialization without modifying this file
 # Create ~/.zshrc.local for local customizations that won't be version controlled
-if [[ -f "$HOME/.zshrc.local" ]]; then
+if [[ -f "$ZDOTDIR/.zshrc.local" ]]; then
   zdebug ".zshrc: Loading local overrides from ~/.zshrc.local"
   # shellcheck source=/dev/null
-  . "$HOME/.zshrc.local"
+  . "$ZDOTDIR/.zshrc.local"
 fi

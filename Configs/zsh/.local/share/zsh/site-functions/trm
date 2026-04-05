@@ -1,0 +1,22 @@
+
+# ==============================================================================
+# Trash/Recycle Bin Management
+# ==============================================================================
+if (( ! $+commands[trash-put] )); then
+  return 0
+fi
+# Delete to the trash
+# Trash/delete function with smart fallback
+if (( $+commands[trash-put] )); then
+  recycle_bin="$TRASH_DIR_LOCAL"
+  # Use mounted trash if available (WSL only)
+  if [[ "${IS_WSL:-0}" == "1" ]] && _is_mounted "$TRASH_MOUNT"; then
+    zdebug "trm: $TRASH_MOUNT is mounted, using it for trash"
+    recycle_bin="$TRASH_DIR"
+  fi
+  trash-put --trash-dir "$recycle_bin" "$@"
+else
+  # Fallback to rm if trash-put is not available
+  zdebug "trm: trash-put not available, using /usr/bin/rm"
+  /usr/bin/rm "$@"
+fi

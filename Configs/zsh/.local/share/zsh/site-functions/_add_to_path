@@ -1,0 +1,20 @@
+
+# ==============================================================================
+# Add prepend/append to the path
+# ==============================================================================
+# Read PATH entries from file (comma-separated format)
+# File format: append_dir,prepend_dir (empty fields are skipped, # lines are comments)
+paths_file="${1:-${ZDOTDIR:-$HOME}/.paths}"
+while IFS=',' read -r append prepend; do
+    line="${append}${prepend}"
+    [[ -z $line ]] && continue
+    [[ "$line" = \#* ]] && continue
+    if [[ "${append:-}" != "" ]]; then
+      zdebug "_add_to_path: Appending $append to PATH"
+      _append_to_path "$append"
+    fi
+    if [[ "${prepend:-}" != "" ]]; then
+      zdebug "_add_to_path: Prepending $prepend to PATH"
+      _prepend_to_path "$prepend"
+    fi
+done < <(tac "$paths_file")

@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root=$(git rev-parse --show-toplevel)
+cd "$repo_root"
+
+declare -a non_exec_scripts=()
+
+# Dotfiles deployment hooks must always be executable.
+while IFS= read -r path; do
+    non_exec_scripts+=("$path")
+done < <(find Hooks -type f -name '*.sh' ! -perm -111 2>/dev/null | sort)
+
+# Utility scripts shipped under Configs/**/bin should also be executable.
+while IFS= read -r path; do
+    non_exec_scripts+=("$path")
+done < <(find Configs -type f -path '*/bin/*.sh' ! -perm -111 2>/dev/null | sort)
+
+if [ ${#non_exec_scripts[@]} -eq 0 ]; then
+    exit 0
+fi
+
+echo "[pre-commit] Non-executable scripts detected:" >&2
+for script_file in "${non_exec_scripts[@]}"; do
+    echo "  - $script_file" >&2
+done
+
+echo "[pre-commit] Fixing permissions and staging updates..." >&2
+for script_file in "${non_exec_scripts[@]}"; do
+    chmod +x "$script_file"
+    git add "$script_file"
+done
+
+echo "[pre-commit] Fixed. Please review and run commit again." >&2
+exit 1

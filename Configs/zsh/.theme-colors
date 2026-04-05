@@ -30,7 +30,7 @@ export BAT_THEME="ansi"
 # ==============================================================================
 # Ripgrep detects terminal capabilities. These options enhance compatibility:
 # Note: .ripgreprc already exists - this env var supplements it
-export RIPGREP_CONFIG_PATH="$HOME/.config/ripgrep/config"
+export RIPGREP_CONFIG_PATH="${XDG_CONFIG_HOME:-$HOME/.config}/ripgrep/config"
 
 # Force color output but let terminal handle the palette
 # (already set in .ripgreprc: --colors color:palette and --colors match:fg:red)
@@ -99,7 +99,6 @@ export CLICOLOR_FORCE=1
 # Terminal Capabilities
 # ==============================================================================
 # Ensure tools know we support 256 color terminal
-# (Already set in .zshenv via TERM but useful for tooling)
 export COLORTERM="truecolor"
 
 # ==============================================================================

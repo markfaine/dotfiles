@@ -1,0 +1,11 @@
+# ==============================================================================
+# Append to path
+# ==============================================================================
+# Append a directory to PATH (checks if directory exists)
+local dir normalized realdir
+dir="$1"
+normalized="$(_normalize_path_entry "$dir")"
+[[ -n "$normalized" ]] || return
+realdir="$(readlink -f "$normalized" 2>/dev/null || true)"
+[[ -d "$realdir" ]] || return
+path=($path "$normalized")

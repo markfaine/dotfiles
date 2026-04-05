@@ -1,99 +1,91 @@
 #!/usr/bin/env bash
 
 set -euo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=../../includes/functions.sh
+source "$SCRIPT_DIR/../../includes/functions.sh"
+# Common helpers from includes/functions.sh.
+
 
 # ==============================================================================
-# Apt Post Hook
+# Zsh Post Hook
 # ==============================================================================
+# Validates deployed zsh dotfiles can be sourced without startup errors.
 
-INSTALL_LIST="$HOME/.config/apt/install"
-REMOVE_LIST="$HOME/.config/apt/remove"
-APT_LOG_DIR="$HOME/.config/apt"
-APT_LOG_FILE="$APT_LOG_DIR/hook-errors.log"
+DRY_RUN=0
+DEBUG=0
+LOG_DIR="${XDG_STATE_HOME:-${ZDOTDIR:-$HOME}/.local/state}"
+LOG_FILE="$LOG_DIR/zsh-hook.log"
 
-log_failure() {
-	local message="$1"
-	mkdir -p "$APT_LOG_DIR"
-	printf '[%s] %s\n' "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" "$message" >> "$APT_LOG_FILE"
+usage() {
+	cat <<'EOF'
+Usage: post.sh [--dry-run|-n] [--debug|-d] [--help|-h]
+
+Validate zsh startup files after deployment.
+
+Checks performed:
+  1) Ensure required files exist
+  2) Syntax-check each file with zsh -n
+  3) Start a login+interactive zsh shell to verify runtime sourcing
+
+Options:
+  -n, --dry-run    Print what would run
+  -d, --debug      Enable verbose output
+  -h, --help       Show this help
+EOF
 }
 
-if ! command -v apt-get >/dev/null 2>&1 || ! command -v dpkg-query >/dev/null 2>&1; then
-	log_failure "apt hook skipped: apt-get or dpkg-query not available"
+for arg in "$@"; do
+	case "$arg" in
+		-n|--dry-run)
+			DRY_RUN=1
+			;;
+		-d|--debug)
+			DEBUG=1
+			;;
+		-h|--help)
+			usage
+			exit 0
+			;;
+		*)
+			echo "Unknown argument: $arg" >&2
+			usage >&2
+			exit 2
+			;;
+	esac
+done
+
+hook_init_defaults
+
+info "Running zsh post hook"
+if (( DRY_RUN )); then
+	info "Dry-run mode enabled"
+fi
+if (( DEBUG )); then
+	info "Debug mode enabled"
+fi
+
+if ! command -v zsh >/dev/null 2>&1; then
+	info "zsh not found; skipping zsh startup validation"
 	exit 0
 fi
 
-if [[ "${EUID}" -eq 0 ]]; then
-	APT_PREFIX=()
-elif command -v sudo >/dev/null 2>&1; then
-	APT_PREFIX=(sudo)
-else
-	log_failure "apt hook skipped: not root and sudo unavailable"
-	exit 0
-fi
-
-read_package_file() {
-	local file="$1"
-	grep -Ev '^\s*($|#)' "$file" 2>/dev/null || true
-}
-
-package_available() {
-	local package="$1"
-	apt-cache show "$package" >/dev/null 2>&1
-}
-
-package_installed() {
-	local package="$1"
-	dpkg-query -W -f='${Status}\n' "$package" 2>/dev/null | grep -q '^install ok installed$'
-}
-
-install_packages_from_file() {
-	local file="$1"
-	local package
-	local packages=()
-
-	[[ -f "$file" ]] || return 0
-
-	while IFS= read -r package; do
-		[[ -z "$package" ]] && continue
-		if package_available "$package"; then
-			packages+=("$package")
-		fi
-	done < <(read_package_file "$file")
-
-	(( ${#packages[@]} > 0 )) || return 0
-
-	if ! "${APT_PREFIX[@]}" apt-get update -qq >/dev/null 2>&1; then
-		log_failure "apt-get update failed before install from $file"
+required_files=("${ZDOTDIR:-$HOME}/.zshrc" "${ZDOTDIR:-$HOME}/.paths")
+for file in "${required_files[@]}"; do
+	if [[ ! -f "$file" ]]; then
+		log_msg ERROR "required zsh startup file missing: $file"
+		echo "Error: required zsh startup file missing: $file" >&2
+		exit 1
 	fi
+done
 
-	if ! "${APT_PREFIX[@]}" apt-get install -y -qq "${packages[@]}" >/dev/null 2>&1; then
-		log_failure "apt-get install failed for packages: ${packages[*]}"
-	fi
-}
+run_cmd "Syntax check ~/.paths" zsh -n "${ZDOTDIR:-$HOME}/.paths"
+run_cmd "Syntax check ~/.zshrc" zsh -n "${ZDOTDIR:-$HOME}/.zshrc"
 
-remove_packages_from_file() {
-	local file="$1"
-	local package
-	local packages=()
+run_cmd "Remove compiled zsh cache files" find "${ZDOTDIR:-$HOME}" -type f -name '*.zwc' -delete
+run_cmd "Delete completion cache" rm -f "${ZSH_COMPDUMP:-${ZDOTDIR:-$HOME}/.zcompdump}"
 
-	[[ -f "$file" ]] || return 0
+# Start a login+interactive shell to match normal user startup behavior.
+run_cmd "Validate login interactive zsh startup" zsh -lic 'exit 0'
 
-	while IFS= read -r package; do
-		[[ -z "$package" ]] && continue
-		if package_installed "$package"; then
-			packages+=("$package")
-		fi
-	done < <(read_package_file "$file")
-
-	(( ${#packages[@]} > 0 )) || return 0
-
-	if ! "${APT_PREFIX[@]}" apt-get remove -y -qq "${packages[@]}" >/dev/null 2>&1; then
-		log_failure "apt-get remove failed for packages: ${packages[*]}"
-	fi
-}
-
-install_packages_from_file "$INSTALL_LIST"
-remove_packages_from_file "$REMOVE_LIST"
-
-
-
+info "Zsh post hook complete"

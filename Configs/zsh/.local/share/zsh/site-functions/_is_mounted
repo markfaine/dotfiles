@@ -1,0 +1,19 @@
+# ==============================================================================
+# Check mounted state
+# ==============================================================================
+# Check if mount point is mounted
+# Returns 0 if mounted, 1 if not
+# Fails gracefully if mount/grep commands unavailable
+function _is_mounted() {
+  local mount_point="$1"
+
+  # Fail fast if required commands are missing
+  if (( ! $+commands[mount] || ! $+commands[grep] )); then
+    return 1
+  fi
+
+  # Strip trailing slash for consistency
+  mount_point="${mount_point%/}"
+  # Check if mount_point is present in the output of mount
+  mount | grep -q " on $mount_point "
+}

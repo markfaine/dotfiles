@@ -1,0 +1,17 @@
+# ==============================================================================
+# Run tuckr unset
+# ==============================================================================
+# Function to unlink dotfiles using tuckr
+if (( ! $+commands[tuckr] )); then
+  return 0
+fi
+echo "Removing links and runing rm_ hooks with tuckr..."
+tuckr unset '*'
+local exit_code=$?
+if [[ $exit_code -eq 0 ]]; then
+  echo "✓ Dotfiles unlinked and rm_ hooks executed successfully"
+  echo "Reload your shell to apply changes: exec zsh"
+else
+  echo "✗ Failed to run hooks (exit code: $exit_code)"
+  return $exit_code
+fi

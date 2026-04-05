@@ -1,0 +1,74 @@
+
+# ==============================================================================
+# Plugin Loading
+# ==============================================================================
+# Load plugins from provided plugin spec lines
+# Handles:
+#   - Per-plugin configuration files (~/.config/zplugin.d/plugin-name.zsh)
+#   - Cloning repositories
+#   - Adding plugin paths to PATH
+#   - Adding plugin completion paths to FPATH
+#   - Lazy loading
+#
+# CSV format: github-org/repo,path-addition,fpath-addition
+# - Empty lines and comments (starting with #) are ignored
+local zconfig_home="${XDG_CONFIG_HOME:-${ZDOTDIR:-$HOME}/.config}"
+
+if (( $# == 0 )); then
+    return 0
+fi
+
+# 1. Clone all repositories first (skip comments/blank/malformed rows).
+local repo_line repo_clone
+local repos=()
+for repo_line in "$@"; do
+    # Trim leading/trailing whitespace.
+    repo_line="${repo_line#${repo_line%%[![:space:]]*}}"
+    repo_line="${repo_line%${repo_line##*[![:space:]]}}"
+
+    [[ -z "$repo_line" || "$repo_line" == \#* ]] && continue
+    repo_clone="${repo_line%%,*}"
+    repo_clone="${repo_clone#${repo_clone%%[![:space:]]*}}"
+    repo_clone="${repo_clone%${repo_clone##*[![:space:]]}}"
+
+    [[ -z "$repo_clone" ]] && continue
+    repos+=("$repo_clone")
+done
+
+(( ${#repos[@]} > 0 )) && znap clone "${repos[@]}"
+
+# 2. Loop to source or lazy-load
+local repo inc fpc triggers plugin spec
+for spec in "$@"; do
+    IFS=',' read -r repo inc fpc triggers <<< "$spec"
+
+    # Trim whitespace around CSV fields.
+    repo="${repo#${repo%%[![:space:]]*}}"
+    repo="${repo%${repo##*[![:space:]]}}"
+    inc="${inc#${inc%%[![:space:]]*}}"
+    inc="${inc%${inc##*[![:space:]]}}"
+    fpc="${fpc#${fpc%%[![:space:]]*}}"
+    fpc="${fpc%${fpc##*[![:space:]]}}"
+    triggers="${triggers#${triggers%%[![:space:]]*}}"
+    triggers="${triggers%${triggers##*[![:space:]]}}"
+
+    [[ -z "$repo" || "$repo" == \#* ]] && continue
+    plugin="${repo#*/}"
+
+    # Source config first
+    [[ -f "$zconfig_home/zplugin.d/$plugin.zsh" ]] && source "$zconfig_home/zplugin.d/$plugin.zsh"
+
+    # Handle pathing
+    [[ -n "$inc" ]] && path=( ~[$repo]/$inc $path )
+    [[ -n "$fpc" ]] && fpath=( ~[$repo]/$fpc $fpath )
+
+    # Decide: Source immediately OR Lazy-load
+    if [[ -n "$triggers" ]]; then
+        # 'triggers' can be a space-separated list of commands
+        znap function ${(s: :)triggers} "znap source $repo"
+    else
+        if ! znap source "$repo"; then
+            printf 'warning: failed to source plugin %s\n' "$repo" >&2
+        fi
+    fi
+done
