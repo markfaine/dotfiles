@@ -1,0 +1,190 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# --- Configuration ---
+COMPOSE_BASE_DIR="/volume1/containers/compose"
+DOCKER_BASE_DIR="/volume1/containers/docker"
+SWARM_BASE_DIR="/volume1/containers/swarms"
+
+# --- Context Setup ---
+
+setup_swarm_context() {
+  # If DOCKER_HOST is already set, respect it
+  if [ -n "${DOCKER_HOST:-}" ]; then return 0; fi
+
+  # Check if we are a manager
+  local control_available=$(docker info --format '{{.Swarm.ControlAvailable}}' 2>/dev/null || echo "false")
+  
+  # If we are NOT a manager, try to find one
+  if [ "$control_available" != "true" ]; then
+    # Strategy 1: Check if 'marks-pc' is reachable (known manager)
+    if ping -c 1 -W 1 marks-pc >/dev/null 2>&1; then
+       export DOCKER_HOST="ssh://marks-pc"
+       return 0
+    fi
+
+    # Strategy 2: Use information from 'docker info' to find remote managers
+    local managers=$(docker info --format '{{range .Swarm.RemoteManagers}}{{.Addr}} {{end}}' 2>/dev/null)
+    for manager_addr in $managers; do
+      local manager_ip="${manager_addr%:*}"
+      if ping -c 1 -W 1 "$manager_ip" >/dev/null 2>&1; then
+        export DOCKER_HOST="ssh://$manager_ip"
+        return 0
+      fi
+    done
+
+    # Strategy 3: Try 'docker node ls' as a last resort
+    local manager=$(docker node ls --filter "role=manager" --format "{{.Hostname}}" 2>/dev/null | head -1 || echo "")
+    if [ -n "$manager" ]; then
+      export DOCKER_HOST="ssh://$manager"
+    fi
+  fi
+}
+
+usage() {
+  echo "Usage: $0 {start|stop|restart|status|logs|update} <service-name>" >&2
+  echo "" >&2
+  echo "Handles Swarm services, Docker Compose, standalone Docker containers, and systemd services." >&2
+  exit 1
+}
+
+# --- Detection Functions ---
+
+is_compose_service() {
+  local svc="$1"
+  # Check direct directory and subdirectories for a match
+  find "$COMPOSE_BASE_DIR" -maxdepth 2 -type d -name "$svc" | grep -q "."
+}
+
+get_compose_info() {
+  local svc="$1"
+  local dir=$(find "$COMPOSE_BASE_DIR" -maxdepth 2 -type d -name "$svc" | head -1)
+  if [ -n "$dir" ]; then
+    local file=""
+    [ -f "$dir/docker-compose.yml" ] && file="$dir/docker-compose.yml"
+    [ -f "$dir/docker-compose.yaml" ] && file="$dir/docker-compose.yaml"
+    echo "$dir|$file"
+  fi
+}
+
+is_docker_standalone() {
+  local svc="$1"
+  [ -d "$DOCKER_BASE_DIR/$svc" ]
+}
+
+is_systemd_service() {
+  local svc="$1"
+  systemctl list-unit-files "$svc.service" >/dev/null 2>&1
+}
+
+# --- Swarm Functions ---
+
+find_swarm_service() {
+  local svc="$1"
+  local state=$(docker info --format '{{.Swarm.LocalNodeState}}' 2>/dev/null || echo "inactive")
+  [ "$state" != "active" ] && return 1
+  
+  docker service ls --format '{{.Name}}' 2>/dev/null | grep -E "_(${svc})$|^(${svc})$" | head -1 || return 1
+}
+
+# --- Action Handlers ---
+
+handle_swarm() {
+  local action="$1" svc="$2" full_name="$3"
+  echo "Targeting Swarm service: $full_name"
+  case "$action" in
+    start)   docker service scale "$full_name=1" ;;
+    stop)    docker service scale "$full_name=0" ;;
+    restart|update) docker service update --force "$full_name" ;;
+    status)  docker service ps "$full_name" ;;
+    logs)    docker service logs -f "$full_name" ;;
+  esac
+}
+
+handle_compose() {
+  local action="$1" svc="$2" info="$3"
+  local dir="${info%|*}"
+  local file="${info#*|}"
+  
+  [ -z "$file" ] && { echo "Error: No compose file found in $dir"; exit 1; }
+  
+  echo "Targeting Compose project: $svc ($dir)"
+  case "$action" in
+    start)   docker compose -f "$file" up -d ;;
+    stop)    docker compose -f "$file" stop ;;
+    restart) docker compose -f "$file" restart ;;
+    status)  docker compose -f "$file" ps ;;
+    logs)    docker compose -f "$file" logs --tail 100 -f ;;
+    update)
+      docker compose -f "$file" pull
+      docker compose -f "$file" up -d --force-recreate
+      ;;
+  esac
+}
+
+handle_docker_standalone() {
+  local action="$1" svc="$2"
+  local dir="$DOCKER_BASE_DIR/$svc"
+  echo "Targeting standalone Docker container: $svc"
+  case "$action" in
+    start)
+      local run_script=$(find "$dir" -maxdepth 1 -name "run_*.sh" | head -1)
+      if [ -n "$run_script" ]; then bash "$run_script"; else docker start "$svc"; fi
+      ;;
+    stop)    docker stop "$svc" ;;
+    restart) docker restart "$svc" ;;
+    status)  docker inspect -f '{{.State.Status}}' "$svc" 2>/dev/null || echo "Not found" ;;
+    logs)    docker logs --tail 100 -f "$svc" ;;
+    update)
+      local image=$(docker inspect -f '{{.Config.Image}}' "$svc" 2>/dev/null || echo "")
+      if [ -n "$image" ]; then
+        docker pull "$image"
+        docker stop "$svc" || true
+        docker rm "$svc" || true
+        local run_script=$(find "$dir" -maxdepth 1 -name "run_*.sh" | head -1)
+        if [ -n "$run_script" ]; then bash "$run_script"; else echo "Warning: No run script for $svc."; fi
+      fi
+      ;;
+  esac
+}
+
+handle_systemd() {
+  local action="$1" svc="$2"
+  echo "Targeting systemd service: $svc"
+  case "$action" in
+    start)   sudo systemctl start "$svc" ;;
+    stop)    sudo systemctl stop "$svc" ;;
+    restart) sudo systemctl restart "$svc" ;;
+    status)  systemctl status "$svc" ;;
+    logs)    journalctl -u "$svc" -f ;;
+    update)  echo "Update not implemented for systemd." ;;
+  esac
+}
+
+# --- Main Logic ---
+
+[ $# -eq 2 ] || usage
+
+ACTION="$1"
+SERVICE="$2"
+
+setup_swarm_context
+
+SWARM_NAME=$(find_swarm_service "$SERVICE") || SWARM_NAME=""
+
+if [ -n "$SWARM_NAME" ]; then
+  handle_swarm "$ACTION" "$SERVICE" "$SWARM_NAME"
+else
+  # Check other types
+  COMP_INFO=$(get_compose_info "$SERVICE") || COMP_INFO=""
+  if [ -n "$COMP_INFO" ]; then
+    handle_compose "$ACTION" "$SERVICE" "$COMP_INFO"
+  elif is_docker_standalone "$SERVICE"; then
+    handle_docker_standalone "$ACTION" "$SERVICE"
+  elif is_systemd_service "$SERVICE"; then
+    handle_systemd "$ACTION" "$SERVICE"
+  else
+    echo "Error: Service '$SERVICE' not found." >&2
+    exit 1
+  fi
+fi

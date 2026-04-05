@@ -1,0 +1,189 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# --- Configuration ---
+SWARM_BASE_DIR="/volume1/containers/swarms"
+COMPOSE_BASE_DIR="/volume1/containers/compose"
+NETWORK_NAME="proxy"
+
+# --- Context Setup ---
+
+setup_swarm_context() {
+  # If DOCKER_HOST is already set, respect it
+  if [ -n "${DOCKER_HOST:-}" ]; then return 0; fi
+
+  # Check if we are a manager
+  local control_available=$(docker info --format '{{.Swarm.ControlAvailable}}' 2>/dev/null || echo "false")
+  
+  # If we are NOT a manager, try to find one
+  if [ "$control_available" != "true" ]; then
+    # Strategy 1: Check if 'marks-pc' is reachable (known manager)
+    if ping -c 1 -W 1 marks-pc >/dev/null 2>&1; then
+       export DOCKER_HOST="ssh://marks-pc"
+       return 0
+    fi
+
+    # Strategy 2: Use information from 'docker info' to find remote managers
+    local managers=$(docker info --format '{{range .Swarm.RemoteManagers}}{{.Addr}} {{end}}' 2>/dev/null)
+    for manager_addr in $managers; do
+      local manager_ip="${manager_addr%:*}"
+      if ping -c 1 -W 1 "$manager_ip" >/dev/null 2>&1; then
+        export DOCKER_HOST="ssh://$manager_ip"
+        return 0
+      fi
+    done
+
+    # Strategy 3: Try 'docker node ls' as a last resort
+    local manager=$(docker node ls --filter "role=manager" --format "{{.Hostname}}" 2>/dev/null | head -1 || echo "")
+    if [ -n "$manager" ]; then
+      export DOCKER_HOST="ssh://$manager"
+    fi
+  fi
+}
+
+# Associative arrays for stacks
+declare -A SWARM_STACKS
+declare -A COMPOSE_STACKS
+
+# Discovery for Swarm Stacks
+if [ -d "$SWARM_BASE_DIR" ]; then
+  for stack_file in "$SWARM_BASE_DIR"/*.yml "$SWARM_BASE_DIR"/*.yaml "$SWARM_BASE_DIR"/*-compose.yml; do
+    if [ -f "$stack_file" ]; then
+      filename=$(basename "$stack_file")
+      case "$filename" in
+      docker-compose.yml | docker-compose.yaml) stack_name="media" ;;
+      *)
+        stack_name="${filename%-compose.yml}"
+        stack_name="${stack_name%.yml}"
+        stack_name="${stack_name%.yaml}"
+        ;;
+      esac
+      SWARM_STACKS["$stack_name"]="$stack_file"
+    fi
+  done
+  for dir in "$SWARM_BASE_DIR"/*/; do
+    [ -d "$dir" ] || continue
+    stack_name=$(basename "$dir")
+    for candidate in docker-compose.yml docker-compose.yaml stack-compose.yml swarm-compose.yml "$stack_name-compose.yml" "$stack_name.yml" "$stack_name.yaml"; do
+      stack_file="$dir/$candidate"
+      if [ -f "$stack_file" ]; then SWARM_STACKS["$stack_name"]="$stack_file"; break; fi
+    done
+  done
+fi
+
+# Discovery for Compose Stacks
+if [ -d "$COMPOSE_BASE_DIR" ]; then
+  for dir in "$COMPOSE_BASE_DIR"/*/; do
+    [ -d "$dir" ] || continue
+    stack_name=$(basename "$dir")
+    for candidate in docker-compose.yml docker-compose.yaml; do
+      stack_file="$dir/$candidate"
+      if [ -f "$stack_file" ]; then COMPOSE_STACKS["$stack_name"]="$stack_file"; break; fi
+    done
+  done
+fi
+
+# --- Helper Functions ---
+
+usage() {
+  echo "Usage: $0 {start|stop|restart|status} <stack_name>" >&2
+  echo "       $0 network {create|remove|inspect}" >&2
+  echo "" >&2
+  echo "Available Swarm Stacks:" >&2
+  for stack in $(echo "${!SWARM_STACKS[@]}" | tr ' ' '\n' | sort); do echo "  - $stack"; done
+  echo "" >&2
+  echo "Available Compose Stacks:" >&2
+  for stack in $(echo "${!COMPOSE_STACKS[@]}" | tr ' ' '\n' | sort); do echo "  - $stack"; done
+  echo "" >&2
+  exit 1
+}
+
+wait_stack_removed() {
+  local name="$1" tries=60
+  while docker stack services "$name" >/dev/null 2>&1; do
+    ((tries--)) || break
+    sleep 1
+  done
+  echo "Stack $name removed."
+}
+
+ensure_swarm() {
+  local state=$(docker info --format '{{.Swarm.LocalNodeState}}' 2>/dev/null || echo "inactive")
+  if [ "$state" != "active" ]; then
+    echo "Docker Swarm is not active." >&2
+    exit 1
+  fi
+}
+
+ensure_network() {
+  ensure_swarm
+  if ! docker network inspect "$NETWORK_NAME" >/dev/null 2>&1; then
+    echo "Creating attachable overlay network: $NETWORK_NAME"
+    docker network create --driver overlay --attachable "$NETWORK_NAME"
+  fi
+}
+
+# --- Action Handlers ---
+
+action_swarm() {
+  local action="$1" stack_name="$2"
+  local stack_file="${SWARM_STACKS[$stack_name]}"
+  ensure_swarm
+  case "$action" in
+  start | restart)
+    echo "Deploying Swarm stack '$stack_name'..."
+    docker stack deploy --with-registry-auth -c "$stack_file" "$stack_name"
+    ;;
+  stop)
+    echo "Removing Swarm stack '$stack_name'..."
+    docker stack rm "$stack_name" || true
+    wait_stack_removed "$stack_name"
+    ;;
+  status)
+    echo "Status for Swarm stack '$stack_name':"
+    docker stack services "$stack_name" || true
+    ;;
+  *) usage ;;
+  esac
+}
+
+action_compose() {
+  local action="$1" stack_name="$2"
+  local stack_file="${COMPOSE_STACKS[$stack_name]}"
+  echo "Handling Compose stack '$stack_name'..."
+  case "$action" in
+  start | restart) docker compose -f "$stack_file" up -d --remove-orphans ;;
+  stop)            docker compose -f "$stack_file" down ;;
+  status)          docker compose -f "$stack_file" ps ;;
+  *) usage ;;
+  esac
+}
+
+# --- Main Logic ---
+
+if [ "${1:-}" = "network" ]; then
+  sub=${2:-}
+  case "$sub" in
+  create) setup_swarm_context; ensure_network ;;
+  remove) setup_swarm_context; docker network rm "$NETWORK_NAME" ;;
+  inspect) setup_swarm_context; docker network inspect "$NETWORK_NAME" ;;
+  *) usage ;;
+  esac
+  exit 0
+fi
+
+[ $# -eq 2 ] || usage
+
+ACTION="$1"
+TARGET="$2"
+
+setup_swarm_context
+
+if [[ -v "SWARM_STACKS[$TARGET]" ]]; then
+  action_swarm "$ACTION" "$TARGET"
+elif [[ -v "COMPOSE_STACKS[$TARGET]" ]]; then
+  action_compose "$ACTION" "$TARGET"
+else
+  echo "Error: Target '$TARGET' not found." >&2
+  usage
+fi

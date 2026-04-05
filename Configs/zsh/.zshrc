@@ -101,7 +101,7 @@ _load_paths
 # Activate Mise
 # ==============================================================================
 if (( $+commands[mise] )); then
-  znap eval mise 'mise activate zsh'
+  znap eval mise 'mise activate zsh --shims'
 fi
 
 # ==============================================================================
