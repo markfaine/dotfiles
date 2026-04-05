@@ -37,9 +37,6 @@ markdownlint-cli2 = "latest"
 marksman = "2026-02-08"
 editorconfig-checker = "latest"
 usage = "latest"
-
-# Python Tools (via pipx)
-uv = "latest"
 pipx = "latest"
 "pipx:pydocstyle" = "latest"
 "pipx:yapf" = "latest"
@@ -83,6 +80,8 @@ neovim = "latest"
 "aqua:Mikescher/better-docker-ps" = "latest"
 yt-dlp = { version = "latest", rename_exe = "yt-dlp" }
 "github:michel-kraemer/zsh-patina" = "latest"
+uv = "latest"
+"npm:@continuedev/cli" = "latest"
 
 [env]
 _.source = '.env'
