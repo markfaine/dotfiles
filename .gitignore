@@ -2,6 +2,7 @@
 **/*.old
 **/*.bak
 **/*.key
+**/*.log
 **/.vault
 **/home/.docker/buildx
 **/.token_seed*
