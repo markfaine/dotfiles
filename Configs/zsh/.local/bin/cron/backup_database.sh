@@ -8,9 +8,9 @@ PROTON_SYNC_DIR="/volume1/backups/proton"
 DATESTAMP=$(date +%Y-%m-%d)
 TARGET_FILE="$PROTON_SYNC_DIR/mariadb-export-$DATESTAMP.sql.gz"
 
-# 1. Find the ID of the running container for this service
-# This handles the .1.<id> naming convention in Swarm
-CONTAINER_ID=$(docker service ps -f "desired-state=running" --format "{{.Name}}.{{.ID}}" $STACK_SERVICE | head -n 1)
+# 1. Find the running container for this service on the local node
+# docker service commands require a manager node; use docker ps with label filter instead
+CONTAINER_ID=$(docker ps --filter "label=com.docker.swarm.service.name=$STACK_SERVICE" --format "{{.ID}}" | head -n 1)
 
 if [ -z "$CONTAINER_ID" ]; then
   echo "Error: Could not find a running container for service $STACK_SERVICE"

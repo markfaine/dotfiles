@@ -101,7 +101,7 @@ plex_api_call() {
 # Main Routine Tasks
 ################################################################################
 
-task_refresh_library(){}
+task_refresh_library() {
   log "==== TASK 2: Plex Refresh Library ===="
 
   # Trigger library scan for movies
