@@ -211,10 +211,18 @@ fi
 # Load order here avoids autosuggestions/pure recursion on Enter.
 
 _load_plugins "zsh-users/zsh-completions,,src" || return
-_load_plugins "zsh-users/zsh-syntax-highlighting" || return
+#_load_plugins "zsh-users/zsh-syntax-highlighting" || return # no longer needed with zsh-patina
 _load_plugins "zsh-users/zsh-autosuggestions" || return
 _load_plugins "zsh-users/zsh-history-substring-search" || return
 _load_plugins "sindresorhus/pure,,." || return
+
+# ==============================================================================
+# Activate zsh-patina (Syntax Highlighting)
+# ==============================================================================
+# Use Znap eval to cache the activation script for performance.
+if (( $+commands[zsh-patina] )); then
+  znap eval zsh-patina 'zsh-patina activate'
+fi
 
 # ==============================================================================
 # Keybindings
