@@ -82,6 +82,7 @@ yarn = "latest"
 neovim = "latest"
 "aqua:Mikescher/better-docker-ps" = "latest"
 yt-dlp = { version = "latest", rename_exe = "yt-dlp" }
+"github:michel-kraemer/zsh-patina" = "latest"
 
 [env]
 _.source = '.env'
