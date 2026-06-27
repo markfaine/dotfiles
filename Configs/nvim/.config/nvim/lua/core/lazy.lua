@@ -7,15 +7,19 @@ fast, lazy-loaded plugin management with performance optimizations.
 
 -- Bootstrap Installation {{{1
 local function install_lazy()
-  local lazypath = vim.fn.stdpath('data') .. '/lazy/lazy.nvim'
+  local lazypath = vim.fn.stdpath 'data' .. '/lazy/lazy.nvim'
 
   if not (vim.uv or vim.loop).fs_stat(lazypath) then
     vim.notify('Installing lazy.nvim...', vim.log.levels.INFO)
 
-    local out = vim.fn.system({
-      'git', 'clone', '--filter=blob:none', '--branch=stable',
-      'https://github.com/folke/lazy.nvim.git', lazypath,
-    })
+    local out = vim.fn.system {
+      'git',
+      'clone',
+      '--filter=blob:none',
+      '--branch=stable',
+      'https://github.com/folke/lazy.nvim.git',
+      lazypath,
+    }
 
     if vim.v.shell_error ~= 0 then
       error('Failed to install lazy.nvim:\n' .. out)
@@ -30,7 +34,7 @@ install_lazy()
 
 -- Configuration {{{1
 local config = {
-  defaults = { lazy = true },
+  defaults = { lazy = true, version = '*' },
 
   spec = {
     { import = 'plugins' },
@@ -42,13 +46,13 @@ local config = {
   },
 
   checker = {
-    enabled = false,   -- disable background update checker
+    enabled = false, -- disable background update checker
     notify = false,
     frequency = 3600,
   },
 
   change_detection = {
-    enabled = false,   -- disable background change detection
+    enabled = false, -- disable background change detection
     notify = false,
   },
 
@@ -59,16 +63,34 @@ local config = {
       reset = true,
       disabled_plugins = {
         -- File management
-        'netrw', 'netrwPlugin', 'netrwSettings', 'netrwFileHandlers',
+        'netrw',
+        'netrwPlugin',
+        'netrwSettings',
+        'netrwFileHandlers',
         -- Archives
-        'gzip', 'zip', 'zipPlugin', 'tar', 'tarPlugin', 'vimball', 'vimballPlugin',
+        'gzip',
+        'zip',
+        'zipPlugin',
+        'tar',
+        'tarPlugin',
+        'vimball',
+        'vimballPlugin',
         -- Web/HTML
-        '2html_plugin', 'tohtml',
+        '2html_plugin',
+        'tohtml',
         -- Scripts
-        'getscript', 'getscriptPlugin', 'logipat',
+        'getscript',
+        'getscriptPlugin',
+        'logipat',
         -- Utilities
-        'rrhelper', 'spellfile_plugin', 'tutor', 'rplugin',
-        'compiler', 'bugreport', 'optwin', 'synmenu',
+        'rrhelper',
+        'spellfile_plugin',
+        'tutor',
+        'rplugin',
+        'compiler',
+        'bugreport',
+        'optwin',
+        'synmenu',
       },
     },
   },
@@ -78,9 +100,19 @@ local config = {
     border = 'rounded',
     backdrop = 60,
     icons = vim.g.have_nerd_font and {} or {
-      cmd = '⌘', config = '🛠', event = '📅', ft = '📂', init = '⚙',
-      keys = '🗝', plugin = '🔌', runtime = '💻', require = '🌙',
-      source = '📄', start = '🚀', task = '📌', lazy = '💤 ',
+      cmd = '⌘',
+      config = '🛠',
+      event = '📅',
+      ft = '📂',
+      init = '⚙',
+      keys = '🗝',
+      plugin = '🔌',
+      runtime = '💻',
+      require = '🌙',
+      source = '📄',
+      start = '🚀',
+      task = '📌',
+      lazy = '💤 ',
     },
   },
 }

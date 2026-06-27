@@ -21,6 +21,9 @@ return {
   {
     'WhoIsSethDaniel/mason-tool-installer.nvim',
     lazy = false,
+    dependencies = {
+      'williamboman/mason.nvim',
+    },
     opts = {
       ensure_installed = {
         -- LSP servers (match your core/lsp.lua)
@@ -46,7 +49,7 @@ return {
         'yamlfmt',
         'mdformat',
       },
-      auto_update = true,
+      auto_update = false,
       run_on_start = true,
       start_delay = 200,
       debounce_hours = 24,
