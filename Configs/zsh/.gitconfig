@@ -52,9 +52,9 @@
 [http]
 	sslVerify = false
 [credential "https://github.com"]
-	helper = !/usr/bin/gh auth git-credential
+	helper = !/home/mfaine/.local/share/mise/shims/gh auth git-credential
 [credential "https://gist.github.com"]
-	helper = !/usr/bin/gh auth git-credential
+	helper = !/home/mfaine/.local/share/mise/shims/gh auth git-credential
 [safe]
 	directory = /home/mfaine/.config/dotfiles
 [user]
