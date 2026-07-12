@@ -30,7 +30,7 @@ return {
         'yaml-language-server',
         'ansible-language-server',
         'marksman',
-        'vscode-html-language-server',
+        'html-lsp',
         -- Diagnostics via none-ls and ftplugins
         'yamllint',
         'shellcheck',

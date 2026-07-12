@@ -1,7 +1,7 @@
 #!/bin/bash
 API_KEY=$1
 PORT=$2
-HOST="192.168.1.5"
+HOST="192.168.1.3"
 
 # 1. Get command history
 # 2. Filter for entries where trigger is "scheduled"

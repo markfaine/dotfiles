@@ -126,6 +126,12 @@ set -g @tmux_conf_24b_colour true
 # ==============================================================================
 # Clipboard Configuration
 # ==============================================================================
+# Enable OSC 52 clipboard sequences
+set -s set-clipboard on
+
+# Optional: If using an older tmux version, explicit override for kitty/alacritty/etc.
+# set -as terminal-features ',xterm-kitty:clipboard'
+
 # Copy to OS clipboard (requires xsel, xclip, clip.exe, etc.)
 set -g @tmux_conf_copy_to_os_clipboard true
 

@@ -1,0 +1,80 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# 1. Handle directory arguments and defaults
+DATA_DIR="${1:-$HOME}"
+LOG_FILE="${DATA_DIR}/kp_merge_history.log"
+
+if [ ! -d "$DATA_DIR" ]; then
+  echo "Error: Directory '$DATA_DIR' does not exist." >&2
+  exit 1
+fi
+
+# Fetch the systemd credential securely, fallback to standard environment variable if run manually
+if [ -n "${CREDENTIALS_DIRECTORY:-}" ] && [ -f "$CREDENTIALS_DIRECTORY/.db_password" ]; then
+  KEEPASS_PW=$(cat "$CREDENTIALS_DIRECTORY/.db_password")
+elif [ -n "${KEEPASS_DB_PASS:-}" ]; then
+  KEEPASS_PW="$KEEPASS_DB_PASS"
+else
+  echo "Error: Database password not found in systemd credentials or KEEPASS_DB_PASS environment." >&2
+  exit 1
+fi
+
+log_message() {
+  local TYPE="$1"
+  local MSG="$2"
+  local TIMESTAMP
+  TIMESTAMP=$(date +"%Y-%m-%d %H:%M:%S")
+  echo "[${TIMESTAMP}] [${TYPE}] ${MSG}" | tee -a "$LOG_FILE"
+}
+
+find "$DATA_DIR" -maxdepth 1 -type f -name "*.new" -print0 | while IFS= read -r -d '' FILE_NEW; do
+  FILE_OLD="${FILE_NEW%.new}"
+  log_message "INFO" "Started processing staging file: ${FILE_NEW}"
+
+  # Handle Backup & Copy initialization
+  if [ -f "$FILE_OLD" ]; then
+    BACKUP_TS=$(date +"%Y%m%d_%H%M%S")
+    BACKUP_FILE="${FILE_OLD}.${BACKUP_TS}.bak"
+    if cp "$FILE_OLD" "$BACKUP_FILE"; then
+      log_message "BACKUP" "Created baseline backup for $(basename "$FILE_OLD") at: ${BACKUP_FILE}"
+    else
+      log_message "ERROR" "Failed to create backup for ${FILE_OLD}. Aborting loop."
+      continue
+    fi
+  else
+    log_message "INIT" "No baseline database found. Initializing fresh from staging file."
+    cp "$FILE_NEW" "$FILE_OLD"
+    rm -f "$FILE_NEW"
+    log_message "SUCCESS" "Successfully initialized: ${FILE_OLD}"
+    continue
+  fi
+
+  # Define the temporary path for working on the copy
+  TMP_FINAL_DB="temp_final_$$.kdbx"
+
+  cleanup() {
+    rm -f "$TMP_FINAL_DB"
+  }
+  trap cleanup EXIT
+
+  log_message "COPY" "Creating a working copy of the live database..."
+  cp "$FILE_OLD" "$TMP_FINAL_DB"
+
+  log_message "MERGE" "Merging entries from staging file into the working copy..."
+  # FIX: Separated '--key-file' and '--key-file-from' specifically instructs the
+  # CLI backend to target both individual file key wrappers explicitly
+  echo -e "${KEEPASS_PW}\n${KEEPASS_PW}" | keepassxc-cli merge \
+    --key-file "$KEEPASS_KEY_PATH" \
+    --key-file-from "$KEEPASS_KEY_PATH" \
+    "$TMP_FINAL_DB" "$FILE_NEW"
+
+  log_message "UPDATE" "Replacing live database file with the updated copy..."
+  mv "$TMP_FINAL_DB" "$FILE_OLD"
+
+  log_message "PURGE" "Purging processed staging file: $(basename "$FILE_NEW")"
+  rm -f "$FILE_NEW"
+
+  cleanup
+  log_message "SUCCESS" "Successfully integrated updates into: ${FILE_OLD}"
+done

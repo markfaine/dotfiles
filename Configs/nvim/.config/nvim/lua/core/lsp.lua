@@ -166,20 +166,20 @@ vim.lsp.config('*', {
     end
 
     -- Enable inlay hints if supported (but disabled by default)
-    if client.supports_method('textDocument/inlayHint') then
+    if client:supports_method 'textDocument/inlayHint' then
       vim.lsp.inlay_hint.enable(false, { bufnr = bufnr })
     end
 
     -- Set up buffer-local options
-    if client.supports_method('textDocument/completion') then
+    if client:supports_method 'textDocument/completion' then
       vim.bo[bufnr].omnifunc = 'v:lua.vim.lsp.omnifunc'
     end
-    if client.supports_method('textDocument/definition') then
+    if client:supports_method 'textDocument/definition' then
       vim.bo[bufnr].tagfunc = 'v:lua.vim.lsp.tagfunc'
     end
 
     -- Disable formatting for null-ls
-    if client.name ~= "null-ls" then
+    if client.name ~= 'null-ls' then
       client.server_capabilities.documentFormattingProvider = false
       client.server_capabilities.documentRangeFormattingProvider = false
     end
@@ -199,7 +199,9 @@ vim.api.nvim_create_autocmd('LspAttach', {
   group = vim.api.nvim_create_augroup('UserLspConfig', { clear = true }),
   callback = function(ev)
     local client = vim.lsp.get_client_by_id(ev.data.client_id)
-    if not client then return end
+    if not client then
+      return
+    end
 
     -- Disable semantic tokens for performance
     client.server_capabilities.semanticTokensProvider = nil
@@ -227,7 +229,7 @@ vim.api.nvim_create_autocmd('LspAttach', {
     -- Documentation and help
     pcall(vim.keymap.del, 'n', 'K', { buffer = ev.buf })
     map('n', 'K', function()
-      vim.lsp.buf.hover({ border = 'rounded', max_width = 80, max_height = 20 })
+      vim.lsp.buf.hover { border = 'rounded', max_width = 80, max_height = 20 }
     end, 'Show hover documentation')
     map('n', '<C-k>', vim.lsp.buf.signature_help, 'Show signature help')
 
@@ -235,7 +237,7 @@ vim.api.nvim_create_autocmd('LspAttach', {
     map({ 'n', 'v' }, '<leader>la', vim.lsp.buf.code_action, 'Code actions')
     map('n', '<leader>lr', vim.lsp.buf.rename, 'Rename symbol')
     map('n', '<leader>lf', function()
-      vim.lsp.buf.format({ async = true })
+      vim.lsp.buf.format { async = true }
     end, 'Format buffer')
 
     -- Workspace and symbols
@@ -252,16 +254,16 @@ vim.api.nvim_create_autocmd('LspAttach', {
     -- Diagnostics
     map('n', 'gl', vim.diagnostic.open_float, 'Show line diagnostics')
     map('n', '[d', function()
-      vim.diagnostic.jump({ count = -1, float = true })
+      vim.diagnostic.jump { count = -1, float = true }
     end, 'Previous diagnostic')
     map('n', ']d', function()
-      vim.diagnostic.jump({ count = 1, float = true })
+      vim.diagnostic.jump { count = 1, float = true }
     end, 'Next diagnostic')
     map('n', '<leader>dq', vim.diagnostic.setloclist, 'Quickfix diagnostics')
     map('n', '<leader>dD', function()
       local ok, diag = pcall(require, 'core.extras.workspace-diagnostic')
       if ok then
-        for _, cur_client in ipairs(vim.lsp.get_clients({ bufnr = 0 })) do
+        for _, cur_client in ipairs(vim.lsp.get_clients { bufnr = 0 }) do
           diag.populate_workspace_diagnostics(cur_client, 0)
         end
         vim.notify('Workspace diagnostics populated', vim.log.levels.INFO)
@@ -269,34 +271,35 @@ vim.api.nvim_create_autocmd('LspAttach', {
     end, 'Populate workspace diagnostics')
     map('n', '<leader>dv', function()
       local current_config = vim.diagnostic.config()
-      vim.diagnostic.config({ virtual_lines = not current_config.virtual_lines })
-      vim.notify(
-        string.format('Virtual lines: %s', not current_config.virtual_lines and 'enabled' or 'disabled'),
-        vim.log.levels.INFO
-      )
+      vim.diagnostic.config { virtual_lines = not current_config.virtual_lines }
+      vim.notify(string.format('Virtual lines: %s', not current_config.virtual_lines and 'enabled' or 'disabled'), vim.log.levels.INFO)
     end, 'Toggle diagnostic virtual lines')
 
     -- Inlay hints toggle
-    if client.supports_method('textDocument/inlayHint') then
+    if client:supports_method 'textDocument/inlayHint' then
       map('n', '<leader>lh', function()
-        local current_setting = vim.lsp.inlay_hint.is_enabled({ bufnr = ev.buf })
+        local current_setting = vim.lsp.inlay_hint.is_enabled { bufnr = ev.buf }
         vim.lsp.inlay_hint.enable(not current_setting, { bufnr = ev.buf })
-        vim.notify(
-          string.format('Inlay hints: %s', not current_setting and 'enabled' or 'disabled'),
-          vim.log.levels.INFO
-        )
+        vim.notify(string.format('Inlay hints: %s', not current_setting and 'enabled' or 'disabled'), vim.log.levels.INFO)
       end, 'Toggle inlay hints')
     end
 
     -- Codelens
-    if client.supports_method('textDocument/codeLens') then
+    if client:supports_method 'textDocument/codeLens' then
       map('n', '<leader>ll', vim.lsp.codelens.run, 'Run codelens')
-      map('n', '<leader>lL', vim.lsp.codelens.refresh, 'Refresh codelens')
+
+      -- FIX: Wrapped in an anonymous function container
+      map('n', '<leader>lL', function()
+        vim.lsp.codelens.enable(true, { bufnr = ev.buf })
+      end, 'Refresh codelens')
 
       -- Auto refresh codelens
       vim.api.nvim_create_autocmd({ 'BufEnter', 'CursorHold', 'InsertLeave' }, {
         buffer = ev.buf,
-        callback = vim.lsp.codelens.refresh,
+        -- FIX: Wrapped in an anonymous function container
+        callback = function()
+          vim.lsp.codelens.enable(true, { bufnr = ev.buf })
+        end,
       })
     end
   end,
@@ -304,6 +307,8 @@ vim.api.nvim_create_autocmd('LspAttach', {
 -- }}}1
 
 -- Language Server Configurations {{{1
+local home = os.getenv 'HOME'
+local cache_dir = os.getenv 'XDG_CACHE_HOME' or home .. '/.cache'
 local servers = {
   -- Ansible Language Server
   ansiblels = {
@@ -316,15 +321,15 @@ local servers = {
           enabled = true,
           lint = {
             enabled = true,
-            path = 'ansible-lint'
-          }
+            path = 'ansible-lint',
+          },
         },
         completion = {
           provideRedirectModules = true,
           provideModuleOptionAliases = true,
         },
-      }
-    }
+      },
+    },
   },
 
   -- Bash Language Server
@@ -344,8 +349,6 @@ local servers = {
     },
     single_file_support = true,
   },
- local home = os.getenv("HOME")
- local cache_dir = os.getenv("XDG_CACHE_HOME") or home .. '/.cache'
   -- GitLab CI Language Server
   gitlab_ci_ls = {
     name = 'gitlab_ci_ls',
@@ -408,13 +411,13 @@ local servers = {
           -- Make type-check less intrusive without turning it off
           groupSeverity = { strong = 'Warning', strict = 'Hint' },
           groupFileStatus = vim.tbl_extend('force', {}, {
-            ['type-check'] = 'Opened',   -- keep it on…
+            ['type-check'] = 'Opened', -- keep it on…
           }),
         },
         workspace = {
           library = {
             vim.env.VIMRUNTIME,
-            vim.fn.stdpath('config'),
+            vim.fn.stdpath 'config',
             '${3rd}/luv/library',
             '${3rd}/busted/library',
           },
@@ -490,7 +493,7 @@ local servers = {
           -- Linters
           pylint = {
             enabled = true,
-            args = {'--max-line-length=88', '--disable=C0111'},
+            args = { '--max-line-length=88', '--disable=C0111' },
             executable = 'pylint',
           },
           pycodestyle = {
@@ -581,13 +584,13 @@ local servers = {
 
 -- Configure and enable servers
 local default_cmd = {
-  pylsp     = { 'pylsp' },                      -- stdio is default; no flag supported
-  lua_ls    = { 'lua-language-server' },        -- no stdio flag needed
-  marksman  = { 'marksman', 'server' },         -- subcommand required
-  bashls    = { 'bash-language-server', 'start' },
+  pylsp = { 'pylsp' }, -- stdio is default; no flag supported
+  lua_ls = { 'lua-language-server' }, -- no stdio flag needed
+  marksman = { 'marksman', 'server' }, -- subcommand required
+  bashls = { 'bash-language-server', 'start' },
   ansiblels = { 'ansible-language-server', '--stdio' },
-  yamlls    = { 'yaml-language-server', '--stdio' },
-  html      = { 'vscode-html-language-server', '--stdio' },
+  yamlls = { 'yaml-language-server', '--stdio' },
+  html = { 'vscode-html-language-server', '--stdio' },
 }
 
 for server_name, config in pairs(servers) do
@@ -609,10 +612,10 @@ end
 local function create_lsp_commands()
   -- Enhanced LspInfo command
   vim.api.nvim_create_user_command('LspInfo', function()
-    local clients = vim.lsp.get_clients({ bufnr = 0 })
+    local clients = vim.lsp.get_clients { bufnr = 0 }
     if #clients == 0 then
       vim.notify('No LSP clients attached to current buffer', vim.log.levels.INFO)
-      vim.cmd('checkhealth vim.lsp')
+      vim.cmd 'checkhealth vim.lsp'
       return
     end
 
@@ -628,22 +631,22 @@ local function create_lsp_commands()
     end
 
     vim.notify(table.concat(info, '\n'), vim.log.levels.INFO)
-    vim.cmd('checkhealth vim.lsp')
+    vim.cmd 'checkhealth vim.lsp'
   end, { desc = 'Show LSP information and run health check' })
 
   -- Enhanced LspStart command
   vim.api.nvim_create_user_command('LspStart', function()
     local bufnr = vim.api.nvim_get_current_buf()
-    for _, client in ipairs(vim.lsp.get_clients({ bufnr = bufnr })) do
-      vim.lsp.stop_client(client.id)
+    for _, client in ipairs(vim.lsp.get_clients { bufnr = bufnr }) do
+      client:stop(client.id)
     end
-    vim.cmd('edit!')
+    vim.cmd 'edit!'
     vim.notify('LSP clients restarted for current buffer', vim.log.levels.INFO)
   end, { desc = 'Start/reload LSP clients for current buffer' })
 
   -- Enhanced LspStop command
   vim.api.nvim_create_user_command('LspStop', function(opts)
-    local clients = vim.lsp.get_clients({ bufnr = 0 })
+    local clients = vim.lsp.get_clients { bufnr = 0 }
     if #clients == 0 then
       vim.notify('No LSP clients to stop', vim.log.levels.WARN)
       return
@@ -666,14 +669,16 @@ local function create_lsp_commands()
     desc = 'Stop LSP clients',
     nargs = '?',
     complete = function()
-      local clients = vim.lsp.get_clients({ bufnr = 0 })
-      return vim.tbl_map(function(client) return client.name end, clients)
+      local clients = vim.lsp.get_clients { bufnr = 0 }
+      return vim.tbl_map(function(client)
+        return client.name
+      end, clients)
     end,
   })
 
   -- Smart LSP restart command
   vim.api.nvim_create_user_command('LspRestart', function(opts)
-    local clients = vim.lsp.get_clients({ bufnr = 0 })
+    local clients = vim.lsp.get_clients { bufnr = 0 }
     if #clients == 0 then
       vim.notify('No LSP clients to restart', vim.log.levels.WARN)
       return
@@ -684,7 +689,7 @@ local function create_lsp_commands()
       if opts.args == '' or client.name == opts.args then
         client_configs[client.name] = {
           config = client.config,
-          buffers = vim.lsp.get_buffers_by_client_id(client.id),
+          buffers = vim.lsp.get_client_by_id(client.id),
         }
         client:stop()
       end
@@ -697,33 +702,39 @@ local function create_lsp_commands()
       return
     end
 
-    timer:start(500, 100, vim.schedule_wrap(function()
-      local all_restarted = true
-      for name, data in pairs(client_configs) do
-        local client_id = vim.lsp.start(data.config)
-        if client_id then
-          for _, buf in ipairs(data.buffers) do
-            vim.lsp.buf_attach_client(buf, client_id)
+    timer:start(
+      500,
+      100,
+      vim.schedule_wrap(function()
+        local all_restarted = true
+        for name, data in pairs(client_configs) do
+          local client_id = vim.lsp.start(data.config)
+          if client_id then
+            for _, buf in ipairs(data.buffers) do
+              vim.lsp.buf_attach_client(buf, client_id)
+            end
+            vim.notify(string.format('Restarted: %s', name), vim.log.levels.INFO)
+            client_configs[name] = nil
+          else
+            all_restarted = false
           end
-          vim.notify(string.format('Restarted: %s', name), vim.log.levels.INFO)
-          client_configs[name] = nil
-        else
-          all_restarted = false
         end
-      end
 
-      if all_restarted or next(client_configs) == nil then
-        if not timer:is_closing() then
-          timer:close()
+        if all_restarted or next(client_configs) == nil then
+          if not timer:is_closing() then
+            timer:close()
+          end
         end
-      end
-    end))
+      end)
+    )
   end, {
     desc = 'Restart LSP clients',
     nargs = '?',
     complete = function()
-      local clients = vim.lsp.get_clients({ bufnr = 0 })
-      return vim.tbl_map(function(client) return client.name end, clients)
+      local clients = vim.lsp.get_clients { bufnr = 0 }
+      return vim.tbl_map(function(client)
+        return client.name
+      end, clients)
     end,
   })
 
@@ -732,7 +743,7 @@ local function create_lsp_commands()
     local log_path = vim.lsp.log.get_filename()
     if vim.fn.filereadable(log_path) == 1 then
       vim.cmd.vsplit(log_path)
-      vim.cmd('normal! G') -- Go to end of file
+      vim.cmd 'normal! G' -- Go to end of file
     else
       vim.notify('LSP log file not found', vim.log.levels.WARN)
     end
@@ -744,18 +755,21 @@ local function create_lsp_commands()
       vim.g.autoformat = true
     end
     vim.g.autoformat = not vim.g.autoformat
-    vim.notify(
-      string.format('Auto-format on save: %s', vim.g.autoformat and 'enabled' or 'disabled'),
-      vim.log.levels.INFO
-    )
+    vim.notify(string.format('Auto-format on save: %s', vim.g.autoformat and 'enabled' or 'disabled'), vim.log.levels.INFO)
   end, { desc = 'Toggle auto-formatting on save' })
 
   -- Diagnostic severity command
-  vim.api.nvim_create_user_command("DiagSeverity", function(opts)
-    local map = { error=vim.diagnostic.severity.ERROR, warn=vim.diagnostic.severity.WARN, info=vim.diagnostic.severity.INFO, hint=vim.diagnostic.severity.HINT }
-    local sev = map[(opts.args or "warn"):lower()] or map.warn
-    vim.diagnostic.config({ virtual_text = { severity = { min = sev } } })
-  end, { nargs = "?", complete = function() return { "error","warn","info","hint" } end })
+  vim.api.nvim_create_user_command('DiagSeverity', function(opts)
+    local map =
+      { error = vim.diagnostic.severity.ERROR, warn = vim.diagnostic.severity.WARN, info = vim.diagnostic.severity.INFO, hint = vim.diagnostic.severity.HINT }
+    local sev = map[(opts.args or 'warn'):lower()] or map.warn
+    vim.diagnostic.config { virtual_text = { severity = { min = sev } } }
+  end, {
+    nargs = '?',
+    complete = function()
+      return { 'error', 'warn', 'info', 'hint' }
+    end,
+  })
 end
 
 create_lsp_commands()
@@ -766,10 +780,10 @@ vim.api.nvim_create_autocmd('BufWritePre', {
   group = vim.api.nvim_create_augroup('LspAutoFormat', { clear = true }),
   callback = function()
     if vim.g.autoformat then
-      local clients = vim.lsp.get_clients({ bufnr = 0 })
+      local clients = vim.lsp.get_clients { bufnr = 0 }
       for _, client in ipairs(clients) do
-        if client.supports_method('textDocument/formatting') then
-          vim.lsp.buf.format({ async = false, timeout_ms = 5000 })
+        if client:supports_method 'textDocument/formatting' then
+          vim.lsp.buf.format { async = false, timeout_ms = 5000 }
           break
         end
       end
@@ -787,7 +801,6 @@ vim.api.nvim_create_autocmd('BufWritePre', {
 --   end
 -- end
 
-
 -- Add/ensure correct cmd for servers that need it:
 servers.ansiblels.cmd = { 'ansible-language-server', '--stdio' }
 servers.lua_ls.cmd = { 'lua-language-server' }
@@ -804,15 +817,15 @@ local function root_dir(markers)
 end
 
 -- Example
-servers.yamlls.root_dir = root_dir({ '.git', '.yamllint' })
+servers.yamlls.root_dir = root_dir { '.git', '.yamllint' }
 
 -- Safe restart command (don’t clobber the built-in :LspStart)
 vim.api.nvim_create_user_command('LspRestart', function(opts)
   local bufnr = opts and opts.bang and 0 or vim.api.nvim_get_current_buf()
-  for _, c in pairs(vim.lsp.get_active_clients({ bufnr = bufnr })) do
+  for _, c in pairs(vim.lsp.get_clients { bufnr = bufnr }) do
     pcall(c.stop, c, true)
   end
   vim.defer_fn(function()
-    vim.cmd('LspStart')
+    vim.cmd 'LspStart'
   end, 100)
 end, { desc = 'Restart LSP for current buffer; use ! to target all', bang = true })

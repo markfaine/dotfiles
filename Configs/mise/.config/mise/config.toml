@@ -5,10 +5,8 @@ node = "latest"
 # NPM Packages
 "npm:yaml-language-server" = "latest"
 "npm:bash-language-server" = "latest"
-"npm:copilot" = "latest"
 "npm:gitlab-search" = "latest"
 "npm:vscode-langservers-extracted" = "4.10.0"
-"npm:@google/gemini-cli" = "0.29.5"
 
 # Other Runtimes
 python = "3.13"
@@ -81,7 +79,8 @@ neovim = "latest"
 yt-dlp = { version = "latest", rename_exe = "yt-dlp" }
 "github:michel-kraemer/zsh-patina" = "latest"
 uv = "latest"
-"npm:@continuedev/cli" = "latest"
+"aqua:binwiederhier/ntfy" = "latest"
+"aqua:google-antigravity/antigravity-cli" = "latest"
 
 [env]
 _.source = '.env'

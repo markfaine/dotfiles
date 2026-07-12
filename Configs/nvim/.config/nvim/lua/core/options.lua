@@ -132,6 +132,7 @@ end
 
 -- Clipboard configuration
 if vim.fn.has 'wsl' == 1 then
+  -- Explicit configuration for Windows Subsystem for Linux
   vim.g.clipboard = {
     name = 'WslClipboard',
     copy = { ['+'] = 'clip.exe', ['*'] = 'clip.exe' },
@@ -142,6 +143,21 @@ if vim.fn.has 'wsl' == 1 then
     cache_enabled = 0,
   }
 else
-  vim.opt.clipboard = 'unnamedplus'
+  -- Fallback configuration for all other setups (macOS, native Linux, SSH, Tmux)
+  vim.g.clipboard = {
+    name = 'OSC 52',
+    copy = {
+      ['+'] = require('vim.ui.clipboard.osc52').copy,
+      ['*'] = require('vim.ui.clipboard.osc52').copy,
+    },
+    paste = {
+      ['+'] = require('vim.ui.clipboard.osc52').paste,
+      ['*'] = require('vim.ui.clipboard.osc52').paste,
+    },
+  }
 end
+
+-- Sync Neovim's default registers so standard 'y' and 'p' use the configured clipboard
+vim.opt.clipboard = 'unnamedplus'
+
 -- }}}1

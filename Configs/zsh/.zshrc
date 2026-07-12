@@ -89,7 +89,24 @@ zstyle :bracketed-paste-magic filter-active url-quote-magic
 # Double dot expansion
 # ==============================================================================
 # Also see: ~/.zshenv for bindkeys
-zle -N _double_dot_expand
+# I find this just double dots too much, even when it's not valid
+# So see this function
+# zle -N _double_dot_expand
+
+double_dot_expand() {
+    # If it's a fresh start (space then ..) or an extension (slash then ..)
+    if [[ "$LBUFFER" =~ '(^| )\.\.$' ]]; then
+        LBUFFER="${LBUFFER%??}../.."
+    elif [[ "$LBUFFER" =~ '/\.\.$' ]]; then
+        LBUFFER="${LBUFFER%??}../.."
+    else
+        zle self-insert
+    fi
+}
+
+# Ensure the widget is registered and bound properly
+zle -N double_dot_expand
+bindkey '.' double_dot_expand
 
 # ==============================================================================
 # Load paths from ~/.paths
@@ -125,15 +142,15 @@ _load_plugins \
 # SSH Identity Management
 
 # Fallback if systemd agent isn't running
-if [[ ! -S "$SSH_AUTH_SOCK" ]]; then
-    if [[ -f "$SSH_ENV" ]]; then
-        . "$SSH_ENV" > /dev/null
-    fi
-    # If still not running after sourcing, start it
-    ps -p "$SSH_AGENT_PID" >/dev/null 2>&1 || start_agent
-fi
-
-load_ssh_identities
+# if [[ ! -S "$SSH_AUTH_SOCK" ]]; then
+#     if [[ -f "$SSH_ENV" ]]; then
+#         . "$SSH_ENV" > /dev/null
+#     fi
+#     # If still not running after sourcing, start it
+#     ps -p "$SSH_AGENT_PID" >/dev/null 2>&1 || start_agent
+# fi
+#
+#load_ssh_identities
 
 # ==============================================================================
 # Trash/Recycle Bin Management
@@ -256,10 +273,6 @@ bindkey '^[[1;5D' backward-word      # Ctrl+Left
 autoload -z edit-command-line
 zle -N edit-command-line
 bindkey "^X^E" edit-command-line
-
-# Double dot expansion
-# Bind the dot key to the widget
-bindkey "." _double_dot_expand
 
 # Optional: Ensure the expansion doesn't break normal completion
 bindkey -M isearch "." self-insert

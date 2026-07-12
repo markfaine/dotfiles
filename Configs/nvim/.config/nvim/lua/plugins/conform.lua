@@ -1,4 +1,4 @@
--- vim: foldmethod=marker foldlevel=1
+-- vim: foldmethod=marker foldlevel=999
 
 return {
   'stevearc/conform.nvim',
@@ -7,6 +7,7 @@ return {
     { '<leader>bf', function() require('conform').format({ async = true, lsp_format = 'prefer' }) end, desc = 'Format buffer' },
     { '<leader>bF', function() require('conform').format({ async = false, timeout_ms = 2000, lsp_format = 'prefer' }) end, desc = 'Format buffer (sync)' },
   },
+
   config = function()
     local conform = require('conform')
 
@@ -23,10 +24,18 @@ return {
         lua = { 'stylua' },
         python = { 'isort', 'black' },
         sh = { 'shfmt' },
-        yaml = { 'yamlfmt' },
+        yaml = { 'yamlfmt'},
         markdown = { 'mdformat' },
         ['_'] = {}, -- default none
       },
+
+      -- Add this section to pass the flag to yamlfmt
+      formatters = {
+        yamlfmt = {
+          prepend_args = { "-include-document-start" },
+        },
+      },
+
       -- prefer LSP if available, otherwise fall back to tool
       format_on_save = function(bufnr)
         if is_large(bufnr) then return end

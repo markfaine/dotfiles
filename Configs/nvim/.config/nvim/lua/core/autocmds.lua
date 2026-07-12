@@ -21,7 +21,7 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   desc = 'Highlight yanked text',
   group = augroups.general,
   callback = function()
-    vim.highlight.on_yank({ higroup = 'Visual', timeout = 200 })
+    vim.highlight.on_yank { higroup = 'Visual', timeout = 200 }
   end,
 })
 
@@ -59,8 +59,10 @@ vim.api.nvim_create_autocmd('BufWritePre', {
   desc = 'Remove trailing whitespace',
   group = augroups.formatting,
   callback = function()
-    local save_cursor = vim.fn.getpos('.')
-    pcall(function() vim.cmd([[%s/\s\+$//e]]) end)
+    local save_cursor = vim.fn.getpos '.'
+    pcall(function()
+      vim.cmd [[%s/\s\+$//e]]
+    end)
     vim.fn.setpos('.', save_cursor)
   end,
 })
@@ -71,7 +73,7 @@ vim.api.nvim_create_autocmd('BufReadPost', {
   group = augroups.formatting,
   pattern = { '*.sh', '*.bash', '*.zsh' },
   callback = function()
-    vim.cmd('silent! %retab')
+    vim.cmd 'silent! %retab'
   end,
 })
 -- }}}1
@@ -83,7 +85,7 @@ vim.api.nvim_create_autocmd('FileType', {
   group = augroups.filetypes,
   pattern = '*',
   callback = function()
-    vim.opt_local.formatoptions:remove({ 'c', 'r', 'o' })
+    vim.opt_local.formatoptions:remove { 'c', 'r', 'o' }
   end,
 })
 
@@ -119,7 +121,7 @@ vim.api.nvim_create_autocmd('BufReadPre', {
     local max_filesize = vim.g.large_file_threshold_bytes or (1000 * 1024)
     local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(0))
     if ok and stats and stats.size > max_filesize then
-      vim.cmd('syntax off')
+      vim.cmd 'syntax off'
       vim.opt_local.foldmethod = 'manual'
       vim.opt_local.undolevels = -1
       vim.opt_local.swapfile = false
@@ -156,7 +158,20 @@ vim.api.nvim_create_autocmd('BufReadPre', {
 })
 -- }}}1
 
+-- Close any remaining quickfix windows if this is the last open window
+vim.api.nvim_create_autocmd('BufEnter', {
+  desc = 'Automatically close quickfix window if it is the last one open',
+  pattern = '*',
+  callback = function()
+    if vim.fn.winnr '$' == 1 and vim.bo.buftype == 'quickfix' then
+      vim.cmd 'quit'
+    end
+  end,
+})
+
 -- UI availability helper
 local M = {}
-function M.is_ui() return not vim.g.started_by_firenvim and #vim.api.nvim_list_uis() > 0 end
+function M.is_ui()
+  return not vim.g.started_by_firenvim and #vim.api.nvim_list_uis() > 0
+end
 return M

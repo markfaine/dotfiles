@@ -21,6 +21,14 @@ setopt PUSHD_SILENT
 setopt PUSHD_TO_HOME
 
 # ==============================================================================
+# KeePassXC
+# ==============================================================================
+KEEPASS_DB_PATH="$HOME/sync/personal.kdbx"
+KEEPASS_KEY_PATH="$HOME/sync/personal.keyx"
+KEEPASS_DB_PASSWD="$(cat "$HOME/sync/.db-password" )"
+export KEEPASS_DB_PATH KEEPASS_KEY_PATH KEEPASS_DB_PASSWD
+
+# ==============================================================================
 # Expansion and Globbing
 # ==============================================================================
 # Treats #, ~, and ^ as patterns for filename globbing.
@@ -179,4 +187,13 @@ fi
 # Timezone for time-related functions
 if [[ "${TZ:-}" == "" ]]; then
   export TZ="America/Chicago"
+fi
+
+
+# =============================================================================
+# LLM (AI)
+# =============================================================================
+# Load tokens from keepassxc database
+if [[ -f "$HOME/.local/bin/load_tokens.sh" ]]; then
+  . "$HOME/.local/bin/load_tokens.sh"
 fi
