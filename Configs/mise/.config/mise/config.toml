@@ -81,6 +81,7 @@ yt-dlp = { version = "latest", rename_exe = "yt-dlp" }
 uv = "latest"
 "aqua:binwiederhier/ntfy" = "latest"
 "aqua:google-antigravity/antigravity-cli" = "latest"
+"npm:opencommit" = "latest"
 
 [env]
 _.source = '.env'
